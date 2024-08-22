@@ -1,8 +1,11 @@
 <template>
     <div>
         <h1 id="linuxBaseline">Linux基线检测报告</h1>
-
-        <el-button @click="onExportToExcel">导出为 Excel</el-button>
+        <!-- 检测时间 -->
+        <div style="text-align:right; margin-top:20px;">
+            <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>
+        </div>
+<!--        <el-button @click="onExportToExcel">导出为 Excel</el-button>-->
         <el-button @click="onExportToPDF">导出为 PDF</el-button>
         <el-row :gutter="20">
             <el-col :span="12"><p>主机名：{{serverInfo.hostname}}</p></el-col>
@@ -90,7 +93,7 @@
 
 <script>
     //引入xlsx库
-    import * as XLSX from 'xlsx';
+    // import * as XLSX from 'xlsx';
     import jsPDF from 'jspdf';//用于在客户端生成 PDF 文件
     import html2canvas from 'html2canvas';//将 HTML 元素转换为画布 (canvas) 图像
 
@@ -120,7 +123,7 @@
         },
         methods: {
             fetchAndDisplayChenckResults() {
-                fetch('http://localhost:8081/userinfo')
+                fetch('http://192.168.177.129:8081/userinfo')
                     .then(response => response.json())
                     .then(data => {
                         this.checkresults = data.Event_result;
@@ -129,17 +132,17 @@
                     .catch(error => console.error('Error:', error));
             },
 
-            onRecheckButton() {
+            /*onRecheckButton() {
                 this.$message('重新检测按钮被点击!');
-            },
-            onExportToExcel() {
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(this.checkresults, {
-                    header: ["description", "basis", "result", "IsComply", "recommend","command"]
-                });
-                XLSX.utils.book_append_sheet(wb, ws, "Report");
-                XLSX.writeFile(wb, "report.xlsx");
-            },
+            },*/
+            // onExportToExcel() {
+            //     const wb = XLSX.utils.book_new();
+            //     const ws = XLSX.utils.json_to_sheet(this.checkresults, {
+            //         header: ["description", "basis", "result", "IsComply", "recommend","command"]
+            //     });
+            //     XLSX.utils.book_append_sheet(wb, ws, "Report");
+            //     XLSX.writeFile(wb, "report.xlsx");
+            // },
             onExportToPDF() {
                 this.showContentForPDF = true; // 确保PDF相关内容是可见的
 
@@ -155,12 +158,14 @@
                         scale: 2,
                         useCORS: true
                     }).then(canvas => {
-                        const imgData = canvas.toDataURL('image/png');
+                        //const imgData = canvas.toDataURL('image/png');
+                        const imgData = canvas.toDataURL('image/jpeg', 0.8);//用jpeg格式，文件会小一点
                         const imgWidth = 190; // 适应PDF的宽度
                         let imgHeight = canvas.height * imgWidth / canvas.width; // 根据比例计算高度
 
                         // 将服务器信息页添加到PDF
-                        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                        //pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                        pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
 
                         // 在添加表格内容之前添加一个新页面
                         pdf.addPage();
@@ -172,11 +177,13 @@
                                 scale: 2,
                                 useCORS: true
                             }).then(canvas => {
-                                const imgData = canvas.toDataURL('image/png');//转换为PNG格式的图像数据
+                                //const imgData = canvas.toDataURL('image/png');//转换为PNG格式的图像数据
+                                const imgData = canvas.toDataURL('image/jpeg', 0.8);
                                 const imgWidth = 190; // 适应PDF的宽度
                                 let imgHeight = canvas.height * imgWidth / canvas.width; // 根据比例计算高度
 
-                                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                                //pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                                pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
 
                                 // 然后开始渲染表格行
                                 processRows(10 + imgHeight + 2); // 将表头下面的位置作为起始位置
@@ -195,7 +202,8 @@
                                         scale: 2,
                                         useCORS: true
                                     }).then(canvas => {
-                                        const imgData = canvas.toDataURL('image/png');
+                                        //const imgData = canvas.toDataURL('image/png');
+                                        const imgData = canvas.toDataURL('image/jpeg', 0.8);
                                         const imgWidth = 190; // 适应PDF的宽度
                                         let imgHeight = canvas.height * imgWidth / canvas.width; // 根据比例计算高度
 
@@ -204,7 +212,8 @@
                                             pdfY = 10; // 重置Y位置
                                         }
 
-                                        pdf.addImage(imgData, 'PNG', 10, pdfY, imgWidth, imgHeight);
+                                        //pdf.addImage(imgData, 'PNG', 10, pdfY, imgWidth, imgHeight);
+                                        pdf.addImage(imgData, 'JPEG', 10, pdfY, imgWidth, imgHeight);
                                         pdfY += imgHeight + 2; // 更新Y位置，并添加间隔
 
                                         processRow(index + 1); // 处理下一行

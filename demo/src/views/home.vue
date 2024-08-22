@@ -1,692 +1,347 @@
+
+
+
 <template>
-    <div>
-        <el-row>
-            <el-col :span="24" style="text-align: center;"><h1 style="color:dimgrey">Linux基线检测</h1></el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="24"><h3 style="color:dimgrey">请输入待检测Linux主机的ip地址和root密码：</h3></el-col>
-        </el-row>
-        <el-form @submit.prevent="submitForm">
-            <el-form-item label="IP 地址:">
-                <el-input v-model="ip"></el-input>
-            </el-form-item>
-            <el-form-item label="root密码:">
-                <el-input v-model="pd" show-password></el-input>
-            </el-form-item>
-            <el-form-item>
-                <el-button type="button" @click="submitForm">开始检测</el-button>
-            </el-form-item>
-        </el-form>
-
-        <el-dialog :visible.sync="showModal" title="进度" width="30%">
-            <div class="progress-bar-container">
-                <el-progress :percentage="progressBarWidth"></el-progress>
-            </div>
-            <span slot="footer" class="dialog-footer">
-                <el-button :disabled="!showButton" @click="closeModal">查看结果</el-button>
-            </span>
-        </el-dialog>
-    </div>
+  <div>
+    这是首页
+  </div>
 </template>
-
-<script>
-    export default {
-        name: "home",
-        data() {
-            return {
-                ip: '',
-                pd: '',
-                showModal: false,
-                progressBarWidth: 0,
-                showButton: false
-            };
-        },
-        methods: {
-            // 原来没有错误提示版本
-            // submitForm() {
-            //     const payload = {
-            //         ip: this.ip,
-            //         pd: this.pd
-            //     };
-            //     console.log("Submitting form...", payload);
-            //
-            //     fetch('http://localhost:8081/login', {
-            //         method: 'POST',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //         },
-            //         body: JSON.stringify(payload),
-            //     })
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             console.log("Response received:", data);
-            //
-            //         })
-            //         .catch((error) => {
-            //             console.error('Error:', error);
-            //         });
-            //     this.progressBarWidth = 0; // 初始化进度为0
-            //     this.showModal = true;
-            //     this.runProgress();
-            // },
-            // submitForm() {
-            //     const payload = {
-            //         ip: this.ip,
-            //         pd: this.pd
-            //     };
-            //     console.log("Submitting form...", payload);
-            //
-            //     fetch('http://localhost:8081/login', {
-            //         method: 'POST',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //         },
-            //         body: JSON.stringify(payload),
-            //     })
-            //         .then(response => {
-            //             if (!response.ok) {
-            //                 if (response.status === 500) { // 假设500状态码为内部错误
-            //                     // 处理特定的500内部错误
-            //                     alert("请求失败，SSH会话无法启动");
-            //                     return; // 不执行下面的操作
-            //                 }
-            //                 throw new Error('Network response was not ok.');
-            //             }
-            //             return response.json();
-            //         })
-            //         .then(data => {
-            //             console.log("Response received:", data);
-            //             // 仅在响应成功时执行这些操作
-            //             this.progressBarWidth = 0; // 初始化进度为0
-            //             this.showModal = true;
-            //             this.runProgress();
-            //         })
-            //         .catch((error) => {
-            //             console.error('Error:', error);
-            //             // 对于非500错误，执行这些操作
-            //             this.progressBarWidth = 0; // 初始化进度为0
-            //             this.showModal = true;
-            //             this.runProgress();
-            //         });
-            // },
-
-            submitForm() {
-                const payload = {
-                    ip: this.ip,
-                    pd: this.pd
-                };
-                console.log("Submitting form...", payload);
-
-                fetch('http://localhost:8081/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            if (response.status === 500) {
-                                // 处理特定的500内部错误
-                                alert("请求失败，SSH会话无法启动");
-                                return null; // 返回null但不结束Promise链，以防止进一步的.then执行
-                            }
-                            // 对于除500外的其他错误，抛出错误并附带状态码
-                            throw new Error(`HTTP status ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // 检查data是否为null来避免执行不需要的代码
-                        if (data === null) return;
-
-                        console.log("Response received:", data);
-                        // 仅在成功响应时执行UI操作
-                        this.progressBarWidth = 0; // 初始化进度为0
-                        this.showModal = true;
-                        this.runProgress();
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        // 显示除500外的其他HTTP错误的错误码
-                        alert(`发生错误：${error.message}`);
-                    });
-            },
-
-
-            runProgress() {
-                let duration = 4000;
-                let elapsed = 0;
-                let intervalTime = 100;
-
-                const interval = setInterval(() => {
-                    elapsed += intervalTime;
-                    this.progressBarWidth = Math.round((elapsed / duration) * 100); // 四舍五入到整数
-
-                    if (elapsed >= duration) {
-                        clearInterval(interval);
-                        this.progressBarWidth = 100; // 确保最后是100%
-                        this.showButton = true;
-                    }
-                }, intervalTime);
-            },
-            closeModal() {
-                this.showModal = false;
-                this.progressBarWidth = 0;
-                this.showButton = false;
-                console.log("Closing modal and redirecting.");
-                this.$nextTick(() => {
-                    this.$router.push('/baseCheck');
-                });
-            }
-        }
-    }
-</script>
-
-<style scoped>
-    .progress-bar-container .el-progress-bar__inner {
-        transition: width 0.1s ease-out;
-    /*平滑过渡动画*/
-    }
-</style>
-
-
-
-
-<!--数据传到后端但没有显示进度条和页面跳转-->
 <!--<template>-->
-<!--    <div>-->
-<!--        <el-form @submit.prevent="submitForm">-->
-<!--            <el-form-item label="IP 地址:">-->
-<!--                <el-input v-model="ip"></el-input>-->
-<!--            </el-form-item>-->
-<!--            <el-form-item label="root密码:">-->
-<!--                <el-input v-model="pd" show-password></el-input>-->
-<!--            </el-form-item>-->
-<!--            <el-form-item>-->
-<!--                <el-button type="button" @click="submitForm">基线检测</el-button>-->
-<!--            </el-form-item>-->
-<!--        </el-form>-->
-
-<!--        <el-dialog :visible.sync="showModal" title="进度" width="30%">-->
-<!--            <div class="progress-bar-container">-->
-<!--                <el-progress :percentage="progressBarWidth"></el-progress>-->
-<!--            </div>-->
-<!--            <span slot="footer" class="dialog-footer">-->
-<!--                <el-button :disabled="!showButton" @click="closeModal">查看结果</el-button>-->
-<!--            </span>-->
-<!--        </el-dialog>-->
-<!--    </div>-->
+<!--  <el-container>-->
+<!--    <el-header>-->
+<!--      <h1>CPE and CVE</h1>-->
+<!--    </el-header>-->
+<!--    <el-main>-->
+<!--      <el-row>-->
+<!--        <el-col :span="24">-->
+<!--          <h2>CPEs</h2>-->
+<!--          <div v-for="cpe in uniqueCpes" :key="cpe" class="cpe-list">-->
+<!--            {{ cpe }}-->
+<!--          </div>-->
+<!--        </el-col>-->
+<!--      </el-row>-->
+<!--      <el-row>-->
+<!--        <el-col :span="24">-->
+<!--          <h2>CVEs Details</h2>-->
+<!--          <el-table :data="cveDetails" border stripe>-->
+<!--            <el-table-column prop="cpe" label="CPE" width="250"/>-->
+<!--            <el-table-column prop="cve_id" label="CVE ID" width="180"/>-->
+<!--            <el-table-column prop="cvss" label="CVSS"/>-->
+<!--            <el-table-column prop="pocExist" label="POC Exist"/>-->
+<!--            <el-table-column prop="vulExist" label="Vulnerability Exists"/>-->
+<!--            <el-table-column prop="ip_port" label="IP / Port" width="150"/>-->
+<!--          </el-table>-->
+<!--        </el-col>-->
+<!--      </el-row>-->
+<!--    </el-main>-->
+<!--  </el-container>-->
 <!--</template>-->
 
 <!--<script>-->
-<!--    export default {-->
-<!--        name: "home",-->
-<!--        data() {-->
-<!--            return {-->
-<!--                ip: '',-->
-<!--                pd: '',-->
-<!--                showModal: false,-->
-<!--                progressBarWidth: 0,-->
-<!--                showButton: false-->
-<!--            };-->
-<!--        },-->
-<!--        methods: {-->
-<!--            submitForm() {-->
-<!--                const payload = {-->
-<!--                    ip: this.ip,-->
-<!--                    pd: this.pd-->
-<!--                };-->
-
-<!--                console.log("Submitting form...", payload);-->
-
-<!--                fetch('http://localhost:8081/login', {-->
-<!--                    method: 'POST',-->
-<!--                    headers: {-->
-<!--                        'Content-Type': 'application/json',-->
-<!--                    },-->
-<!--                    body: JSON.stringify(payload),-->
-<!--                })-->
-<!--                    .then(response => response.json())-->
-<!--                    .then(data => {-->
-<!--                        console.log("Response received:", data);-->
-<!--                        this.showModal = true;-->
-<!--                        this.runProgress();-->
-<!--                    })-->
-<!--                    .catch((error) => {-->
-<!--                        console.error('Error:', error);-->
-<!--                    });-->
-<!--            },-->
-<!--            runProgress() {-->
-<!--                let duration = 4000; // 总持续时间(毫秒)-->
-<!--                let elapsed = 0; // 已过时间-->
-<!--                let intervalTime = 50; // 更新间隔(毫秒)-->
-
-<!--                const interval = setInterval(() => {-->
-<!--                    elapsed += intervalTime;-->
-<!--                    this.progressBarWidth = (elapsed / duration) * 100;-->
-<!--                    console.log("Progress:", this.progressBarWidth);-->
-
-<!--                    if (elapsed >= duration) {-->
-<!--                        clearInterval(interval);-->
-<!--                        this.showButton = true;-->
-<!--                        console.log("Progress complete.");-->
-<!--                    }-->
-<!--                }, intervalTime);-->
-<!--            },-->
-<!--            closeModal() {-->
-<!--                this.showModal = false;-->
-<!--                this.progressBarWidth = 0;-->
-<!--                this.showButton = false;-->
-<!--                console.log("Closing modal and redirecting.");-->
-<!--                this.$router.push('/baseCheck');-->
+<!--export default {-->
+<!--  data() {-->
+<!--    return {-->
+<!--      uniqueCpes: [],-->
+<!--      cveDetails: []-->
+<!--    };-->
+<!--  },-->
+<!--  mounted() {-->
+<!--    this.fetchData();-->
+<!--  },-->
+<!--  methods: {-->
+<!--    fetchData() {-->
+<!--      fetch('http://192.168.177.129:8080/cveScan') // 请替换成你的API端点-->
+<!--          .then(response => {-->
+<!--            if (response.ok) {-->
+<!--              return response.json();-->
 <!--            }-->
+<!--            throw new Error('Network response was not ok.');-->
+<!--          })-->
+<!--          .then(data => {-->
+<!--            this.extractData(data);-->
+<!--          })-->
+<!--          .catch(error => {-->
+<!--            console.error("Error fetching data: ", error);-->
+<!--          });-->
+<!--    },-->
+<!--    extractData(data) {-->
+<!--      // 创建一个空的 Set 对象，用于存储唯一的 CPE-->
+<!--      const cpesSet = new Set();-->
+
+<!--      // 遍历输入的每个主机结果（hostResult）。-->
+<!--      data.forEach(hostResult => {-->
+<!--        // 检查当前主机结果中是否存在cpes字段-->
+<!--        if (hostResult.cpes) {-->
+<!--          // 遍历主机结果中的每个CPE-->
+<!--          for (let cpe in hostResult.cpes) {-->
+<!--            // 将当前 CPE 添加到cpesSet集合中-->
+<!--            cpesSet.add(cpe);-->
+<!--            // 遍历当前CPE下的每个CVE-->
+<!--            hostResult.cpes[cpe].forEach(cve => {-->
+<!--              // 将CVE详细信息添加到this.cveDetails数组中-->
+<!--              this.cveDetails.push({-->
+<!--                cpe: cpe,-->
+<!--                cve_id: cve.CVE_id,-->
+<!--                cvss: cve.CVSS,-->
+<!--                pocExist: cve.pocExist ? 'Yes' : 'No',-->
+<!--                vulExist: cve.vulExist,-->
+<!--                ip_port: hostResult.ip-->
+<!--              });-->
+<!--            });-->
+<!--          }-->
 <!--        }-->
-<!--    }-->
-<!--</script>-->
+<!--        // 遍历主机结果中的每个端口-->
+<!--        hostResult.ports.forEach(port => {-->
+<!--          // 检查当前端口是否有cpes字段-->
+<!--          if (port.cpes) {-->
+<!--            // 遍历端口中的每个CPE-->
+<!--            for (let cpe in port.cpes) {-->
+<!--              // 将当前CPE添加到cpesSet集合中-->
+<!--              cpesSet.add(cpe);-->
 
-
-
-<!--一个报错的修改版本-->
-<!--<template>-->
-<!--    <div>-->
-<!--        <el-form @submit.prevent="submitForm">-->
-<!--            <el-form-item label="IP 地址:">-->
-<!--                <el-input v-model="ip"></el-input>-->
-<!--            </el-form-item>-->
-<!--            <el-form-item label="root密码:">-->
-<!--                <el-input v-model="pd" show-password></el-input>-->
-<!--            </el-form-item>-->
-<!--            <el-form-item>-->
-<!--                <el-button type="primary" native-type="submit">基线检测</el-button>-->
-<!--            </el-form-item>-->
-<!--        </el-form>-->
-
-<!--        <el-dialog :visible.sync="showModal" title="进度" width="30%">-->
-<!--            <div class="progress-bar-container">-->
-<!--                <el-progress :percentage="progressBarWidth"></el-progress>-->
-<!--            </div>-->
-<!--            <span slot="footer" class="dialog-footer">-->
-<!--                <el-button :disabled="!showButton" @click="closeModal">查看结果</el-button>-->
-<!--            </span>-->
-<!--        </el-dialog>-->
-<!--    </div>-->
-<!--</template>-->
-
-<!--<script>-->
-<!--    export default {-->
-<!--        name: "home",-->
-<!--        data() {-->
-<!--            return {-->
-<!--                ip: '',-->
-<!--                pd: '',-->
-<!--                showModal: false,-->
-<!--                progressBarWidth: 0,-->
-<!--                showButton: false-->
-<!--            };-->
-<!--        },-->
-<!--        methods: {-->
-<!--            submitForm() {-->
-<!--                const payload = {-->
-<!--                    ip: this.ip,-->
-<!--                    pd: this.pd-->
-<!--                };-->
-
-<!--                //测试-->
-<!--                console.log("Submitting form...", payload);-->
-
-<!--                fetch('http://localhost:8081/login', {-->
-<!--                    method: 'POST',-->
-<!--                    headers: {-->
-<!--                        'Content-Type': 'application/json',-->
-<!--                    },-->
-<!--                    body: JSON.stringify(payload),-->
-<!--                })-->
-<!--                    .then(response => response.json())-->
-<!--                    .then(data => {-->
-<!--                        //测试-->
-<!--                        console.log("Response received:", data);-->
-
-<!--                        console.log(data);-->
-<!--                        this.showModal = true;-->
-<!--                        this.runProgress();-->
-<!--                    })-->
-<!--                    .catch((error) => {-->
-<!--                        console.error('Error:', error);-->
-<!--                    });-->
-<!--            },-->
-<!--            runProgress() {-->
-<!--                let duration = 4000; // 总持续时间(毫秒)-->
-<!--                let elapsed = 0; // 已过时间-->
-<!--                let intervalTime = 50; // 更新间隔(毫秒)-->
-
-<!--                const interval = setInterval(() => {-->
-<!--                    elapsed += intervalTime;-->
-<!--                    this.progressBarWidth = (elapsed / duration) * 100;-->
-<!--                    //测试-->
-<!--                    console.log("Progress:", this.progressBarWidth);-->
-
-<!--                    if (elapsed >= duration) {-->
-<!--                        clearInterval(interval);-->
-<!--                        this.showButton = true;-->
-<!--                        //测试-->
-<!--                        console.log("Progress complete.");-->
-<!--                    }-->
-<!--                }, intervalTime);-->
-<!--            },-->
-<!--            closeModal() {-->
-<!--                this.showModal = false;-->
-<!--                this.progressBarWidth = 0;-->
-<!--                this.showButton = false;-->
-<!--                //测试-->
-<!--                console.log("Closing modal and redirecting.");-->
-<!--                this.$router.push('/baseCheck');-->
+<!--              // 遍历当前CPE下的每个 CVE-->
+<!--              port.cpes[cpe].forEach(cve => {-->
+<!--                // 将CVE详细信息添加到this.cveDetails数组中-->
+<!--                this.cveDetails.push({-->
+<!--                  cpe: cpe,-->
+<!--                  cve_id: cve.CVE_id,-->
+<!--                  cvss: cve.CVSS,-->
+<!--                  pocExist: cve.pocExist ? 'Yes' : 'No',-->
+<!--                  vulExist: cve.vulExist,-->
+<!--                  ip_port: `${hostResult.ip}:${port.portId}`//当前主机的IP地址及端口号-->
+<!--                });-->
+<!--              });-->
 <!--            }-->
-<!--        }-->
+<!--          }-->
+<!--        });-->
+<!--      });-->
+<!--      this.uniqueCpes = Array.from(cpesSet);//转换cpesSet为数组,使得Vue更好处理数组数据-->
 <!--    }-->
-<!--</script>-->
-
-
-
-
-<!--下面是原来没有使用element ui的代码-->
-<!--<template>-->
-<!--    <div>-->
-<!--        <form @submit.prevent="submitForm">-->
-<!--            <label for="ip">IP 地址:</label>-->
-<!--            <input type="text" id="ip" v-model="ip"><br><br>-->
-<!--            <label for="pd">root密码:</label>-->
-<!--            <input type="text" id="pd" v-model="pd"><br><br>-->
-<!--            <button type="submit">基线检测</button>-->
-<!--        </form>-->
-
-<!--        <div v-if="showModal" class="modal">-->
-<!--            <div class="progress-bar-container">-->
-<!--                <div :style="{ width: progressBarWidth + '%' }" class="progress-bar"></div>-->
-<!--            </div>-->
-<!--            <button :disabled="!showButton" :class="{ 'disabled-button': !showButton }" @click="closeModal">查看结果</button>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</template>-->
-
-<!--<script>-->
-<!--    export default {-->
-<!--        name: "home",-->
-<!--        data() {-->
-<!--            return {-->
-<!--                ip: '',-->
-<!--                pd: '',-->
-<!--                showModal: false,-->
-<!--                progressBarWidth: 0,-->
-<!--                showButton: false-->
-<!--            };-->
-<!--        },-->
-<!--        methods: {-->
-<!--            submitForm() {-->
-<!--                const payload = {-->
-<!--                    ip: this.ip,-->
-<!--                    pd: this.pd-->
-<!--                };-->
-
-<!--                fetch('http://localhost:8081/login', {-->
-<!--                    method: 'POST',-->
-<!--                    headers: {-->
-<!--                        'Content-Type': 'application/json',-->
-<!--                    },-->
-<!--                    body: JSON.stringify(payload),-->
-<!--                })-->
-<!--                    .then(response => response.json())-->
-<!--                    .then(data => {-->
-<!--                        console.log(data);-->
-<!--                    })-->
-<!--                    .catch((error) => {-->
-<!--                        console.error('Error:', error);-->
-<!--                    });-->
-
-<!--                // 显示模态框并开始进度条动画-->
-<!--                // 显示模态框并开始进度条动画-->
-<!--                    this.showModal = true;-->
-<!--                    this.progressBarWidth = 0; // 初始化进度条宽度-->
-<!--                    let duration = 4000; // 总持续时间(毫秒)-->
-<!--                    let elapsed = 0; // 已过时间-->
-<!--                    let intervalTime = 50; // 更新间隔(毫秒)-->
-
-<!--                    const interval = setInterval(() => {-->
-<!--                        elapsed += intervalTime;-->
-<!--                        this.progressBarWidth = (elapsed / duration) * 100;-->
-<!--                        if (elapsed >= duration) {-->
-<!--                            clearInterval(interval);-->
-<!--                            this.showButton = true;-->
-<!--                        }-->
-<!--                    }, intervalTime);-->
-<!--                },-->
-
-<!--            //     this.showModal = true;-->
-<!--            //     let seconds = 0;-->
-<!--            //     const interval = setInterval(() => {-->
-<!--            //         seconds++;-->
-<!--            //         this.progressBarWidth = (seconds / 4) * 100;-->
-<!--            //         if (seconds >= 4) {-->
-<!--            //             clearInterval(interval);-->
-<!--            //             this.showButton = true;-->
-<!--            //         }-->
-<!--            //     }, 1000);-->
-<!--            // },-->
-<!--            closeModal() {-->
-<!--                this.showModal = false;-->
-<!--                this.progressBarWidth = 0;-->
-<!--                this.showButton = false;-->
-<!--                this.$router.push('/baseCheck');-->
-<!--            }-->
-<!--        }-->
-<!--    }-->
+<!--  }-->
+<!--};-->
 <!--</script>-->
 
 <!--<style scoped>-->
-<!--    .modal {-->
-<!--        position: fixed;-->
-<!--        left: 50%;-->
-<!--        top: 50%;-->
-<!--        transform: translate(-50%, -50%);-->
-<!--        background: white;-->
-<!--        padding: 20px;-->
-<!--        z-index: 1000;-->
-<!--        width: 60%; /* 调整模态框宽度以适应更长的进度条 */-->
-<!--        display: flex; /* 设置模态框为flex容器 */-->
-<!--        flex-direction: column; /* 子元素垂直排列 */-->
-<!--        align-items: center; /* 水平居中对齐子元素 */-->
-<!--        justify-content: center; /* 垂直居中对齐子元素 */-->
+<!--.cpe-list {-->
+<!--  margin-bottom: 20px;-->
+<!--}-->
+<!--</style>-->
+
+<!--没用element-ui的版本-->
+<!--<template>-->
+<!--  <div class="hello">-->
+<!--    <h1>Scan Results</h1>-->
+<!--    <h2>Operating Systems and CPEs</h2>-->
+<!--    <div v-for="(result, index) in scanResults" :key="'result-' + index">-->
+<!--      <h3>{{ result.ip }}</h3>-->
+<!--      <ul>-->
+<!--        <li v-for="(cves, cpe) in result.cpes" :key="cpe">-->
+<!--          <button @click="toggleCPE(cpe)">{{ cpe }}</button>-->
+<!--          <ul v-if="visibleCPEs.includes(cpe)">-->
+<!--            <li v-for="cve in cves" :key="cve.CVE_id">-->
+<!--              CVE ID: {{ cve.CVE_id }}, CVSS: {{ cve.CVSS }}, PoC Exists: {{ cve.pocExist }}, Vulnerability Exists: {{ cve.vulExist }}-->
+<!--            </li>-->
+<!--          </ul>-->
+<!--        </li>-->
+<!--      </ul>-->
+<!--    </div>-->
+<!--    <h2>Ports and Services</h2>-->
+<!--    <div v-for="(result, index) in scanResults" :key="'ports-' + index">-->
+<!--      <h3>{{ result.ip }}</h3>-->
+<!--      <table>-->
+<!--        <thead>-->
+<!--        <tr>-->
+<!--          <th>Port ID</th>-->
+<!--          <th>Protocol</th>-->
+<!--          <th>Status</th>-->
+<!--          <th>Service</th>-->
+<!--          <th>Version</th>-->
+<!--          <th>CPEs</th>-->
+<!--        </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--        <tr v-for="port in result.ports" :key="port.portId">-->
+<!--          <td>{{ port.portId }}</td>-->
+<!--          <td>{{ port.protocol }}</td>-->
+<!--          <td>{{ port.status }}</td>-->
+<!--          <td>{{ port.service_name }}</td>-->
+<!--          <td>{{ port.version }}</td>-->
+<!--          <td>-->
+<!--            <ul>-->
+<!--              <li v-for="(cves, cpe) in port.cpes" :key="cpe">-->
+<!--                <button @click="toggleCPE(cpe)">{{ cpe }}</button>-->
+<!--                <ul v-if="visibleCPEs.includes(cpe)">-->
+<!--                  <li v-for="cve in cves" :key="cve.CVE_id">-->
+<!--                    CVE ID: {{ cve.CVE_id }}, CVSS: {{ cve.CVSS }}, PoC Exists: {{ cve.pocExist }}, Vulnerability Exists: {{ cve.vulExist }}-->
+<!--                  </li>-->
+<!--                </ul>-->
+<!--              </li>-->
+<!--            </ul>-->
+<!--          </td>-->
+<!--        </tr>-->
+<!--        </tbody>-->
+<!--      </table>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</template>-->
+
+<!--<script>-->
+<!--import axios from 'axios';-->
+
+<!--export default {-->
+<!--  name: 'HelloWorld',-->
+<!--  data() {-->
+<!--    return {-->
+<!--      scanResults: [],-->
+<!--      visibleCPEs: []-->
+<!--    };-->
+<!--  },-->
+<!--  methods: {-->
+<!--    fetchScanResults() {-->
+<!--      axios.get('http://192.168.177.129:8080/cveScan')-->
+<!--          .then(response => {-->
+<!--            this.scanResults = response.data;-->
+<!--          })-->
+<!--          .catch(error => {-->
+<!--            console.error("There was an error fetching the scan results:", error);-->
+<!--          });-->
+<!--    },-->
+<!--    toggleCPE(cpe) {-->
+<!--      const index = this.visibleCPEs.indexOf(cpe);-->
+<!--      if (index > -1) {-->
+<!--        this.visibleCPEs.splice(index, 1);-->
+<!--      } else {-->
+<!--        this.visibleCPEs.push(cpe);-->
+<!--      }-->
 <!--    }-->
-<!--    .progress-bar-container {-->
-<!--        width: 100%; /* 容器宽度调整为100% */-->
-<!--        background: #eee;-->
-<!--        margin-bottom: 10px;-->
-<!--        height: 10px; /* 调整容器高度为10px，使得进度条看起来更扁 */-->
-<!--        border-radius: 5px; /* 可选：添加圆角 */-->
-<!--    }-->
-<!--    .progress-bar {-->
-<!--        height: 100%; /* 进度条高度填满容器 */-->
-<!--        background: green;-->
-<!--        border-radius: 5px; /* 可选：添加圆角 */-->
-<!--    }-->
-<!--    button {-->
-<!--        margin-top: 20px; /* 在按钮和进度条之间添加一些间隙 */-->
-<!--    }-->
-<!--    .disabled-button {-->
-<!--        opacity: 0.5; /* 设置不透明度为0.5，使按钮看起来更暗 */-->
-<!--        cursor: not-allowed; /* 鼠标悬停时显示禁止符号 */-->
-<!--    }-->
+<!--  },-->
+<!--  mounted() {-->
+<!--    this.fetchScanResults();-->
+<!--  }-->
+<!--}-->
+<!--</script>-->
+
+<!--<style scoped>-->
+<!--button {-->
+<!--  margin: 5px;-->
+<!--}-->
 <!--</style>-->
 
 
 
 
-
-
-
+<!--element-ui有错误的版本-->
 <!--<template>-->
-<!--    <div>-->
-<!--        <form @submit.prevent="submitForm">-->
-<!--            <label for="ip">IP 地址:</label>-->
-<!--            <input type="text" id="ip" v-model="ip"><br><br>-->
-<!--            <label for="pd">root密码:</label>-->
-<!--            <input type="text" id="pd" v-model="pd"><br><br>-->
-<!--            <button type="submit">基线检测</button>-->
-<!--        </form>-->
+<!--  <div class="hello">-->
+<!--    <el-row>-->
+<!--      <el-col :span="24"><h1>Scan Results</h1></el-col>-->
+<!--    </el-row>-->
 
-<!--        <div v-if="showModal" class="modal">-->
-<!--            <div class="progress-bar-container">-->
-<!--                <div :style="{ width: progressBarWidth + '%' }" class="progress-bar"></div>-->
-<!--            </div>-->
-<!--            <button v-if="showButton" @click="closeModal">查看结果</button>-->
-<!--        </div>-->
-<!--    </div>-->
+<!--    <el-row>-->
+<!--      <el-col :span="24">-->
+<!--        <h2>Operating Systems and CPEs</h2>-->
+<!--        <el-collapse v-model="activeNames">-->
+<!--          <el-collapse-item v-for="(result, index) in scanResults" :key="'result-' + index" :name="'result-' + index">-->
+<!--            <template #title>-->
+<!--              {{ result.ip }}-->
+<!--            </template>-->
+<!--            <ul>-->
+<!--              <li v-for="(cves, cpe) in result.cpes" :key="cpe">-->
+<!--                <el-button @click="toggleCPE(cpe)">{{ cpe }}</el-button>-->
+<!--                <el-collapse v-if="visibleCPEs.includes(cpe)" accordion>-->
+<!--                  <el-collapse-item v-for="cve in cves" :key="cve.CVE_id" :name="cve.CVE_id">-->
+<!--                    <template #title>-->
+<!--                      {{ cve.CVE_id }}-->
+<!--                    </template>-->
+<!--                    CVSS: {{ cve.CVSS }}, PoC Exists: {{ cve.pocExist ? 'Yes' : 'No' }}, Vulnerability Exists: {{ cve.vulExist }}-->
+<!--                  </el-collapse-item>-->
+<!--                </el-collapse>-->
+<!--              </li>-->
+<!--            </ul>-->
+<!--          </el-collapse-item>-->
+<!--        </el-collapse>-->
+<!--      </el-col>-->
+<!--    </el-row>-->
+
+<!--    <el-row>-->
+<!--      <el-col :span="24">-->
+<!--        <h2>Ports and Services</h2>-->
+<!--        <el-table :data="scanResults" style="width: 100%">-->
+<!--          <el-table-column prop="ip" label="IP Address" width="180"></el-table-column>-->
+<!--          <el-table-column label="Ports">-->
+<!--            <template #default="scope">-->
+<!--              <el-table :data="scope.row.ports" style="width: 100%">-->
+<!--                <el-table-column prop="portId" label="Port ID" width="100"></el-table-column>-->
+<!--                <el-table-column prop="protocol" label="Protocol" width="100"></el-table-column>-->
+<!--                <el-table-column prop="status" label="Status" width="100"></el-table-column>-->
+<!--                <el-table-column prop="service_name" label="Service" width="100"></el-table-column>-->
+<!--                <el-table-column prop="version" label="Version" width="180"></el-table-column>-->
+<!--                <el-table-column label="CPEs">-->
+<!--                  <template #default="subscope">-->
+<!--                    <div v-for="(cves, cpe) in subscope.row.cpes" :key="cpe">-->
+<!--                      <el-button size="mini" @click="toggleCPE(cpe)">-->
+<!--                        {{ cpe }}-->
+<!--                      </el-button>-->
+<!--                      <el-collapse v-if="visibleCPEs.includes(cpe)" accordion>-->
+<!--                        <el-collapse-item v-for="cve in cves" :key="cve.CVE_id" :name="cve.CVE_id">-->
+<!--                          <template #title>-->
+<!--                            {{ cve.CVE_id }}-->
+<!--                          </template>-->
+<!--                          CVSS: {{ cve.CVSS }}, PoC Exists: {{ cve.pocExist ? 'Yes' : 'No' }}, Vulnerability Exists: {{ cve.vulExist }}-->
+<!--                        </el-collapse-item>-->
+<!--                      </el-collapse>-->
+<!--                    </div>-->
+<!--                  </template>-->
+
+<!--                </el-table-column>-->
+<!--              </el-table>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+<!--        </el-table>-->
+<!--      </el-col>-->
+<!--    </el-row>-->
+<!--  </div>-->
 <!--</template>-->
 
 <!--<script>-->
-<!--    export default {-->
-<!--        name: "home",-->
-<!--        data() {-->
-<!--            return {-->
-<!--                ip: '',-->
-<!--                pd: '',-->
-<!--                showModal: false,-->
-<!--                progressBarWidth: 0,-->
-<!--                showButton: false-->
-<!--            };-->
-<!--        },-->
-<!--        methods: {-->
-<!--            submitForm() {-->
-<!--                const payload = {-->
-<!--                    ip: this.ip,-->
-<!--                    pd: this.pd-->
-<!--                };-->
+<!--import axios from 'axios';-->
 
-<!--                fetch('http://localhost:8081/login', {-->
-<!--                    method: 'POST',-->
-<!--                    headers: {-->
-<!--                        'Content-Type': 'application/json',-->
-<!--                    },-->
-<!--                    body: JSON.stringify(payload),-->
-<!--                })-->
-<!--                    .then(response => response.json())-->
-<!--                    .then(data => {-->
-<!--                        console.log(data);-->
-<!--                    })-->
-<!--                    .catch((error) => {-->
-<!--                        console.error('Error:', error);-->
-<!--                    });-->
-
-<!--                // 显示模态框并开始进度条动画-->
-<!--                this.showModal = true;-->
-<!--                let seconds = 0;-->
-<!--                const interval = setInterval(() => {-->
-<!--                    seconds++;-->
-<!--                    this.progressBarWidth = (seconds / 4) * 100;-->
-<!--                    if (seconds >= 4) {-->
-<!--                        clearInterval(interval);-->
-<!--                        this.showButton = true;-->
-<!--                    }-->
-<!--                }, 1000);-->
-<!--            },-->
-<!--            closeModal() {-->
-<!--                this.showModal = false;-->
-<!--                this.progressBarWidth = 0;-->
-<!--                this.showButton = false;-->
-<!--                this.$router.push('/baseCheck');-->
-<!--            }-->
-<!--        }-->
+<!--export default {-->
+<!--  name: 'HelloWorld',-->
+<!--  data() {-->
+<!--    return {-->
+<!--      scanResults: [],-->
+<!--      visibleCPEs: [],-->
+<!--      activeNames: []-->
+<!--    };-->
+<!--  },-->
+<!--  methods: {-->
+<!--    fetchScanResults() {-->
+<!--      axios.get('http://192.168.177.129:8080/cveScan')-->
+<!--          .then(response => {-->
+<!--            this.scanResults = response.data;-->
+<!--          })-->
+<!--          .catch(error => {-->
+<!--            console.error("There was an error fetching the scan results:", error);-->
+<!--          });-->
+<!--    },-->
+<!--    toggleCPE(cpe) {-->
+<!--      const index = this.visibleCPEs.indexOf(cpe);-->
+<!--      if (index > -1) {-->
+<!--        this.visibleCPEs.splice(index, 1);-->
+<!--      } else {-->
+<!--        this.visibleCPEs.push(cpe);-->
+<!--      }-->
 <!--    }-->
+<!--  },-->
+<!--  mounted() {-->
+<!--    this.fetchScanResults();-->
+<!--  }-->
+<!--}-->
 <!--</script>-->
 
 <!--<style scoped>-->
-<!--    .modal {-->
-<!--        position: fixed;-->
-<!--        left: 50%;-->
-<!--        top: 50%;-->
-<!--        transform: translate(-50%, -50%);-->
-<!--        background: white;-->
-<!--        padding: 20px;-->
-<!--        z-index: 1000;-->
-<!--        width: 60%; /* 调整模态框宽度以适应更长的进度条 */-->
-<!--        display: flex; /* 设置模态框为flex容器 */-->
-<!--        flex-direction: column; /* 子元素垂直排列 */-->
-<!--        align-items: center; /* 水平居中对齐子元素 */-->
-<!--        justify-content: center; /* 垂直居中对齐子元素 */-->
-<!--    }-->
-<!--    .progress-bar-container {-->
-<!--        width: 100%; /* 容器宽度调整为100% */-->
-<!--        background: #eee;-->
-<!--        margin-bottom: 10px;-->
-<!--        height: 10px; /* 调整容器高度为10px，使得进度条看起来更扁 */-->
-<!--        border-radius: 5px; /* 可选：添加圆角 */-->
-<!--    }-->
-<!--    .progress-bar {-->
-<!--        height: 100%; /* 进度条高度填满容器 */-->
-<!--        background: green;-->
-<!--        border-radius: 5px; /* 可选：添加圆角 */-->
-<!--    }-->
-<!--    button {-->
-<!--        margin-top: 20px; /* 在按钮和进度条之间添加一些间隙 */-->
-<!--    }-->
+<!--.el-collapse-item__header {-->
+<!--  background-color: #f5f7fa;-->
+<!--}-->
 <!--</style>-->
-
-
-
-
-
-<!--
-<template>
-    <div>
-        <form @submit.prevent="submitForm">
-            <label for="ip">ip地址:</label>
-            <input type="text" id="ip" v-model="ip"><br><br>
-            <label for="pd">性别:</label>
-            <input type="text" id="pd" v-model="pd"><br><br>
-            <button type="submit">基线检测</button>
-        </form>
-    </div>
-</template>
-
-<script>
-    export default {
-        name:"home",
-        data() {
-            return {
-                ip: '',
-                pd: ''
-            };
-        },
-        methods: {
-            submitForm() {
-                const payload = {
-                    ip: this.ip,
-                    pd: this.pd
-                };
-
-                fetch('http://localhost:8081/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data);
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
-                //在这里添加一个弹窗，弹窗显示一个进度条，表示正在进行基线检测，进度条持续六秒，下面有一个查看结果按钮，六秒后点击弹窗中的按钮退出弹窗，继续执行下面的代码
-                this.$router.push('/baseCheck');
-            }
-        }
-    }
-</script>
-
-&lt;!&ndash; Optional: add styles here &ndash;&gt;
-<style scoped>
-    /* Your CSS styles */
-</style>
--->
