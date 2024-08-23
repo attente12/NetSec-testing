@@ -666,7 +666,7 @@ export default {
 
       // 添加文件，如果有的话
       if (this.fileList.length > 0) {
-        formData.append('script', this.fileList[0].raw); // 这里的字段名称应与后端一致
+        formData.append('file', this.fileList[0]); // 这里的字段名称应与后端一致
       }
 
       try {
@@ -680,6 +680,7 @@ export default {
           this.$message.success('POC更新成功');
           this.editDialogVisible = false;
           this.fileList = [];
+          window.location.reload();
         } else {
           this.$message.error('更新失败: ' + response.data.message);
         }
