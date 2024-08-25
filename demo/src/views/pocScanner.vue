@@ -36,7 +36,6 @@
                   <el-collapse v-if="visibleCPEs.includes(cpe)" accordion>
                     <el-collapse-item v-for="cve in cves" :key="cve.CVE_id" :name="cve.CVE_id">
                       <template #title>
-<!--                        {{ cve.CVE_id }}-->
                         <span style="padding-left: 30px;">{{ cve.CVE_id }}</span>
                       </template>
                       <div style="color: slategrey; font-size: 12px; margin-left: 40px">
@@ -67,7 +66,6 @@
           <div slot="header">端口扫描结果</div>
           <el-table :data="scanResults" style="width: 100%">
             <el-table-column prop="ip" label="IP 地址" width="150"></el-table-column>
-<!--            <el-table-column label="端口" >-->
             <el-table-column>
               <template #header>
                 <div style="text-align: center;">端 口</div>
@@ -101,21 +99,6 @@
                       </div>
                     </template>
                   </el-table-column>
-<!--                  <el-table :data="scope.row.ports" style="width: 100%">-->
-<!--                    <el-collapse v-if="visibleCPEs.includes(cpe)" accordion>-->
-<!--                      <el-collapse-item v-for="cve in cves" :key="cve.CVE_id" :name="cve.CVE_id">-->
-<!--                        <template #title>-->
-<!--                          &lt;!&ndash;                              {{ cve.CVE_id }}&ndash;&gt;-->
-<!--                          <span style="padding-left: 30px;">{{ cve.CVE_id }}</span>-->
-<!--                        </template>-->
-<!--                        <div style="color: slategrey; font-size: 12px; margin-left: 40px">-->
-<!--                          CVSS: {{ cve.CVSS }}<br>-->
-<!--                          PoC Exists: {{ cve.pocExist ? 'Yes' : 'No' }}<br>-->
-<!--                          Vulnerability Exists: {{ cve.vulExist }}<br>-->
-<!--                        </div>-->
-<!--                      </el-collapse-item>-->
-<!--                    </el-collapse>-->
-<!--                  </el-table>-->
                 </el-table>
               </template>
             </el-table-column>

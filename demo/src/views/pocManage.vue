@@ -438,7 +438,7 @@ export default {
       this.loadData();
     },
     loadData() {
-      fetch('http://192.168.177.129:8081/getAllData')
+      fetch('/api/getAllData')
           .then(response => {
             if (!response.ok) {
               throw new Error('Network response was not ok');
@@ -541,7 +541,7 @@ export default {
     //       });
     // },
     del(id) {
-      fetch(`http://192.168.177.129:8081/deleteDataById`, {
+      fetch(`/api/deleteDataById`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -563,7 +563,7 @@ export default {
     },
     delBatch() {
       const idsToDelete = this.$refs.table.selection.map(row => row.id);
-      fetch(`http://192.168.177.129:8081/deleteDataById`, {
+      fetch(`/api/deleteDataById`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

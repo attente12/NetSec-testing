@@ -123,7 +123,7 @@
         },
         methods: {
             fetchAndDisplayChenckResults() {
-                fetch('http://192.168.177.129:8081/userinfo')
+                fetch('/api/userinfo')
                     .then(response => response.json())
                     .then(data => {
                         this.checkresults = data.Event_result;

@@ -49,7 +49,7 @@
                 };
                 console.log("Submitting form...", payload);
 
-                fetch('http://192.168.177.129:8081/login', {
+                fetch('/api/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
