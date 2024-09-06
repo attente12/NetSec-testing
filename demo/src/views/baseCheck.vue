@@ -132,17 +132,6 @@
                     .catch(error => console.error('Error:', error));
             },
 
-            /*onRecheckButton() {
-                this.$message('重新检测按钮被点击!');
-            },*/
-            // onExportToExcel() {
-            //     const wb = XLSX.utils.book_new();
-            //     const ws = XLSX.utils.json_to_sheet(this.checkresults, {
-            //         header: ["description", "basis", "result", "IsComply", "recommend","command"]
-            //     });
-            //     XLSX.utils.book_append_sheet(wb, ws, "Report");
-            //     XLSX.writeFile(wb, "report.xlsx");
-            // },
             onExportToPDF() {
                 this.showContentForPDF = true; // 确保PDF相关内容是可见的
 
@@ -229,94 +218,7 @@
                     });
                 }, 1000);
             }
-
-
-
         },
-            // onExportToPDF() {
-            //     this.showContentForPDF = true; // 确保PDF相关内容是可见的
-            //
-            //     setTimeout(() => { // 增加延迟确保DOM完全更新
-            //         const pdf = new jsPDF({
-            //             orientation: 'l', // 横向
-            //             unit: 'mm',//单位为毫米
-            //             format: 'a4'//页面格式为A4
-            //         });
-            //         // 渲染PDF的服务器信息页
-            //         const contentForPDF = this.$el.querySelector('.pdf-content .server1');
-            //         html2canvas(contentForPDF, {
-            //             scale: 2,
-            //             useCORS: true
-            //         }).then(canvas => {
-            //             const imgData = canvas.toDataURL('image/png');
-            //             const imgWidth = 277; // 适应PDF的宽度
-            //             let imgHeight = canvas.height * imgWidth / canvas.width; // 根据比例计算高度
-            //
-            //             // 将服务器信息页添加到PDF
-            //             pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-            //
-            //             // 在添加表格内容之前添加一个新页面
-            //             pdf.addPage();
-            //
-            //             // 首先渲染表头
-            //             const header = this.$el.querySelector('.pdf-content .el-table__header-wrapper');
-            //             if (header) {
-            //                 html2canvas(header, {  //转换成画布（canvas）
-            //                 scale: 2,
-            //                 useCORS: true
-            //             }).then(canvas => {
-            //                 const imgData = canvas.toDataURL('image/png');//转换为PNG格式的图像数据
-            //                 const imgWidth = 277; // 适应PDF的宽度
-            //                 let imgHeight = canvas.height * imgWidth / canvas.width; // 根据比例计算高度
-            //
-            //                 pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-            //
-            //                 // 然后开始渲染表格行
-            //                 processRows(10 + imgHeight + 2); // 将表头下面的位置作为起始位置
-            //             });
-            //         }
-            //
-            //             //pdfY跟踪当前在PDF页面上的垂直位置
-            //         const processRows = (pdfY) => {
-            //             const exportContents = this.$el.querySelectorAll('.pdf-content .el-table__body-wrapper table tr');
-            //             const pageHeight = pdf.internal.pageSize.getHeight() - 20; // 页面总高度减去上下边距
-            //
-            //             const processRow = (index) => {
-            //                 if (index < exportContents.length) {
-            //                     const row = exportContents[index];
-            //                     html2canvas(row, {
-            //                         scale: 2,
-            //                         useCORS: true
-            //                     }).then(canvas => {
-            //                         const imgData = canvas.toDataURL('image/png');
-            //                         const imgWidth = 277; // 适应PDF的宽度
-            //                         let imgHeight = canvas.height * imgWidth / canvas.width; // 根据比例计算高度
-            //
-            //                         if (pdfY + imgHeight > pageHeight) {//当前行的图像加上当前的pdfY值超出pageHeight则新建一个pdf页面
-            //                             pdf.addPage(); // 添加新页面
-            //                             pdfY = 10; // 重置Y位置
-            //                         }
-            //
-            //                         pdf.addImage(imgData, 'PNG', 10, pdfY, imgWidth, imgHeight);
-            //                         pdfY += imgHeight + 2; // 更新Y位置，并添加间隔
-            //
-            //                         processRow(index + 1); // 处理下一行
-            //                     });
-            //                 } else {
-            //                     pdf.save('report.pdf'); // 所有行处理完毕后保存PDF
-            //                     this.showContentForPDF = false; // 隐藏PDF相关内容
-            //                 }
-            //             };
-            //
-            //             processRow(0); // 从第一行开始处理
-            //         };
-            //         });
-            //     }, 1000);
-            // }
-
-
-
-        // },
 
         mounted() {
             this.fetchAndDisplayChenckResults();
@@ -356,19 +258,19 @@
 
     /*文字分割的正确版本*/
     .pdf-content {
-        font-size: 10pt; /* 设置字体大小为10磅 */
-        max-width: 297mm; /* A4 宽度约为 210mm */
-        padding: 15mm; /* A4 页面常用边距 */
-        box-sizing: border-box;
+      font-size: 10pt; /* 设置字体大小为10磅 */
+      max-width: 297mm; /* A4 宽度约为 210mm */
+      padding: 15mm; /* A4 页面常用边距 */
+      box-sizing: border-box;
     }
 
     /* 单独调整某些元素的字体大小 */
     .pdf-content h1 {
-        font-size: 14pt; /* 较大的标题字体 */
+      font-size: 14pt; /* 较大的标题字体 */
     }
 
     .pdf-content p {
-        font-size: 9pt; /* 正文的字体大小 */
+      font-size: 9pt; /* 正文的字体大小 */
     }
 
 </style>

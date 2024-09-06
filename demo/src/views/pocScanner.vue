@@ -2,6 +2,8 @@
   <div class="container">
     <div class="title">
       <h1>漏洞扫描</h1>
+<!--      <el-button size="medium" @click="goPocVerify">去进行poc验证</el-button>-->
+<!--      <h1></h1>-->
     </div>
 
     <el-row :gutter="20">
@@ -16,7 +18,7 @@
               @input="validateInput">
           </el-input>
           <div class="scan-button">
-            <el-button size="small" @click="detect">扫描</el-button>
+            <el-button size="small" @click="detect" type="primary">扫描</el-button>
           </div>
         </el-card>
       </el-col>
@@ -106,6 +108,10 @@
         </el-card>
       </el-col>
     </el-row>
+    <h1></h1>
+    <div style="display: flex; justify-content: flex-end;">
+      <el-button size="medium" @click="goPocVerify" type="primary">去进行poc验证</el-button>
+    </div>
   </div>
 
 </template>
@@ -168,6 +174,11 @@ export default {
             console.error('There was an error scanning the target:', error);
             // 在这里处理错误
           });
+    },
+    goPocVerify(){
+      this.$nextTick(() => {
+        this.$router.push('/pocScanner/pocVerify');
+      });
     }
   },
   mounted() {

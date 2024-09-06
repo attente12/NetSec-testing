@@ -57,7 +57,7 @@ export default new Router({
             meta:{title:'漏洞扫描'}
         },
         {
-            path: '/pocVerify',
+            path: '/pocScanner/pocVerify',
             name: 'pocVerify',
             component: pocVerify,
             meta:{title:'POC验证'}

@@ -261,23 +261,6 @@ export default {
     togglePasswordVisibility() {
       this.passwordVisible = !this.passwordVisible;
     },
-    // async checkPasswordStrength() {
-    //   try {
-    //     const response = await axios.post('/api/testWeakPassword', { pd: this.secret });
-    //     if (response.data.message === 'true') {
-    //       this.passwordStrength = '强';
-    //       this.passwordStrengthColor = 'green';
-    //     } else {
-    //       this.passwordStrength = '弱';
-    //       this.passwordStrengthColor = 'red';
-    //     }
-    //   } catch (error) {
-    //     console.error('Error checking password strength:', error);
-    //     this.passwordStrength = '检测失败';
-    //     this.passwordStrengthColor = 'black'; // 发生错误时用黑色表示
-    //   }
-    // }
-
     async checkPasswordStrength() {
       try {
         const response = await axios.post('/api/testWeakPassword', { pd: this.secret });
@@ -309,19 +292,6 @@ export default {
         this.passwordStrengthColor = 'black'; // 发生错误时用黑色表示
       }
     }
-
-    // async checkPasswordStrength() {
-    //   try {
-    //     const response = await axios.post('/api/testWeakPassword', { pd: this.secret });
-    //     this.passwordStrength = response.data.message === 'true' ? '强' : '弱';
-    //   } catch (error) {
-    //     console.error('Error checking password strength:', error);
-    //     this.passwordStrength = '检测失败';
-    //   }
-    // }
-    // test1() {
-    //   console.log('检测按钮被点击');
-    // }
   },
   mounted() {
     this.loadTableData();
