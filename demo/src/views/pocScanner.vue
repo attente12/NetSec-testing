@@ -126,7 +126,7 @@ export default {
       scanResults: [],
       visibleCPEs: [],
       activeNames: [],
-      scanTarget:'192.168.177.129'
+      scanTarget:''
     };
   },
   // computed: {
@@ -142,6 +142,10 @@ export default {
       this.scanTarget = event;
     },
     fetchScanResults() {
+      const dataStorage=localStorage.getItem('scanTarget');
+      if (dataStorage) {
+        this.scanTarget = JSON.parse(dataStorage);
+      }
       //axios.get('http://192.168.177.129:8081/cveScan')
       axios.get('/api/cveScan')
           .then(response => {
@@ -160,6 +164,7 @@ export default {
       }
     },
     detect() {
+      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       const target = { ip: this.scanTarget };
       axios.post('/api/getNmapIp', target)
           .then(response => {

@@ -5,12 +5,12 @@
     </div>
 
     <el-row :gutter="20">
-      <el-col :span="12">
+      <el-col :span="8">
         <el-card class="box-card">
           <div slot="header">目标ip（首先您需要输入目标IP扫描得到存在的服务）</div>
           <el-input
               type="textarea"
-              rows="3"
+              rows="4"
               placeholder="请输入要扫描的目标，例如：192.168.1.0"
               v-model="scanTarget"
               @input="validateInput">
@@ -21,17 +21,40 @@
         </el-card>
       </el-col>
 
-      <el-col :span="12">
+<!--      <el-col :span="12">-->
+<!--        <el-card class="box-card">-->
+<!--          <div slot="header">选择服务进行检测</div>-->
+<!--          <el-radio-group v-model="selectedServiceName">-->
+<!--            <el-radio-->
+<!--                v-for="service in services"-->
+<!--                :label="service.name"-->
+<!--                :key="service.name"-->
+<!--                :value="service.name">-->
+<!--              {{ service.name }}-->
+<!--            </el-radio>-->
+<!--          </el-radio-group>-->
+
+<!--          <p>-->
+<!--            已选择服务: {{ getServiceDetails(selectedServiceName).name || '无' }}，-->
+<!--            端口: {{ getServiceDetails(selectedServiceName).port || '无' }}-->
+<!--          </p>-->
+
+<!--          <div class="scan-button">-->
+<!--            <el-button size="small" @click="serviceDetect">检测</el-button>-->
+<!--          </div>-->
+<!--        </el-card>-->
+<!--      </el-col>-->
+      <el-col :span="16">
         <el-card class="box-card">
           <div slot="header">选择服务进行检测</div>
           <el-radio-group v-model="selectedServiceName">
-            <el-radio
-                v-for="service in services"
-                :label="service.name"
-                :key="service.name"
-                :value="service.name">
-              {{ service.name }}
-            </el-radio>
+            <el-row :gutter="20">
+              <el-col :span="3" v-for="service in services" :key="service.name">
+                <el-radio :label="service.name" :value="service.name">
+                  {{ service.name }}
+                </el-radio>
+              </el-col>
+            </el-row>
           </el-radio-group>
 
           <p>
@@ -44,6 +67,7 @@
           </div>
         </el-card>
       </el-col>
+
     </el-row>
 
     <el-row :gutter="20" style="margin-top: 20px;">
@@ -141,18 +165,47 @@ export default {
   data() {
     return {
       tableData: [],
+      // services: [
+      //   { name: 'ssh', port: 22 },
+      //   { name: 'ftp', port: 21 },
+      //   { name: 'email', port: 25 },
+      //   { name: 'mysql', port: 3306 },
+      //   { name: 'web', port: 80 },
+      //   { name: 'cloud', port: 8080 },
+      //   { name: 'vpn', port: 1723 },
+      //   { name: 'storage', port: 2049 }
+      // ],
       services: [
         { name: 'ssh', port: 22 },
-        { name: 'ftp', port: 21 },
-        { name: 'email', port: 25 },
         { name: 'mysql', port: 3306 },
-        { name: 'web', port: 80 },
-        { name: 'cloud', port: 8080 },
-        { name: 'vpn', port: 1723 },
-        { name: 'storage', port: 2049 }
+        { name: 'rdp', port: 3389 },
+        { name: 'ftp', port: 21 },
+        { name: 'smtp', port: 25 },
+        { name: 'smtps', port: 465 },
+        { name: 'smtp-starttls', port: 587 },
+        { name: 'pop3', port: 110 },
+        { name: 'pop3s', port: 995 },
+        { name: 'imap', port: 143 },
+        { name: 'imaps', port: 993 },
+        { name: 'postgresql', port: 5432 },
+        { name: 'mssql', port: 1433 },
+        { name: 'http', port: 80 },
+        { name: 'https', port: 443 },
+        { name: 'ldap', port: 389 },
+        { name: 'ldaps', port: 636 },
+        { name: 'smb', port: 445 },
+        { name: 'vnc', port: 5900 },
+        { name: 'telnet', port: 23 },
+        { name: 'snmp', port: 161 },
+        { name: 'oracle', port: 1521 },
+        { name: 'redis', port: 6379 },
+        { name: 'sip', port: 5060 },
+        { name: 'sips', port: 5061 },
+        { name: 'xmpp', port: 5222 },
+        { name: 'xmpps', port: 5223 }
       ],
       selectedServiceName: '',
-      scanTarget: '192.168.177.129',
+      scanTarget: '',
       secret: '',
       passwordVisible: false,
       passwordStrength: '',
@@ -168,6 +221,7 @@ export default {
       this.scanTarget = event;
     },
     detect() {
+      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       if (!this.scanTarget) {
         this.$message.error('请输入有效的IP地址');
         return;
@@ -241,9 +295,14 @@ export default {
     },
     loadTableData() {
       const data = localStorage.getItem('tableData');
+      const dataStorage=localStorage.getItem('scanTarget');
       if (data) {
         this.tableData = JSON.parse(data);
       }
+      if (dataStorage) {
+        this.scanTarget = JSON.parse(dataStorage);
+      }
+
     },
     clearLocalStorage() {
       localStorage.removeItem('tableData');
