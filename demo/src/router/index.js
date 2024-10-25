@@ -13,6 +13,8 @@ import pocScanner from '../views/pocScanner.vue'
 import pocVerify from "@/views/pocVerify.vue";
 import weakPasswordDetect from "../views/weakPasswordDetect.vue"
 import classifyProtect from "../views/classifyProtect.vue"
+import CVELibrary from "@/views/CVELibrary.vue";
+import toVerify from "@/views/toVerify.vue";
 
 
 export default new Router({
@@ -73,7 +75,19 @@ export default new Router({
             name: 'classifyProtect',
             component: classifyProtect,
             meta:{title:'等级保护测评'}
-        }
+        },
+        {
+            path: '/CVELibrary',
+            name: 'CVELibrary',
+            component: CVELibrary,
+            meta:{title:'CVE库'}
+        },
+        {
+            path: '/toVerify',
+            name: 'toVerify',
+            component: toVerify,
+            meta:{title:'单个漏洞验证'}
+        },
 
     ]
 })

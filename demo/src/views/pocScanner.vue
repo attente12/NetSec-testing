@@ -4,6 +4,15 @@
       <h1>漏洞扫描</h1>
 <!--      <el-button size="medium" @click="goPocVerify">去进行poc验证</el-button>-->
 <!--      <h1></h1>-->
+<!--      <h2 style="text-align: right; font-size: 16px;">-->
+<!--        上次扫描时间：{{scanResults.scan_time}}-->
+<!--      </h2>-->
+      <h2  v-if="scanResults.length > 0" style="text-align: right; font-size: 16px;">
+<!--        <span style="font-weight: normal;">上次扫描时间：</span><strong>2024.09.07 12:43</strong>-->
+        <span style="font-weight: normal;">上次扫描时间：</span><strong>{{scanResults[0].scan_time}}</strong>
+      </h2>
+
+
     </div>
 
     <el-row :gutter="20">
@@ -18,19 +27,21 @@
               @input="validateInput">
           </el-input>
           <div class="scan-button">
+            <el-button size="small" @click="detectAll" type="primary">全端口扫描</el-button>
             <el-button size="small" @click="detect" type="primary">扫描</el-button>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" style="margin-top: 20px;">
+    <el-row  v-if="scanResults.length > 0" :gutter="20" style="margin-top: 20px;">
       <el-col :span="24">
         <el-card class="box-card">
           <div slot="header">操作系统识别</div>
           <ul style="list-style-type: none; padding-left: 0;">
             <li v-for="(result, index) in scanResults" :key="'result-' + index">
               <div>ip：{{ result.ip }}</div>
+<!--              <div>{{result.scan_time}}</div>-->
               <br>
               <ul style="list-style-type: none; padding-left: 20px;">
                 <li v-for="(cves, cpe) in result.cpes" :key="cpe">
@@ -166,6 +177,28 @@ export default {
     detect() {
       localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       const target = { ip: this.scanTarget };
+      axios.post('/api/getNmapIp', target)
+          .then(response => {
+            console.log('Scan result:', response.data);
+            Message.success('扫描完成');
+            setTimeout(() => {
+              window.location.reload(); // 刷新页面
+            }, 2000); // 显示提示2秒后刷新页面
+            // 在这里处理成功响应的数据
+          })
+          .catch(error => {
+            console.error('There was an error scanning the target:', error);
+            // 在这里处理错误
+          });
+    },
+    detectAll() {
+      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      //const target = { ip: this.scanTarget };
+      // 生成请求体，默认包含 all_ports: true
+      const target = {
+        ip: this.scanTarget,
+        all_ports: true // 默认发送 all_ports 为 true
+      };
       axios.post('/api/getNmapIp', target)
           .then(response => {
             console.log('Scan result:', response.data);

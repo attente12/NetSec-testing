@@ -38,6 +38,7 @@
                             <span>安全风险评估</span>
                         </template>
                         <el-menu-item-group>
+                            <el-menu-item index="/CVELibrary">CVE库</el-menu-item>
                             <el-menu-item index="/pocManage">POC管理</el-menu-item>
                             <el-menu-item index="/pocScanner">漏洞扫描</el-menu-item>
                         </el-menu-item-group>
