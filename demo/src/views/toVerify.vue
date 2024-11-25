@@ -22,7 +22,8 @@
             <label class="label">CVE 名称:</label>
           </el-col>
           <el-col :span="22" class="row-content">
-            <span>{{ cveData.CVEName }}</span>
+<!--            <span>{{ cveData.CVEName }}</span>-->
+            <el-input v-model="cveData.CVEName"></el-input>
           </el-col>
 
           <el-col :span="2">
@@ -47,11 +48,28 @@
           </el-col>
 
           <el-col :span="2">
+            <label class="label">漏洞影响范围:</label>
+          </el-col>
+          <el-col :span="22" class="row-content">
+<!--            <span>{{affected_infra}}</span>-->
+<!--            <el-input v-model="affected_infra"></el-input>-->
+            <el-autocomplete
+                v-model="affected_infra"
+                :fetch-suggestions="querySearch"
+                placeholder="请输入内容"
+                @select="handleSelect"
+                style="width: 300px;"
+            />
+          </el-col>
+
+          <el-col :span="2">
             <label class="label">漏洞描述:</label>
           </el-col>
           <el-col :span="22" class="row-content">
             <span>{{ cveData.summary }}</span>
           </el-col>
+
+
 
           <el-col :span="2">
             <label class="label">POC代码:</label>
@@ -127,28 +145,43 @@ export default {
   data() {
     return {
       cveData: '',
-      code: '# 初始化 Python 代码\nprint("Hello, World!")', // 表单数据绑定
+      code: '', // 表单数据绑定
       fileList: [],
       filename: '',
       details: '验证详情。。。。。。。。',
+      affected_infra: '',
+      suggestions: [], // 将文件内容读取后填充到此数组，格式为 { value: "文本" }
     };
   },
   created() {
     this.cveData = JSON.parse(this.$route.query.data); // 解析 row 对象
     console.log('接收到的数据:', this.cveData);
     this.lookDetails();
+    this.getPoc();
+    this.loadFile();
   },
   methods:{
     lookDetails() {
       axios
-          .post('/api/details', { cve_id: this.cveData.CVE })
+          .post('/api/pocExcute', { CVE_id: this.cveData.CVE })
           .then((response) => {
-            this.details = response.data.details || '未提供详情';
+            this.details = response.data.message || '未提供详情';
           })
           .catch((error) => {
             console.error('There was an error fetching the CVE details:', error);
-            this.$message.error('获取漏洞详情失败，请稍后再试');
+            //this.$message.error('获取漏洞详情失败，请稍后再试');
           });
+    },
+    getPoc() {
+      axios.get('/api/getPOCContent', {
+        params: {
+          vuln_id: this.cveData.CVE
+        }
+      })
+          .then(response => {
+            this.code = response.data.content;
+            this.affected_infra=response.data.affected_infra;
+          })
     },
     beforeFileUpload(file) {
       const isPython = file.type === 'application/x-python-code' || file.name.endsWith('.py');
@@ -202,25 +235,32 @@ export default {
     },
     // 提交POC代码
     submitUpload() {
+      if (this.affected_infra === '') {
+        this.$message.warning('请先输入影响范围');
+        return;
+      }
+
       if (this.fileList.length === 0) {
         this.$message.warning('请先选择文件');
         return;
       }
 
       const formData = new FormData();
-      formData.append('cve_id', this.currentCveId2); // 添加CVE ID
+      formData.append('cve_id', this.cveData.CVE); // 添加CVE ID
+      formData.append('vul_name', this.cveData.CVEName); // 添加CVE ID
+      formData.append('affected_infra', '影响范围'); // 添加CVE ID
       formData.append('mode','upload');
-      formData.append('file', this.fileList[0].raw); // 添加文件
+      formData.append('file', this.fileList[0]); // 添加文件
 
       // 发送POST请求
       axios
-          .post('/api/updatePoc', formData, {
+          .put('/api/updatePoc', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
           })
           .then(response => {
             // 使用后端返回的 message
             this.$message.success(response.data.message || 'POC上传成功');
-            window.location.reload();//刷新页面
+            //window.location.reload();//刷新页面
           })
           .catch(error => {
             // 使用后端返回的错误消息
@@ -231,15 +271,48 @@ export default {
     },
     submitCode() {
       //需要先进行文件检查，代码正则表达式检查（还没写）
+      // 检查文件名是否以 .py 结尾
+      if (!this.filename.endsWith('.py')) {
+        this.$message.error('文件名错误，必须以 .py 结尾');
+        return;  // 停止保存流程
+      }
+
+      // 正则表达式数组（多行模式，处理空格和换行）
+      const requiredFields = [
+        { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义
+        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
+        { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
+        { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']
+        { regex: /\[!\]/m, label: '[!]' },  // [!]
+        { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]
+      ];
+
+      // 检查每个正则表达式是否匹配代码
+      let allFieldsPresent = true;
+      requiredFields.forEach(field => {
+        const isMatch = field.regex.test(this.code);
+        console.log(`Checking field: ${field.label}, Match: ${isMatch}`);  // 调试输出
+        if (!isMatch) {
+          this.$message.error(`代码中缺少必要的字段：${field.label}`);
+          allFieldsPresent = false;  // 如果任意字段未匹配，标记为 false
+        }
+      });
+
+      if (!allFieldsPresent) {
+        return;  // 停止保存流程
+      }
+
       const formData = new FormData();
-      formData.append('cve_id', this.currentCveId2); // 添加CVE ID
+      formData.append('cve_id', this.cveData.CVE); // 添加CVE ID
+      formData.append('vul_name', this.cveData.CVEName); // 添加CVE ID
+      formData.append('affected_infra', '影响范围'); // 添加CVE ID
       formData.append('mode','edit');
       formData.append('edit_filename',this.filename);
       formData.append('poc_content',this.code);
 
       // 发送POST请求
       axios
-          .post('/api/updatePoc', formData, {
+          .put('/api/updatePoc', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
           })
           .then(response => {
@@ -254,22 +327,64 @@ export default {
             console.error('POC上传失败:', error);
           });
     },
+    // startVerify() {
+    //   axios.post('/api/pocVerify', { cve_ids:[this.cveData.CVE] })
+    //       .then(() => {
+    //         this.$message.success(`POC 执行成功`);
+    //         this.getPoc(); // 刷新数据
+    //         window.location.reload();
+    //       })
+    //       .catch(error => {
+    //         console.error(`There was an error executing POC for ${this.cveData.CVE}:`, error);
+    //         //this.$message.error('执行POC失败，请稍后再试');
+    //       });
+    // },
     startVerify() {
-      axios.post('/api/pocVerify', { cve_ids:this.cveData.CVE })
+      axios.post('/api/pocVerify', { cve_ids:[this.cveData.CVE] })
           .then(() => {
-            this.$message.success(`POC 执行成功`);
-            this.fetchCpeData(); // 刷新数据
+            this.$message.success("操作成功");
+            this.getPoc(); // 刷新数据
+            window.location.reload();
           })
           .catch(error => {
             console.error(`There was an error executing POC for ${this.cveData.CVE}:`, error);
-            this.$message.error('执行POC失败，请稍后再试');
+            //this.$message.error('执行POC失败，请稍后再试');
           });
     },
     returnFront() {
       this.$nextTick(() => {
         this.$router.push('/pocScanner/pocVerify');
       });
-    }
+    },
+    async loadFile() {
+      try {
+        const response = await fetch("/nmap_infrastructure_list_grouped_multiline.txt");
+        if (!response.ok) throw new Error("Network response was not ok");
+        const text = await response.text();
+        // 将每一行内容处理为 { value: "文本" } 格式
+        this.suggestions = text.split("\n").map(line => ({ value: line.trim() })).filter(item => item.value);
+        console.log("Loaded suggestions:", this.suggestions);
+      } catch (error) {
+        console.error("Failed to load file:", error);
+      }
+    },
+    querySearch(queryString, callback) {
+      console.log("querySearch triggered with:", queryString); // 调试信息
+      // 仅当输入字符数达到或超过3个并且为连续匹配时才执行匹配
+      if (queryString.length >= 3) {
+        const results = this.suggestions.filter(item =>
+            item.value.toLowerCase().includes(queryString.toLowerCase())
+        );
+        console.log("Filtered results:", results); // 调试信息
+        callback(results);
+      } else {
+        // 输入字符数不足时返回空数组
+        callback([]);
+      }
+    },
+    handleSelect(item) {
+      console.log("Selected:", item);
+    },
   }
 };
 </script>

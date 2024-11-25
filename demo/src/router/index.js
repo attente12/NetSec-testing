@@ -15,6 +15,8 @@ import weakPasswordDetect from "../views/weakPasswordDetect.vue"
 import classifyProtect from "../views/classifyProtect.vue"
 import CVELibrary from "@/views/CVELibrary.vue";
 import toVerify from "@/views/toVerify.vue";
+import pluginScan from "@/views/pluginScan.vue";
+import assetManage from "@/views/assetManage.vue";
 
 
 export default new Router({
@@ -87,6 +89,18 @@ export default new Router({
             name: 'toVerify',
             component: toVerify,
             meta:{title:'单个漏洞验证'}
+        },
+        {
+            path: '/pluginScan',
+            name: 'pluginScan',
+            component: pluginScan,
+            meta:{title:'插件化扫描'}
+        },
+        {
+            path: '/assetManage',
+            name: 'assetManage',
+            component: assetManage,
+            meta:{title:'资产管理'}
         },
 
     ]

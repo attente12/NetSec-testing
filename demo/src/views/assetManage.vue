@@ -49,12 +49,12 @@
         <div slot="header" class="clearfix">
           <span>漏洞类型分布</span>
         </div>
-        <div class="pie-chart" ref="pieChart" style="width: 100%; height: 400px;"></div>
+        <div class="pie-chart" ref="pieChart" style="width: 100%; height: 300px;"></div>
       </el-card>
 
       <!-- 主机漏洞表格 -->
       <div class="table-section">
-        <h3>主机漏洞</h3>
+        <h3><strong>系统漏洞</strong></h3>
         <el-table
             :data="currentAsset.host_vulnerabilities"
             border
@@ -81,7 +81,7 @@
 
       <!-- 端口漏洞表格 -->
       <div class="table-section">
-        <h3>端口漏洞</h3>
+        <h3><strong>软件资产漏洞</strong></h3>
         <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities"
              :key="type"
              class="vulnerability-group">
@@ -150,6 +150,8 @@ export default {
             }
           ],
           "ip": "10.8.250.77",
+          "ports": "8080, 80, 5000, 22",
+          "os": "Linux 2.6.32",
           "port_vulnerabilities": [
             {
               "cvss": "8.900000",
@@ -162,7 +164,7 @@ export default {
             },
             {
               "cvss": "8.900000",
-              "port_id": 804,
+              "port_id": 80,
               "softwareType": "Web应用程序",
               "summary": "描述。",
               "vulExist": "存在",
@@ -171,7 +173,7 @@ export default {
             },
             {
               "cvss": "8.900000",
-              "port_id": 808,
+              "port_id": 22,
               "softwareType": "系统工具",
               "summary": "Apache Struts 2.3.34 存在远程代码执行漏洞，攻击者可通过恶意请求触发。",
               "vulExist": "存在",
@@ -180,7 +182,7 @@ export default {
             },
             {
               "cvss": "8.900000",
-              "port_id": 80,
+              "port_id": 5000,
               "softwareType": "未知类型",
               "summary": "描述。",
               "vulExist": "存在",
@@ -522,8 +524,8 @@ export default {
 
 /* 新增的饼图相关样式 */
 .chart-section {
-  margin: 10px 0;
-  padding: 20px;
+  margin: 20px 0;
+  padding: 0px;
   background-color: #fff;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
@@ -539,3 +541,397 @@ export default {
   height: 400px;
 }
 </style>
+
+
+<!--没有饼状图的代码 -->
+<!--<template>-->
+<!--  <div class="vulnerability-container">-->
+<!--    &lt;!&ndash; 左侧IP列表 &ndash;&gt;-->
+<!--    <div class="ip-list">-->
+<!--      <div class="menu-header">-->
+<!--        <span class="title">资产</span>-->
+<!--        <el-badge-->
+<!--            :value="assets.length"-->
+<!--            class="asset-count"-->
+<!--            type="primary">-->
+<!--        </el-badge>-->
+<!--      </div>-->
+<!--      <el-menu-->
+<!--          :default-active="currentIp"-->
+<!--          class="ip-menu"-->
+<!--          @select="handleSelect">-->
+<!--        <el-menu-item-->
+<!--            v-for="asset in assets"-->
+<!--            :key="asset.ip"-->
+<!--            :index="asset.ip">-->
+<!--          <i class="el-icon-monitor"></i>-->
+<!--          <span>{{ asset.ip }}</span>-->
+<!--        </el-menu-item>-->
+<!--      </el-menu>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 右侧详情内容 &ndash;&gt;-->
+<!--    <div class="content-area" v-if="currentAsset">-->
+<!--      <div class="ip-header">-->
+<!--        <h2>资产信息</h2>-->
+<!--        <div class="asset-info">-->
+<!--          <div class="info-item">-->
+<!--            <span class="label">IP地址：</span>-->
+<!--            <span class="value">{{ currentAsset.ip }}</span>-->
+<!--          </div>-->
+<!--          <div class="info-item">-->
+<!--            <span class="label">操作系统：</span>-->
+<!--            <span class="value">{{ currentAsset.os }}</span>-->
+<!--          </div>-->
+<!--          <div class="info-item">-->
+<!--            <span class="label">开放端口：</span>-->
+<!--            <span class="value">{{ currentAsset.ports }}</span>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; 主机漏洞表格 &ndash;&gt;-->
+<!--      <div class="table-section">-->
+<!--        <h3>主机漏洞</h3>-->
+<!--        <el-table-->
+<!--            :data="currentAsset.host_vulnerabilities"-->
+<!--            border-->
+<!--            stripe-->
+<!--            :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
+<!--        >-->
+<!--          <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
+<!--          <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
+<!--          <el-table-column prop="cvss" label="风险等级" width="120">-->
+<!--            <template slot-scope="scope">-->
+<!--              <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+<!--          <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
+<!--          <el-table-column prop="vulExist" label="是否存在" width="100">-->
+<!--            <template slot-scope="scope">-->
+<!--              <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
+<!--                {{ scope.row.vulExist }}-->
+<!--              </el-tag>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+<!--        </el-table>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; 端口漏洞表格 &ndash;&gt;-->
+<!--      &lt;!&ndash; 将原来的端口漏洞表格部分替换成以下代码 &ndash;&gt;-->
+<!--      &lt;!&ndash; 端口漏洞表格 &ndash;&gt;-->
+<!--      <div class="table-section">-->
+<!--        <h3>端口漏洞</h3>-->
+<!--        <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities"-->
+<!--             :key="type"-->
+<!--             class="vulnerability-group">-->
+<!--          <h4 class="group-title">{{ type }}</h4>-->
+<!--          <el-table-->
+<!--              :data="vulnerabilities"-->
+<!--              border-->
+<!--              stripe-->
+<!--              :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
+<!--          >-->
+<!--            <el-table-column prop="port_id" label="端口" width="100"></el-table-column>-->
+<!--            <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
+<!--            <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
+<!--            <el-table-column prop="cvss" label="风险等级" width="120">-->
+<!--              <template slot-scope="scope">-->
+<!--                <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--            <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
+<!--            <el-table-column prop="vulExist" label="是否存在" width="100">-->
+<!--              <template slot-scope="scope">-->
+<!--                <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
+<!--                  {{ scope.row.vulExist }}-->
+<!--                </el-tag>-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--          </el-table>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 未选择IP时的提示 &ndash;&gt;-->
+<!--    <div class="empty-content" v-else>-->
+<!--      <el-empty description="请选择左侧IP地址查看详情"></el-empty>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</template>-->
+
+<!--<script>-->
+<!--export default {-->
+<!--  name: 'VulnerabilityTable',-->
+<!--  data() {-->
+<!--    return {-->
+<!--      currentIp: '',-->
+<!--      assets: [-->
+<!--        {-->
+<!--          "host_vulnerabilities": [-->
+<!--            {-->
+<!--              "cvss": "9.800000",-->
+<!--              "softwareType": "操作系统",-->
+<!--              "summary": "MongoDB 4.2.7存在权限提升漏洞，攻击者可以通过特定的构造命令绕过认证并获得管理员权限。",-->
+<!--              "vulExist": "存在",-->
+<!--              "vuln_id": "CVE-2020-12345",-->
+<!--              "vuln_name": ""-->
+<!--            },-->
+<!--            {-->
+<!--              "cvss": "7.500000",-->
+<!--              "softwareType": "操作系统",-->
+<!--              "summary": "Windows SMBv3协议存在内存损坏漏洞，允许远程代码执行。",-->
+<!--              "vulExist": "存在",-->
+<!--              "vuln_id": "CVE-2021-34527",-->
+<!--              "vuln_name": ""-->
+<!--            }-->
+<!--          ],-->
+<!--          "ip": "10.8.250.77",-->
+<!--          "port_vulnerabilities": [-->
+<!--            {-->
+<!--              "cvss": "8.900000",-->
+<!--              "port_id": 8080,-->
+<!--              "softwareType": "Web应用程序",-->
+<!--              "summary": "Apache Struts 2.3.34 存在远程代码执行漏洞，攻击者可通过恶意请求触发。",-->
+<!--              "vulExist": "存在",-->
+<!--              "vuln_id": "CVE-2018-11776",-->
+<!--              "vuln_name": ""-->
+<!--            },-->
+<!--            {-->
+<!--              "cvss": "8.900000",-->
+<!--              "port_id": 804,-->
+<!--              "softwareType": "Web应用程序",-->
+<!--              "summary": "描述。",-->
+<!--              "vulExist": "存在",-->
+<!--              "vuln_id": "CVE-2018-12436",-->
+<!--              "vuln_name": ""-->
+<!--            },-->
+<!--            {-->
+<!--              "cvss": "8.900000",-->
+<!--              "port_id": 808,-->
+<!--              "softwareType": "系统工具",-->
+<!--              "summary": "Apache Struts 2.3.34 存在远程代码执行漏洞，攻击者可通过恶意请求触发。",-->
+<!--              "vulExist": "存在",-->
+<!--              "vuln_id": "CVE-2018-1236",-->
+<!--              "vuln_name": ""-->
+<!--            },-->
+<!--            {-->
+<!--              "cvss": "8.900000",-->
+<!--              "port_id": 80,-->
+<!--              "softwareType": "未知类型",-->
+<!--              "summary": "描述。",-->
+<!--              "vulExist": "存在",-->
+<!--              "vuln_id": "CVE-2018-132",-->
+<!--              "vuln_name": ""-->
+<!--            }-->
+<!--          ]-->
+<!--        },-->
+<!--        {-->
+<!--          "host_vulnerabilities": [-->
+<!--            {-->
+<!--              "cvss": "6.500000",-->
+<!--              "softwareType": "操作系统",-->
+<!--              "summary": "VMware ESXi 7.0中的特定模块存在拒绝服务漏洞，可能导致虚拟机异常终止。",-->
+<!--              "vulExist": "存在",-->
+<!--              "vuln_id": "CVE-2022-12345",-->
+<!--              "vuln_name": ""-->
+<!--            }-->
+<!--          ],-->
+<!--          "ip": "192.168.1.100",-->
+<!--          "port_vulnerabilities": [-->
+<!--            {-->
+<!--              "cvss": "10.000000",-->
+<!--              "port_id": 443,-->
+<!--              "softwareType": "Web服务器",-->
+<!--              "summary": "nginx 1.18.0 存在缓冲区溢出漏洞，允许远程攻击者执行任意代码。",-->
+<!--              "vulExist": "存在",-->
+<!--              "vuln_id": "CVE-2021-23017",-->
+<!--              "vuln_name": ""-->
+<!--            }-->
+<!--          ]-->
+<!--        }-->
+<!--      ]-->
+<!--    }-->
+<!--  },-->
+<!--  computed: {-->
+<!--    currentAsset() {-->
+<!--      return this.assets.find(asset => asset.ip === this.currentIp);-->
+<!--    },-->
+<!--    groupedPortVulnerabilities() {-->
+<!--      if (!this.currentAsset || !this.currentAsset.port_vulnerabilities) {-->
+<!--        return {};-->
+<!--      }-->
+<!--      return this.currentAsset.port_vulnerabilities.reduce((groups, vuln) => {-->
+<!--        const type = vuln.softwareType || '未分类';-->
+<!--        if (!groups[type]) {-->
+<!--          groups[type] = [];-->
+<!--        }-->
+<!--        groups[type].push(vuln);-->
+<!--        return groups;-->
+<!--      }, {});-->
+<!--    }-->
+<!--  },-->
+<!--  methods: {-->
+<!--    getResults() {-->
+<!--      fetch('/api/getAllAssetsVulnData')-->
+<!--          .then(response => response.json())-->
+<!--          .then(data => {-->
+<!--            this.assets = data;-->
+<!--          })-->
+<!--          .catch(error => console.error('Error:', error));-->
+<!--    },-->
+<!--    handleSelect(ip) {-->
+<!--      this.currentIp = ip;-->
+<!--    },-->
+<!--    getCvssType(score) {-->
+<!--      score = parseFloat(score);-->
+<!--      if (score >= 7.0) return 'danger';-->
+<!--      if (score >= 4.0) return 'warning';-->
+<!--      if (score >= 0.0) return 'success';-->
+<!--      return 'info';-->
+<!--    },-->
+<!--    getRiskLevel(score) {-->
+<!--      score = parseFloat(score);-->
+<!--      if (score >= 7.0) return '高风险';-->
+<!--      if (score >= 4.0) return '中风险';-->
+<!--      if (score >= 0.0) return '低风险';-->
+<!--      return '信息';-->
+<!--    }-->
+<!--  },-->
+<!--  created() {-->
+<!--    this.getResults();-->
+<!--  },-->
+<!--  mounted() {-->
+<!--    // 默认选中第一个IP-->
+<!--    if (this.assets.length > 0) {-->
+<!--      this.currentIp = this.assets[0].ip;-->
+<!--    }-->
+<!--  }-->
+<!--}-->
+<!--</script>-->
+
+<!--<style scoped>-->
+<!--.vulnerability-container {-->
+<!--  display: flex;-->
+<!--  height: 100%;-->
+<!--  min-height: 600px;-->
+<!--  background-color: #fff;-->
+<!--}-->
+
+<!--.ip-list {-->
+<!--  width: 250px;-->
+<!--  border-right: 1px solid #e6e6e6;-->
+<!--  background-color: #f5f7fa;-->
+<!--}-->
+
+<!--.menu-header {-->
+<!--  height: 50px;-->
+<!--  display: flex;-->
+<!--  align-items: center;-->
+<!--  padding: 0 20px;-->
+<!--  border-bottom: 1px solid #e6e6e6;-->
+<!--}-->
+
+<!--.menu-header .title {-->
+<!--  font-size: 16px;-->
+<!--  font-weight: 600;-->
+<!--  color: #303133;-->
+<!--}-->
+
+<!--.menu-header .asset-count {-->
+<!--  margin-left: 10px;-->
+<!--}-->
+
+<!--.ip-menu {-->
+<!--  border-right: none;-->
+<!--}-->
+
+<!--.content-area {-->
+<!--  flex: 1;-->
+<!--  padding: 20px;-->
+<!--  overflow-y: auto;-->
+<!--}-->
+
+<!--.empty-content {-->
+<!--  flex: 1;-->
+<!--  display: flex;-->
+<!--  justify-content: center;-->
+<!--  align-items: center;-->
+<!--}-->
+
+<!--.ip-header {-->
+<!--  margin-bottom: 20px;-->
+<!--  padding-bottom: 10px;-->
+<!--  border-bottom: 1px solid #ebeef5;-->
+<!--}-->
+
+<!--.ip-header h2 {-->
+<!--  color: #303133;-->
+<!--  font-size: 18px;-->
+<!--  font-weight: 600;-->
+<!--  margin: 0 0 15px 0;-->
+<!--}-->
+
+<!--.asset-info {-->
+<!--  padding: 15px;-->
+<!--  background-color: #f5f7fa;-->
+<!--  border-radius: 4px;-->
+<!--}-->
+
+<!--.info-item {-->
+<!--  line-height: 28px;-->
+<!--  display: flex;-->
+<!--}-->
+
+<!--.info-item .label {-->
+<!--  color: #606266;-->
+<!--  width: 80px;-->
+<!--  text-align: right;-->
+<!--  margin-right: 15px;-->
+<!--}-->
+
+<!--.info-item .value {-->
+<!--  color: #303133;-->
+<!--  flex: 1;-->
+<!--}-->
+
+<!--.table-section {-->
+<!--  margin-bottom: 30px;-->
+<!--}-->
+
+<!--.table-section h3 {-->
+<!--  margin: 15px 0;-->
+<!--  color: #303133;-->
+<!--  font-size: 16px;-->
+<!--  font-weight: 500;-->
+<!--}-->
+
+<!--.el-tag {-->
+<!--  width: 65px;-->
+<!--  text-align: center;-->
+<!--}-->
+
+<!--/* 表格内的标签居中显示 */-->
+<!--.el-table .cell {-->
+<!--  text-align: center;-->
+<!--}-->
+
+<!--/* 确保描述列左对齐 */-->
+<!--.el-table .el-table__row td:nth-child(4) .cell {-->
+<!--  text-align: left;-->
+<!--}-->
+
+<!--.vulnerability-group {-->
+<!--  margin-bottom: 20px;-->
+<!--}-->
+
+<!--.group-title {-->
+<!--  color: #606266;-->
+<!--  font-size: 14px;-->
+<!--  font-weight: 500;-->
+<!--  margin: 10px 0;-->
+<!--  padding-left: 10px;-->
+<!--  border-left: 3px solid #409EFF;-->
+<!--}-->
+<!--</style>-->
+

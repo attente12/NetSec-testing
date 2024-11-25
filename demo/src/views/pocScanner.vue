@@ -47,9 +47,9 @@
                 <li v-for="(cves, cpe) in result.cpes" :key="cpe">
                   <el-button size="mini" @click="toggleCPE(cpe)" style="font-size: 16px;">{{ cpe }}</el-button>
                   <el-collapse v-if="visibleCPEs.includes(cpe)" accordion>
-                    <el-collapse-item v-for="cve in cves" :key="cve.CVE_id" :name="cve.CVE_id">
+                    <el-collapse-item v-for="cve in cves" :key="cve.Vuln_id" :name="cve.Vuln_id">
                       <template #title>
-                        <span style="padding-left: 30px;">{{ cve.CVE_id }}</span>
+                        <span style="padding-left: 30px;">{{ cve.Vuln_id }}</span>
                       </template>
                       <div style="color: slategrey; font-size: 12px; margin-left: 40px">
                           CVSS: {{ cve.CVSS }}<br>
@@ -61,6 +61,14 @@
                 </li>
               </ul>
               <br>
+              <div>操作系统类别：</div>
+              <br>
+              <ul>
+                <li v-for="(oslist, index) in result.os_list" :key="index">
+                  {{ oslist }}
+                </li>
+              </ul>
+              <br>
               <div>操作系统版本：</div>
               <br>
               <ul>
@@ -68,6 +76,7 @@
                   {{ os }}
                 </li>
               </ul>
+
             </li>
           </ul>
         </el-card>
@@ -89,6 +98,7 @@
                   <el-table-column prop="protocol" label="协议" width="100"></el-table-column>
                   <el-table-column prop="status" label="开放的状态" width="100"></el-table-column>
                   <el-table-column prop="service_name" label="服务" width="100"></el-table-column>
+                  <el-table-column prop="product" label="应用" width="100"></el-table-column>
                   <el-table-column prop="version" label="版本" width="180"></el-table-column>
                   <el-table-column label="cpes与潜在CVEs对应信息">
                     <template #default="subscope">
@@ -97,10 +107,10 @@
                           {{ cpe }}
                         </el-button>
                         <el-collapse v-if="visibleCPEs.includes(cpe)" accordion>
-                          <el-collapse-item v-for="cve in cves" :key="cve.CVE_id" :name="cve.CVE_id">
+                          <el-collapse-item v-for="cve in cves" :key="cve.Vuln_id" :name="cve.Vuln_id">
                             <template #title>
 <!--                              {{ cve.CVE_id }}-->
-                              <span style="padding-left: 30px;">{{ cve.CVE_id }}</span>
+                              <span style="padding-left: 30px;">{{ cve.Vuln_id }}</span>
                             </template>
                             <div style="color: slategrey; font-size: 12px; margin-left: 40px">
                               CVSS: {{ cve.CVSS }}<br>

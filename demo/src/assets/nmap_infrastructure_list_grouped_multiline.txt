@@ -1,0 +1,12 @@
+ACNS
+AIX
+AOS
+ASA
+AirOS
+AireOS
+AmigaOS
+Android
+EOS
+ESXi
+eCos
+embedded

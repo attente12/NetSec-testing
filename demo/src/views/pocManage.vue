@@ -33,8 +33,21 @@
         <el-form-item label="漏洞名称">
           <el-input v-model="newPoc.vul_name"></el-input>
         </el-form-item>
+        <el-form-item label="漏洞类型">
+          <el-input v-model="newPoc.type"></el-input>
+        </el-form-item>
         <el-form-item label="漏洞描述">
           <el-input type="textarea" v-model="newPoc.description"></el-input>
+        </el-form-item>
+        <el-form-item label="受影响的基础设施（操作系统或软件或协议）">
+          <el-autocomplete
+              v-model="newPoc.affected_infra"
+              :fetch-suggestions="querySearch"
+              placeholder="请输入内容"
+              @select="handleSelect"
+              style="width: 300px;"
+          />
+<!--          <el-input v-model="newPoc.affected_infra"></el-input>-->
         </el-form-item>
         <el-form-item label="POC类型">
           <el-select v-model="newPoc.script_type" placeholder="请选择">
@@ -144,8 +157,21 @@
         <el-form-item label="漏洞名称">
           <el-input v-model="editPoc.vul_name"></el-input>
         </el-form-item>
+        <el-form-item label="漏洞类型">
+          <el-input v-model="editPoc.type"></el-input>
+        </el-form-item>
         <el-form-item label="漏洞描述">
           <el-input type="textarea" v-model="editPoc.description"></el-input>
+        </el-form-item>
+        <el-form-item label="受影响的基础设施（操作系统或软件或协议）">
+          <el-autocomplete
+              v-model="editPoc.affected_infra"
+              :fetch-suggestions="querySearch"
+              placeholder="请输入内容"
+              @select="handleSelect"
+              style="width: 300px;"
+          />
+<!--          <el-input v-model="editPoc.affected_infra"></el-input>-->
         </el-form-item>
         <el-form-item label="POC类型">
           <el-select v-model="editPoc.script_type" placeholder="请选择">
@@ -218,7 +244,9 @@
       <el-table-column prop="id" label="ID" width="50"></el-table-column>
       <el-table-column prop="cve_id" label="CVE编号" width="170"></el-table-column>
       <el-table-column prop="vul_name" label="漏洞名称" width="130"></el-table-column>
-      <el-table-column prop="description" label="漏洞描述" width="280">
+      <el-table-column prop="type" label="漏洞类型" width="110"></el-table-column>
+      <el-table-column prop="affected_infra" label="漏洞影响的范围" width="130"></el-table-column>
+      <el-table-column prop="description" label="漏洞描述" width="250">
         <template slot-scope="scope">
                     <span v-if="!scope.row.showFullDescription">
                         {{ scope.row.description.slice(0, 40) }}...
@@ -230,9 +258,9 @@
                     </span>
         </template>
       </el-table-column>
-      <el-table-column prop="script_type" label="POC类型" width="130"></el-table-column>
+      <el-table-column prop="script_type" label="POC类型" width="85"></el-table-column>
 
-      <el-table-column prop="script" label="POC代码" width="150">
+      <el-table-column prop="script" label="POC代码" width="100">
         <template slot-scope="scope">
           <el-button type="success" @click="handleLook(scope.row)">查看</el-button>
         </template>
@@ -280,10 +308,12 @@ export default {
       addDialogVisible: false,
       codeDialogVisible: false,
       newPoc: {
+        type: '',
         cve_id: '',
         vul_name: '',
         description: '',
         script_type: '',
+        affected_infra: '',
         //script: ''
       },
       //用来编辑poc
@@ -291,9 +321,11 @@ export default {
         id: '',
         cve_id: '',
         vul_name: '',
+        type: '',
         description: '',
+        affected_infra: '',
         script_type: '',
-        script: ''
+        script: '',
       },
       editDialogVisible: false,
       codeEditDialogVisible: false,
@@ -316,6 +348,7 @@ export default {
       vulnerabilityType: 0, // 漏洞类型
       authRequired: 1, // 身份验证，默认是Yes
       canGetCommandResult: 1, // 命令执行结果，默认是Yes
+      suggestions: [], // 将文件内容读取后填充到此数组，格式为 { value: "文本" }
       // codeMirrorOptions: {
       //   mode: 'python',      // 设置为 Python 模式
       //   theme: 'material',   // 设置编辑器的主题
@@ -452,7 +485,9 @@ export default {
           .then(data => {
             this.pocs = data.map(poc => ({
               id: poc.id,
-              cve_id: poc.cve_id,
+              cve_id: poc.vuln_id,
+              affected_infra: poc.affected_infra,
+              type: poc.type,
               vul_name: poc.vul_name,
               description: poc.description,
               script_type: poc.script_type,
@@ -683,7 +718,9 @@ export default {
       formData.append('cve_id', this.newPoc.cve_id);
       formData.append('vul_name', this.newPoc.vul_name);
       formData.append('description', this.newPoc.description);
+      formData.append('affected_infra', this.newPoc.affected_infra);
       formData.append('script_type', this.newPoc.script_type);
+      formData.append('type', this.newPoc.type);
       if (this.fileList.length > 0) {
         formData.append('mode','upload');
         formData.append('file', this.fileList[0].raw || this.fileList[0]); // 添加文件到表单数据
@@ -775,12 +812,42 @@ export default {
             this.tempnewcode = '# 无法读取模板文件';
           });
     },
+    async loadFile() {
+      try {
+        const response = await fetch("/nmap_infrastructure_list_grouped_multiline.txt");
+        if (!response.ok) throw new Error("Network response was not ok");
+        const text = await response.text();
+        // 将每一行内容处理为 { value: "文本" } 格式
+        this.suggestions = text.split("\n").map(line => ({ value: line.trim() })).filter(item => item.value);
+        console.log("Loaded suggestions:", this.suggestions);
+      } catch (error) {
+        console.error("Failed to load file:", error);
+      }
+    },
+    querySearch(queryString, callback) {
+      console.log("querySearch triggered with:", queryString); // 调试信息
+      // 仅当输入字符数达到或超过3个并且为连续匹配时才执行匹配
+      if (queryString.length >= 3) {
+        const results = this.suggestions.filter(item =>
+            item.value.toLowerCase().includes(queryString.toLowerCase())
+        );
+        console.log("Filtered results:", results); // 调试信息
+        callback(results);
+      } else {
+        // 输入字符数不足时返回空数组
+        callback([]);
+      }
+    },
+    handleSelect(item) {
+      console.log("Selected:", item);
+    },
 
   },
 
 
   created() {
     this.loadData();
+    this.loadFile();
   }
 }
 </script>
