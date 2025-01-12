@@ -1,16 +1,23 @@
 <template>
     <div>
         <el-row>
-            <el-col :span="24" style="text-align: center;"><h1 style="color:dimgrey">Linux基线检测</h1></el-col>
+            <el-col :span="24" style="text-align: center;"><h1 style="color:dimgrey">{{ flag ? 'Windows' : 'Linux'}}基线检测</h1></el-col>
         </el-row>
+        <el-button type="button" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
         <el-row>
-            <el-col :span="24"><h3 style="color:dimgrey">请输入待检测Linux主机的ip地址和root密码：</h3></el-col>
+            <el-col :span="24"><h3 style="color:dimgrey">请输入待检测{{ flag ? 'Windows' : 'Linux'}}主机的ip地址和{{flag ? '管理员用户名及' : 'root'}}密码：</h3></el-col>
         </el-row>
         <el-form @submit.prevent="submitForm">
             <el-form-item label="IP 地址:">
                 <el-input v-model="ip"></el-input>
             </el-form-item>
-            <el-form-item label="root密码:">
+            <el-form-item v-show="flag" label="管理员账户名（默认为Administer）:">
+                <el-input v-model="adminName"></el-input>
+            </el-form-item>
+            <el-form-item v-show="flag" label="管理员密码">
+                <el-input v-model="pd" show-password></el-input>
+            </el-form-item>
+            <el-form-item v-show="!flag" label="root密码">
                 <el-input v-model="pd" show-password></el-input>
             </el-form-item>
             <el-form-item>
@@ -34,7 +41,9 @@
         name: "home",
         data() {
             return {
+                flag: true,
                 ip: '',
+                adminName: '',
                 pd: '',
                 showModal: false,
                 progressBarWidth: 0,
@@ -42,7 +51,16 @@
             };
         },
         methods: {
-            submitForm() {
+            //切换Windows或Linux方法
+            turnFlag(){
+                this.flag = ! this.flag
+                this.pd = ''
+            },
+
+            WindowsSubmitForm(){
+                window.alert('ok, 200')
+            },
+            LinuxSubmitForm(){
                 const payload = {
                     ip: this.ip,
                     pd: this.pd
@@ -85,6 +103,13 @@
                     });
             },
 
+            submitForm() {
+                if (this.flag) {
+                    this.WindowsSubmitForm()
+                }else{
+                    this.LinuxSubmitForm()
+                }
+            },
 
             runProgress() {
                 let duration = 4000;
@@ -102,6 +127,7 @@
                     }
                 }, intervalTime);
             },
+            
             closeModal() {
                 this.showModal = false;
                 this.progressBarWidth = 0;
