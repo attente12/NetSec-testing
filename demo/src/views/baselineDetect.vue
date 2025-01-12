@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1 id="linuxBaseline">Linux基线检测</h1>
+        <h1 id="linuxBaseline">基线检测</h1>
         <button id="recheckButton" @click="onRecheckButton">重新检测</button>
 
         <select id="statusFilter" v-model="selectedStatus" @change="filterRows">
