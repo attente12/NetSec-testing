@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1 id="linuxBaseline">Linux基线检测报告</h1>
+        <h1 id="linuxBaseline">基线检测报告</h1>
         <!-- 检测时间 -->
         <div style="text-align:right; margin-top:20px;">
             <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>
