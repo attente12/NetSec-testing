@@ -28,6 +28,14 @@
                     <el-input v-model="pd" type="password" show-password placeholder="请输入密码" prefix-icon="el-icon-lock">
                     </el-input>
                 </el-form-item>
+                <p class="versionSelector" v-show="flag">
+                    <span>请选择Windows版本：</span>
+                    <el-select v-model="checkedVersions" placeholder="请选择">
+                        <el-option v-for="item in winVersions" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                    </el-select>
+                </p>
+
                 <el-form-item>
                     <el-button type="primary" @click="submitForm">开始检测</el-button>
                     <el-button type="primary" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
@@ -82,7 +90,7 @@ export default {
     name: "home",
     data() {
         return {
-            flag: true,
+            flag: false,
             ip: '',
             adminName: '',
             pd: '',
@@ -182,35 +190,48 @@ export default {
                 { id: 89, name: '检查内核版本是否处于CVE-2021-43267漏洞影响版本' }
             ],
             checkItemsW: [
-                { id: 1, name: '强制密码历史值为5或更高' },
-                { id: 2, name: '密码最长使用期限值为90天或更少，但不为0' },
-                { id: 3, name: '密码最短使用期限值为1或更多' },
-                { id: 4, name: '密码必须符合复杂性要求值为enabled' },
-                { id: 5, name: '用可还原的加密来存储密码值为Disabled' },
-                { id: 6, name: '密码长度最小值值为8或更高' },
-                { id: 7, name: '账户锁定时间值为15分钟或更长' },
-                { id: 8, name: '账户锁定阈值值为5或更少，但不为0' },
-                { id: 9, name: '重置账户锁定计数器值为15分钟或更多，但值要小于Account lockout duration的值' },
-                { id: 10, name: '审核策略更改：成功' },
-                { id: 11, name: '审核登录事件：成功，失败' },
-                { id: 12, name: '审核对象访问：成功' },
-                { id: 13, name: '审核进程跟踪：成功，失败' },
-                { id: 14, name: '审核目录服务访问：成功，失败' },
-                { id: 15, name: '审核系统事件：成功，失败' },
-                { id: 16, name: '审核帐户登录事件：成功，失败' },
-                { id: 17, name: '审核帐户管理：成功，失败' },
-                { id: 18, name: '作为受信任的呼叫方访问凭据管理器值为空，没有设置任何用户' },
-                { id: 19, name: '以操作系统方式执行值为空，没有设置任何用户。' },
-                { id: 20, name: '将工作站添加到域值仅为特定的用户或用户组,不能有513，514，515' },
-                { id: 21, name: '创建全局对象值为空' },
-                { id: 22, name: '拒绝作为批处理作业登录包含Guests' },
-                { id: 23, name: '拒绝以服务身份登录包含Guests' },
+                { id: 1, name: '检测强制密码历史值为5或更高' },
+                { id: 2, name: '检测密码最长使用期限值为90天或更少，但不为0' },
+                { id: 3, name: '检测密码最短使用期限值为1或更多' },
+                { id: 4, name: '检测密码必须符合复杂性要求值为enabled' },
+                { id: 5, name: '检测用可还原的加密来存储密码值为Disabled' },
+                { id: 6, name: '检测密码长度最小值值为8或更高' },
+                { id: 7, name: '检测账户锁定时间值为15分钟或更长' },
+                { id: 8, name: '检测账户锁定阈值值为5或更少，但不为0' },
+                { id: 9, name: '检测重置账户锁定计数器值为15分钟或更多，但值要小于Account lockout duration的值' },
+                { id: 10, name: '检测审核策略更改：成功' },
+                { id: 11, name: '检测审核登录事件：成功，失败' },
+                { id: 12, name: '检测审核对象访问：成功' },
+                { id: 13, name: '检测审核进程跟踪：成功，失败' },
+                { id: 14, name: '检测审核目录服务访问：成功，失败' },
+                { id: 15, name: '检测审核系统事件：成功，失败' },
+                { id: 16, name: '检测审核帐户登录事件：成功，失败' },
+                { id: 17, name: '检测审核帐户管理：成功，失败' },
+                { id: 18, name: '检测作为受信任的呼叫方访问凭据管理器值为空，没有设置任何用户' },
+                { id: 19, name: '检测以操作系统方式执行值为空，没有设置任何用户。' },
+                { id: 20, name: '检测将工作站添加到域值仅为特定的用户或用户组,不能有513，514，515' },
+                { id: 21, name: '检测创建全局对象值为空' },
+                { id: 22, name: '检测拒绝作为批处理作业登录包含Guests' },
+                { id: 23, name: '检测拒绝以服务身份登录包含Guests' },
                 { id: 24, name: '拒绝本地登录包含Guests' },
-                { id: 25, name: '从远程系统强制关机值为administrators本地组和s-1-5-32-549(域控的一个内置组' },
-                { id: 26, name: '修改对象标签值为空' },
-                { id: 27, name: '同步目录服务数据值为空' },
-                { id: 28, name: '' }
-            ]
+                { id: 25, name: '检测从远程系统强制关机值为administrators本地组和s-1-5-32-549(域控的一个内置组' },
+                { id: 26, name: '检测修改对象标签值为空' },
+                { id: 27, name: '检测同步目录服务数据值为空' }
+                //{ id: 28, name: '' }
+            ],
+            winVersions:[
+            { value: 1, label: 'Windows11' },
+            { value: 2, label: 'Windows10' },
+            { value: 3, label: 'Windows8' },
+            { value: 4, label: 'Windows7' },
+            { value: 5, label: 'Windows xp' },
+            { value: 6, label: 'Window server 2025' },
+            { value: 6, label: 'Window server 2022' },
+            { value: 6, label: 'Window server 2019' },
+            { value: 6, label: 'Window server 2016' },
+            { value: 6, label: 'Window server 2012' },
+            ],
+            checkedVersion: ''
         };
     },
     methods: {
@@ -218,6 +239,8 @@ export default {
         turnFlag() {
             this.flag = !this.flag
             this.pd = ''
+            this.ip = ''
+            this.adminName = ''
         },
 
         WindowsSubmitForm() {
@@ -404,5 +427,9 @@ export default {
 
 .el-row {
     margin-bottom: 20px;
+}
+
+.versionSelector{
+    font-size: 14px;
 }
 </style>
