@@ -17,6 +17,7 @@ import CVELibrary from "@/views/CVELibrary.vue";
 import toVerify from "@/views/toVerify.vue";
 import pluginScan from "@/views/pluginScan.vue";
 import assetManage from "@/views/assetManage.vue";
+import hostDiscovery from "@/views/hostDiscovery.vue";
 
 
 export default new Router({
@@ -25,6 +26,12 @@ export default new Router({
             path: '/',
             name: 'home',
             component: home,
+        },
+        {
+            path: '/hostDiscovery',
+            name: 'hostDiscovery',
+            component: hostDiscovery,
+            meta:{title:'主机发现'}
         },
         {
             path: '/baseCheckHome',

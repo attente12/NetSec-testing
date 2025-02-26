@@ -8,55 +8,69 @@
       <el-col :span="8">
         <el-card class="box-card">
           <div slot="header">目标ip（首先您需要输入目标IP扫描得到存在的服务）</div>
-          <el-input
-              type="textarea"
-              rows="4"
-              placeholder="请输入要扫描的目标，例如：192.168.1.0"
+          <el-select
               v-model="scanTarget"
-              @input="validateInput">
-          </el-input>
+              placeholder="请输入或选择要扫描的目标，例如：192.168.1.0"
+              filterable
+              allow-create
+              default-first-option
+              style="width: 100%; margin-bottom: 10px;">
+            <el-option
+                v-for="ip in aliveHosts"
+                :key="ip"
+                :label="ip"
+                :value="ip">
+            </el-option>
+          </el-select>
+<!--          <el-input-->
+<!--              type="textarea"-->
+<!--              rows="4"-->
+<!--              placeholder="请输入要扫描的目标，例如：192.168.1.0"-->
+<!--              v-model="scanTarget"-->
+<!--              @input="validateInput">-->
+<!--          </el-input>-->
           <div class="scan-button">
-            <el-button size="small" @click="detect">扫描</el-button>
+            <el-button size="small" @click="debouncedDetect">扫描</el-button>
           </div>
         </el-card>
-<!--        <el-card class="box-card" style="margin-top: 20px;">-->
-<!--          <div slot="header">字典上传（可选）</div>-->
-<!--          <div class="upload-section">-->
-<!--            <div class="upload-item">-->
-<!--              <span>用户名字典：</span>-->
-<!--              <el-upload-->
-<!--                  class="upload"-->
-<!--                  action="#"-->
-<!--                  :auto-upload="false"-->
-<!--                  :on-change="handleUsernameFileChange"-->
-<!--                  :limit="1"-->
-<!--                  accept=".txt">-->
-<!--                <el-button size="small" type="primary">选择文件</el-button>-->
-<!--              </el-upload>-->
-<!--              <div v-if="usernameFile" class="file-info">-->
-<!--                已选择: {{ usernameFile.name }}-->
-<!--                <i class="el-icon-close" @click="removeUsernameFile"></i>-->
-<!--              </div>-->
-<!--            </div>-->
+        <!--        <el-card class="box-card" style="margin-top: 20px;">-->
+        <!--          <div slot="header">字典上传（可选）</div>-->
+        <!--          <div class="upload-section">-->
+        <!--            <div class="upload-item">-->
+        <!--              <span>用户名字典：</span>-->
+        <!--              <el-upload-->
+        <!--                  class="upload"-->
+        <!--                  action="#"-->
+        <!--                  :auto-upload="false"-->
+        <!--                  :on-change="handleUsernameFileChange"-->
+        <!--                  :limit="1"-->
+        <!--                  accept=".txt">-->
+        <!--                <el-button size="small" type="primary">选择文件</el-button>-->
+        <!--              </el-upload>-->
+        <!--              <div v-if="usernameFile" class="file-info">-->
+        <!--                已选择: {{ usernameFile.name }}-->
+        <!--                <i class="el-icon-close" @click="removeUsernameFile"></i>-->
+        <!--              </div>-->
+        <!--            </div>-->
 
-<!--            <div class="upload-item">-->
-<!--              <span>密码字典：</span>-->
-<!--              <el-upload-->
-<!--                  class="upload"-->
-<!--                  action="#"-->
-<!--                  :auto-upload="false"-->
-<!--                  :on-change="handlePasswordFileChange"-->
-<!--                  :limit="1"-->
-<!--                  accept=".txt">-->
-<!--                <el-button size="small" type="primary">选择文件</el-button>-->
-<!--              </el-upload>-->
-<!--              <div v-if="passwordFile" class="file-info">-->
-<!--                已选择: {{ passwordFile.name }}-->
-<!--                <i class="el-icon-close" @click="removePasswordFile"></i>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </el-card>-->
+        <!--            <div class="upload-item">-->
+        <!--              <span>密码字典：</span>-->
+        <!--              <el-upload-->
+        <!--                  class="upload"-->
+        <!--                  action="#"-->
+        <!--                  :auto-upload="false"-->
+        <!--                  :on-change="handlePasswordFileChange"-->
+        <!--                  :limit="1"-->
+        <!--                  accept=".txt">-->
+        <!--                <el-button size="small" type="primary">选择文件</el-button>-->
+        <!--              </el-upload>-->
+        <!--              <div v-if="passwordFile" class="file-info">-->
+        <!--                已选择: {{ passwordFile.name }}-->
+        <!--                <i class="el-icon-close" @click="removePasswordFile"></i>-->
+        <!--              </div>-->
+        <!--            </div>-->
+        <!--          </div>-->
+        <!--        </el-card>-->
       </el-col>
 
       <el-col :span="16">
@@ -74,7 +88,7 @@
 
           <p>已选择服务:
             <template v-for="(serviceName, index) in selectedServices">
-                {{ serviceName }}({{ getServiceDetails(serviceName).port }})
+              {{ serviceName }}({{ getServiceDetails(serviceName).port }})
               <span v-if="index < selectedServices.length - 1" :key="'comma' + index">, </span>
             </template>
           </p>
@@ -119,97 +133,9 @@
               </div>
             </div>
           </div>
-          <!-- 新的上传区域设计 -->
-<!--          <div class="upload-container">-->
-<!--            <div class="upload-row">-->
-<!--              <div class="upload-item">-->
-<!--                <el-upload-->
-<!--                    class="upload"-->
-<!--                    action="#"-->
-<!--                    :auto-upload="false"-->
-<!--                    :on-change="handleUsernameFileChange"-->
-<!--                    :limit="1"-->
-<!--                    :show-file-list="false"-->
-<!--                    accept=".txt">-->
-<!--                  <el-button size="small" type="primary">上传用户名字典</el-button>-->
-<!--                </el-upload>-->
-<!--                <div v-if="usernameFile" class="file-info">{{ usernameFile.name }}-->
-<!--                  <i class="el-icon-close" @click.stop="removeUsernameFile"></i>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="upload-item" style="margin-left: 10px;">-->
-<!--                <el-upload-->
-<!--                    class="upload"-->
-<!--                    action="#"-->
-<!--                    :auto-upload="false"-->
-<!--                    :on-change="handlePasswordFileChange"-->
-<!--                    :limit="1"-->
-<!--                    :show-file-list="false"-->
-<!--                    accept=".txt">-->
-<!--                  <el-button size="small" type="primary">上传密码字典</el-button>-->
-<!--                </el-upload>-->
-<!--                <div v-if="passwordFile" class="file-info">{{ passwordFile.name }}-->
-<!--                  <i class="el-icon-close" @click.stop="removePasswordFile"></i>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-
-<!--          <div class="upload-container">-->
-<!--            <div class="upload-row">-->
-<!--              <div class="upload-item">-->
-<!--                <el-upload-->
-<!--                    class="upload"-->
-<!--                    action="#"-->
-<!--                    :auto-upload="false"-->
-<!--                    :on-change="handleUsernameFileChange"-->
-<!--                    :limit="1"-->
-<!--                    accept=".txt">-->
-<!--                  <el-button size="small" type="primary">上传用户名字典</el-button>-->
-<!--                </el-upload>-->
-<!--                <span v-if="usernameFile" class="file-name">-->
-<!--                  {{ usernameFile.name }}-->
-<!--                  <i class="el-icon-close" @click.stop="removeUsernameFile"></i>-->
-<!--                </span>-->
-<!--              </div>-->
-
-<!--              <div class="upload-item">-->
-<!--                <el-upload-->
-<!--                    class="upload"-->
-<!--                    action="#"-->
-<!--                    :auto-upload="false"-->
-<!--                    :on-change="handlePasswordFileChange"-->
-<!--                    :limit="1"-->
-<!--                    accept=".txt">-->
-<!--                  <el-button size="small" type="primary">上传密码字典</el-button>-->
-<!--                </el-upload>-->
-<!--                <span v-if="passwordFile" class="file-name">-->
-<!--                  {{ passwordFile.name }}-->
-<!--                  <i class="el-icon-close" @click.stop="removePasswordFile"></i>-->
-<!--                </span>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-
-
-          <!--          <el-radio-group v-model="selectedServiceName">-->
-<!--            <el-row :gutter="20">-->
-<!--              <el-col :span="3" v-for="service in services" :key="service.name">-->
-<!--                <el-radio :label="service.name" :value="service.name">-->
-<!--                  {{ service.name }}-->
-<!--                </el-radio>-->
-<!--              </el-col>-->
-<!--            </el-row>-->
-<!--          </el-radio-group>-->
-
-<!--          <p>-->
-<!--            已选择服务: {{ getServiceDetails(selectedServiceName).name || '无' }}，-->
-<!--            端口: {{ getServiceDetails(selectedServiceName).port || '无' }}-->
-<!--          </p>-->
 
           <div class="scan-button">
-            <el-button size="small" @click="serviceDetect">检测</el-button>
+            <el-button size="small" @click="debouncedServiceDetect">检测</el-button>
           </div>
         </el-card>
       </el-col>
@@ -268,7 +194,7 @@
                    style="cursor: pointer; font-size: 24px;margin-top: 8px;"></i>
               </template>
             </el-input>
-            <el-button size="small" @click="checkPasswordStrength" style="margin-right: 20px;">检测</el-button>
+            <el-button size="small" @click="debouncedCheckPasswordStrength" style="margin-right: 20px;">检测</el-button>
             <span>结果：</span>
             <span :style="{ color: passwordStrengthColor, fontWeight: 'bold'  }">
               {{ passwordStrength }}
@@ -306,6 +232,7 @@
 
 <script>
 import axios from 'axios';
+import _ from 'lodash';
 
 export default {
   data() {
@@ -343,38 +270,43 @@ export default {
         { name: 'xmpps', port: 5223 }
       ],
       selectedServices: [],
-      // selectedServiceName: '',
       scanTarget: '',
       secret: '',
       passwordVisible: false,
       passwordStrength: '',
-      passwordStrengthColor: 'black' // 默认为黑色
+      passwordStrengthColor: 'black',
+      isDetecting: false, // 新增：用于跟踪检测状态
+      isScanning: false , // 新增：用于跟踪扫描状态
+      aliveHosts: [], // 新增：存储活跃IP列表
     };
   },
 
+  created() {
+    // 创建防抖函数
+    this.debouncedDetect = _.debounce(this.detect, 1000);
+    this.debouncedServiceDetect = _.debounce(this.serviceDetect, 1000);
+    this.debouncedCheckPasswordStrength = _.debounce(this.checkPasswordStrength, 500);
+  },
+
   methods: {
+    // 新增：获取活跃IP列表的方法
+    fetchAliveHosts() {
+      axios.get('/api/getAliveHosts')
+          .then(response => {
+            this.aliveHosts = response.data.alive_hosts;
+          })
+          .catch(error => {
+            console.error('获取活跃IP列表失败:', error);
+            this.$message.error('获取活跃IP列表失败');
+          });
+    },
     getServiceDetails(serviceName) {
       return this.services.find(service => service.name === serviceName) || {};
     },
+
     validateInput(event) {
       this.scanTarget = event;
     },
-    // 文件上传相关方法
-    // handleUsernameFileChange(file) {
-    //   if (file.raw.type !== 'text/plain') {
-    //     this.$message.error('请上传txt文件');
-    //     return false;
-    //   }
-    //   this.usernameFile = file.raw;
-    // },
-    //
-    // handlePasswordFileChange(file) {
-    //   if (file.raw.type !== 'text/plain') {
-    //     this.$message.error('请上传txt文件');
-    //     return false;
-    //   }
-    //   this.passwordFile = file.raw;
-    // },
 
     removeUsernameFile() {
       this.usernameFile = null;
@@ -396,20 +328,21 @@ export default {
     },
 
     handlePasswordFileChange(file) {
+      //限制文件类型
       if (file.raw.type !== 'text/plain') {
         this.$message.error('请上传txt文件');
         this.$refs.passwordUpload.clearFiles();
         return false;
       }
+      //限制文件大小1MB
+      const maxSize = 1024 * 1024;
+      if (file.raw.size > maxSize) {
+        this.$message.error('文件大小不能超过1MB');
+        this.$refs.usernameUpload.clearFiles();
+        return false;
+      }
       this.passwordFile = file.raw;
     },
-    // removeUsernameFile() {
-    //   this.usernameFile = null;
-    // },
-    //
-    // removePasswordFile() {
-    //   this.passwordFile = null;
-    // },
 
     validateDictionaryFiles() {
       if (this.usernameFile && !this.passwordFile) {
@@ -423,31 +356,47 @@ export default {
       return true;
     },
 
+    // 修改后的detect方法
+    async detect() {
+      if (this.isScanning) {
+        this.$message.warning('扫描正在进行中，请稍候...');
+        return;
+      }
 
-    detect() {
-      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       if (!this.scanTarget) {
         this.$message.error('请输入有效的IP地址');
         return;
       }
 
-      const apiUrl = '/api/getNmapIp';
-      axios.post(apiUrl, {
-        ip: this.scanTarget
-      }).then(response => {
+      this.isScanning = true;
+      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+
+      try {
+        const apiUrl = '/api/getNmapIp';
+        const response = await axios.post(apiUrl, {
+          ip: this.scanTarget
+        });
+
         if (response.data.message === 'Nmap scan completed and CVE data fetched.') {
           this.$message.success('扫描完成');
         } else {
           this.$message.error('扫描失败，请重试');
         }
-      }).catch(error => {
+      } catch (error) {
         this.$message.error('网络错误或服务器无响应');
         console.error('Scan error:', error);
-      });
+      } finally {
+        this.isScanning = false;
+      }
     },
 
-    // 服务检测方法
+    // 修改后的serviceDetect方法
     async serviceDetect() {
+      if (this.isDetecting) {
+        this.$message.warning('检测正在进行中，请稍候...');
+        return;
+      }
+
       if (this.selectedServices.length === 0) {
         this.$message.error('请至少选择一个服务');
         return;
@@ -462,8 +411,9 @@ export default {
         return;
       }
 
+      this.isDetecting = true;
+
       try {
-        // 为每个选中的服务创建FormData
         const serviceRequests = this.selectedServices.map(serviceName => {
           const serviceDetails = this.getServiceDetails(serviceName);
           const formData = new FormData();
@@ -480,7 +430,6 @@ export default {
           return formData;
         });
 
-        // 发送所有请求
         const responses = await Promise.all(
             serviceRequests.map(formData =>
                 axios.post('/api/getWeakPassword', formData, {
@@ -493,7 +442,6 @@ export default {
 
         let foundWeakPasswords = false;
 
-        // 处理所有响应
         responses.forEach(response => {
           if (response.data && response.data.length > 0) {
             foundWeakPasswords = true;
@@ -515,155 +463,38 @@ export default {
           this.$message.warning('检测完成，但未发现弱口令');
         }
       } catch (error) {
-        if (error.response && error.response.data && error.response.data.error) {
-          if (error.response.data.error === "Service not found") {
-            this.$message.error(`${error.response.data.service_name}: Service not found`);
-          } else {
-            this.$message.error('检测失败，请检查网络或服务器');
-          }
+        if (error.response?.data?.error === "Service not found") {
+          this.$message.error(`${error.response.data.service_name}: Service not found`);
         } else {
           this.$message.error('检测失败，请检查网络或服务器');
         }
         console.error('Service detect error:', error);
+      } finally {
+        this.isDetecting = false;
       }
     },
-
-    //有批量执行 但没有字典文件上传的代码
-    // async serviceDetect() {
-    //   if (this.selectedServices.length === 0) {
-    //     this.$message.error('请至少选择一个服务');
-    //     return;
-    //   }
-    //
-    //   if (!this.scanTarget) {
-    //     this.$message.error('请输入有效的IP地址');
-    //     return;
-    //   }
-    //
-    //   // Create array of service requests
-    //   const serviceRequests = this.selectedServices.map(serviceName => {
-    //     const serviceDetails = this.getServiceDetails(serviceName);
-    //     return {
-    //       ip: this.scanTarget,
-    //       portId: serviceDetails.port.toString(),
-    //       service_name: serviceDetails.name
-    //     };
-    //   });
-    //
-    //   try {
-    //     // Send requests for all selected services
-    //     const responses = await Promise.all(
-    //         serviceRequests.map(request =>
-    //             axios.post('/api/getWeakPassword', request)
-    //         )
-    //     );
-    //
-    //     let foundWeakPasswords = false;
-    //
-    //     // Process all responses
-    //     responses.forEach(response => {
-    //       if (response.data && response.data.length > 0) {
-    //         foundWeakPasswords = true;
-    //         response.data.forEach(result => {
-    //           this.tableData.push({
-    //             port: result.port,
-    //             service: result.service,
-    //             account: result.login,
-    //             password: result.password
-    //           });
-    //         });
-    //       }
-    //     });
-    //
-    //     if (foundWeakPasswords) {
-    //       this.$message.success('检测完成，结果已更新');
-    //       this.saveTableData();
-    //     } else {
-    //       this.$message.warning('检测完成，但未发现弱口令');
-    //     }
-    //   } catch (error) {
-    //     if (error.response && error.response.data && error.response.data.error) {
-    //       if (error.response.data.error === "Service not found") {
-    //         this.$message.error(`${error.response.data.service_name}: Service not found`);
-    //       } else {
-    //         this.$message.error('检测失败，请检查网络或服务器');
-    //       }
-    //     } else {
-    //       this.$message.error('检测失败，请检查网络或服务器');
-    //     }
-    //     console.error('Service detect error:', error);
-    //   }
-    // },
-    //没有批量执行的代码
-    // serviceDetect() {
-    //   if (!this.selectedServiceName) {
-    //     this.$message.error('请先选择一个服务');
-    //     return;
-    //   }
-    //
-    //   const serviceDetails = this.getServiceDetails(this.selectedServiceName);
-    //
-    //   if (!this.scanTarget) {
-    //     this.$message.error('请输入有效的IP地址');
-    //     return;
-    //   }
-    //
-    //   const postData = {
-    //     ip: this.scanTarget,
-    //     portId: serviceDetails.port.toString(),
-    //     service_name: serviceDetails.name
-    //   };
-    //
-    //   axios.post('/api/getWeakPassword', postData)
-    //       .then(response => {
-    //         if (response.data && response.data.length > 0) {
-    //           response.data.forEach(result => {
-    //             this.tableData.push({
-    //               port: result.port,
-    //               service: result.service,
-    //               account: result.login,
-    //               password: result.password
-    //             });
-    //           });
-    //           this.$message.success('检测完成，结果已更新');
-    //           this.saveTableData();
-    //         } else {
-    //           this.$message.warning('检测完成，但未发现弱口令');
-    //         }
-    //       })
-    //       .catch(error => {
-    //         if (error.response && error.response.data && error.response.data.error) {
-    //           if (error.response.data.error === "Service not found") {
-    //             this.$message.error(`${error.response.data.service_name}: Service not found`);
-    //           } else {
-    //             this.$message.error('检测失败，请检查网络或服务器');
-    //           }
-    //         } else {
-    //           this.$message.error('检测失败，请检查网络或服务器');
-    //         }
-    //         console.error('Service detect error:', error);
-    //       });
-    // },
 
     saveTableData() {
       localStorage.setItem('tableData', JSON.stringify(this.tableData));
     },
+
     loadTableData() {
       const data = localStorage.getItem('tableData');
-      const dataStorage=localStorage.getItem('scanTarget');
+      const dataStorage = localStorage.getItem('scanTarget');
       if (data) {
         this.tableData = JSON.parse(data);
       }
       if (dataStorage) {
         this.scanTarget = JSON.parse(dataStorage);
       }
-
     },
+
     clearLocalStorage() {
       localStorage.removeItem('tableData');
       this.tableData = [];
       this.$message.success('本地存储数据已清除');
     },
+
     printReport() {
       const printContents = document.getElementById('printable').innerHTML;
       const originalContents = document.body.innerHTML;
@@ -672,9 +503,11 @@ export default {
       document.body.innerHTML = originalContents;
       window.location.reload();
     },
+
     togglePasswordVisibility() {
       this.passwordVisible = !this.passwordVisible;
     },
+
     async checkPasswordStrength() {
       try {
         const response = await axios.post('/api/testWeakPassword', { pd: this.secret });
@@ -696,19 +529,28 @@ export default {
             this.passwordStrengthColor = 'black';
             break;
           default:
-            this.passwordStrength = '未知'; // Handle any unexpected response
-            this.passwordStrengthColor = 'gray'; // Or any other color for unexpected cases
+            this.passwordStrength = '未知';
+            this.passwordStrengthColor = 'gray';
             break;
         }
       } catch (error) {
         console.error('Error checking password strength:', error);
         this.passwordStrength = '检测失败';
-        this.passwordStrengthColor = 'black'; // 发生错误时用黑色表示
+        this.passwordStrengthColor = 'black';
       }
     }
   },
+
   mounted() {
     this.loadTableData();
+    this.fetchAliveHosts(); // 新增：组件挂载时获取活跃IP列表
+  },
+
+  // 组件销毁前取消防抖函数
+  beforeDestroy() {
+    this.debouncedDetect.cancel();
+    this.debouncedServiceDetect.cancel();
+    this.debouncedCheckPasswordStrength.cancel();
   }
 }
 </script>
@@ -813,4 +655,5 @@ export default {
   color: #f56c6c;
 }
 </style>
+
 

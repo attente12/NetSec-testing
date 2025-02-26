@@ -24,6 +24,11 @@
                         <span slot="title">首页</span>
                     </el-menu-item>
 
+                  <el-menu-item index="/hostDiscovery">
+                    <i class="el-icon-search"></i>
+                    <span slot="title">主机发现</span>
+                  </el-menu-item>
+
                     <el-submenu index="1">
                         <template slot="title">
                             <i class="el-icon-location"></i>
