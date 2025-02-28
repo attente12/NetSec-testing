@@ -156,30 +156,17 @@ export default {
           this.searched = true
           try {
 
-
-            // 错误的写法，当network为10.9.130.0/24会将请求变成/api/host_discovery?network=10.9.130.0%2F24
-            // const response = await axios.post(
-            //     `/api/host_discovery?network=${encodeURIComponent(this.searchForm.ipInput)}` // 将 network 作为 URL 参数
-            // )
-            //正确的写法
             const response = await axios.post(
                 '/api/host_discovery?network=' + this.searchForm.ipInput // 将 network 作为 URL 参数
             )
-
-            //后端写的不在请求体中 在url中
-            // const response = await axios.post(
-            //     '/api/host_discovery', {
-            //       network: this.searchForm.ipInput
-            //     }
-            // )
-
             // 处理返回的数据格式
             this.hostList = response.data.alive_hosts.map(ip => ({
               ip,
               lastSeen: new Date().toLocaleString()
             }))
           } catch (error) {
-            this.$message.error('搜索失败：' + (error.response?.data?.message || error.message))
+            this.$message.error('error：' + (error.response.data))
+            //this.$message.error('搜索失败：' + (error.response.data?.message || error.message))
           } finally {
             this.loading = false
           }
