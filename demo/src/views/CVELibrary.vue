@@ -2,7 +2,7 @@
   <div>
     <!--    <h1>这是首页</h1>-->
     <iframe
-        src="http://192.168.1.9:5000/"
+        src="http://10.9.130.77:5000/"
         width="100%"
         height="760px"
         frameborder="0">
