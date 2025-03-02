@@ -377,8 +377,8 @@ export default {
           ip: this.scanTarget
         });
 
-        if (response.data.message === 'Nmap scan completed and CVE data fetched.') {
-          this.$message.success('扫描完成');
+        if (response.data.message === 'Nmap 扫描完成并获取 CVE 数据。') {
+          this.$message.success('Nmap 扫描完成并获取 CVE 数据');
         } else {
           this.$message.error('扫描失败，请重试');
         }
