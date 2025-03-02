@@ -41,8 +41,24 @@
 <!--              @input="validateInput">-->
 <!--          </el-input>-->
           <div class="scan-button">
-            <el-button size="small" @click="detectAll" type="primary">全端口扫描</el-button>
-            <el-button size="small" @click="detect" type="primary">扫描</el-button>
+<!--            <el-button size="small" @click="detectAll" type="primary">全端口扫描</el-button>-->
+            <el-button
+                size="small"
+                @click="detectAll"
+                :loading="detectAllState"
+                icon="el-icon-search"
+                type="primary">
+              全端口扫描
+            </el-button>
+<!--            <el-button size="small" @click="detect" type="primary">扫描</el-button>-->
+            <el-button
+                size="small"
+                @click="detect"
+                :loading="detectState"
+                icon="el-icon-search"
+                type="primary">
+              扫描
+            </el-button>
           </div>
         </el-card>
       </el-col>
@@ -67,7 +83,7 @@
                       </template>
                       <div style="color: slategrey; font-size: 12px; margin-left: 40px">
                         CVSS: {{ cve.CVSS }}<br>
-                        PoC Exists: {{ cve.pocExist ? 'Yes' : 'No' }}<br>
+<!--                        PoC Exists: {{ cve.pocExist ? 'Yes' : 'No' }}<br>-->
                         Vulnerability Exists: {{ cve.vulExist }}<br>
                       </div>
                     </el-collapse-item>
@@ -128,7 +144,7 @@
                             </template>
                             <div style="color: slategrey; font-size: 12px; margin-left: 40px">
                               CVSS: {{ cve.CVSS }}<br>
-                              PoC Exists: {{ cve.pocExist ? 'Yes' : 'No' }}<br>
+<!--                              PoC Exists: {{ cve.pocExist ? 'Yes' : 'No' }}<br>-->
                               Vulnerability Exists: {{ cve.vulExist }}<br>
                             </div>
                           </el-collapse-item>
@@ -162,7 +178,9 @@ export default {
       visibleCPEs: [],
       activeNames: [],
       scanTarget:'',
-      aliveHosts: [] // 新增：存储活跃IP列表
+      aliveHosts: [], // 新增：存储活跃IP列表
+      detectAllState: false,//检测中状态
+      detectState: false,
     };
   },
   // computed: {
@@ -211,6 +229,7 @@ export default {
       }
     },
     detect() {
+      this.detectState=true;
       localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       const target = { ip: this.scanTarget };
       axios.post('/api/getNmapIp', target)
@@ -218,16 +237,19 @@ export default {
             console.log('Scan result:', response.data);
             Message.success('扫描完成');
             setTimeout(() => {
+              this.detectState=false;
               window.location.reload(); // 刷新页面
             }, 2000); // 显示提示2秒后刷新页面
             // 在这里处理成功响应的数据
           })
           .catch(error => {
+            this.detectState=false;
             console.error('There was an error scanning the target:', error);
             // 在这里处理错误
           });
     },
     detectAll() {
+      this.detectAllState=true;//检测中状态
       localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       //const target = { ip: this.scanTarget };
       // 生成请求体，默认包含 all_ports: true
@@ -240,12 +262,14 @@ export default {
             console.log('Scan result:', response.data);
             Message.success('扫描完成');
             setTimeout(() => {
+              this.detectAllState=false;//关闭检测中状态
               window.location.reload(); // 刷新页面
             }, 2000); // 显示提示2秒后刷新页面
             // 在这里处理成功响应的数据
           })
           .catch(error => {
             console.error('There was an error scanning the target:', error);
+            this.detectAllState=false;//关闭检测中状态
             // 在这里处理错误
           });
     },

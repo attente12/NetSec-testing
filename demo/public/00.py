@@ -25,7 +25,7 @@ class DemoPOC:
         self.port = port
 
     def check_and_install_dependencies(self):
-        """��鲢��װ����Ŀ�"""
+        """检查并安装所需的库"""
         missing_packages = []
         for package in self.install_requires:
             try:

@@ -11,11 +11,11 @@ import importlib
 from scan.lib.random_header import get_ua
 
 class DemoPOC:
-    appName = 'Weblogic'
-    appVersion = '? 10.3.6.0��12.1.3.0��12.2.1.1��12.2.1.2'
-    install_requires = ['requests']
-    CVE_ID = "CVE-2017-10271"
-    Vul_Date = "2017-10-20"
+    appName = 'Weblogic'             # 漏洞影响的应用或组件名称
+    appVersion = '10.3.6.0'          # 漏洞影响版本
+    install_requires = ['requests']  # 需要的库
+    CVE_ID = "CVE-2017-10271"        # CVE编号
+    Vul_Date = "2017-10-20"          # 漏洞公开日期
 
     def __init__(self, url, ip, port):
         self.url = url

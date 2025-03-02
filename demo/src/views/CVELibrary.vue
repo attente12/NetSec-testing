@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="refresh-tip">若刷新失败请尝试ctrl+shift+R</p>
+    <p class="refresh-tip">若刷新失败请尝试 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> 强制刷新</p>
     <div class="iframe-wrapper">
       <iframe
           :src="iframeUrl"
@@ -19,7 +19,7 @@ export default {
   data() {
     return {
       iframeKey: 1,
-      baseUrl: 'http://10.9.130.140:5000/'
+      baseUrl: 'http://10.9.130.181:5000/'
     }
   },
   computed: {
