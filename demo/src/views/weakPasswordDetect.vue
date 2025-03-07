@@ -30,7 +30,14 @@
 <!--              @input="validateInput">-->
 <!--          </el-input>-->
           <div class="scan-button">
-            <el-button size="small" @click="debouncedDetect">扫描</el-button>
+<!--            <el-button size="small" @click="debouncedDetect">扫描</el-button>-->
+            <el-button
+                @click="debouncedDetect"
+                :loading="debouncedDetectLoading"
+                icon="el-icon-search"
+                type="primary">
+              扫描
+            </el-button>
           </div>
         </el-card>
         <!--        <el-card class="box-card" style="margin-top: 20px;">-->
@@ -135,7 +142,14 @@
           </div>
 
           <div class="scan-button">
-            <el-button size="small" @click="debouncedServiceDetect">检测</el-button>
+<!--            <el-button size="small" @click="debouncedServiceDetect">检测</el-button>-->
+            <el-button
+                @click="debouncedServiceDetect"
+                :loading="debouncedServiceDetectLoading"
+                icon="el-icon-search"
+                type="primary">
+              检测
+            </el-button>
           </div>
         </el-card>
       </el-col>
@@ -194,7 +208,15 @@
                    style="cursor: pointer; font-size: 24px;margin-top: 8px;"></i>
               </template>
             </el-input>
-            <el-button size="small" @click="debouncedCheckPasswordStrength" style="margin-right: 20px;">检测</el-button>
+<!--            <el-button size="small" @click="debouncedCheckPasswordStrength" style="margin-right: 20px;">检测</el-button>-->
+            <el-button
+                @click="debouncedCheckPasswordStrength"
+                :loading="PasswordStrengthLoading"
+                icon="el-icon-search"
+                type="small"
+                style="margin-right: 20px;">
+              检测
+            </el-button>
             <span>结果：</span>
             <span :style="{ color: passwordStrengthColor, fontWeight: 'bold'  }">
               {{ passwordStrength }}
@@ -278,6 +300,9 @@ export default {
       isDetecting: false, // 新增：用于跟踪检测状态
       isScanning: false , // 新增：用于跟踪扫描状态
       aliveHosts: [], // 新增：存储活跃IP列表
+      debouncedDetectLoading:false,
+      debouncedServiceDetectLoading:false,
+      PasswordStrengthLoading:false,
     };
   },
 
@@ -358,6 +383,7 @@ export default {
 
     // 修改后的detect方法
     async detect() {
+      this.debouncedDetectLoading=true;
       if (this.isScanning) {
         this.$message.warning('扫描正在进行中，请稍候...');
         return;
@@ -387,11 +413,13 @@ export default {
         console.error('Scan error:', error);
       } finally {
         this.isScanning = false;
+        this.debouncedDetectLoading=false;
       }
     },
 
     // 修改后的serviceDetect方法
     async serviceDetect() {
+
       if (this.isDetecting) {
         this.$message.warning('检测正在进行中，请稍候...');
         return;
@@ -411,6 +439,7 @@ export default {
         return;
       }
 
+      this.debouncedServiceDetectLoading=true;
       this.isDetecting = true;
 
       try {
@@ -471,6 +500,7 @@ export default {
         console.error('Service detect error:', error);
       } finally {
         this.isDetecting = false;
+        this.debouncedServiceDetectLoading=false;
       }
     },
 
@@ -509,6 +539,7 @@ export default {
     },
 
     async checkPasswordStrength() {
+      this.PasswordStrengthLoading=true;
       try {
         const response = await axios.post('/api/testWeakPassword', { pd: this.secret });
         switch (response.data.message) {
@@ -537,6 +568,8 @@ export default {
         console.error('Error checking password strength:', error);
         this.passwordStrength = '检测失败';
         this.passwordStrengthColor = 'black';
+      }finally {
+        this.PasswordStrengthLoading=false;
       }
     }
   },

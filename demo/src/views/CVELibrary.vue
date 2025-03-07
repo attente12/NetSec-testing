@@ -19,7 +19,7 @@ export default {
   data() {
     return {
       iframeKey: 1,
-      baseUrl: 'http://10.9.130.181:5000/'
+      baseUrl: 'http://10.9.130.37:5000/'
     }
   },
   computed: {
