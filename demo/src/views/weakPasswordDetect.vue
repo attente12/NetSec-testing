@@ -7,7 +7,8 @@
     <el-row :gutter="20">
       <el-col :span="8">
         <el-card class="box-card">
-          <div slot="header">目标ip（首先您需要输入目标IP扫描得到存在的服务）</div>
+<!--          <div slot="header">目标ip（首先您需要输入目标IP扫描得到存在的服务）</div>-->
+          <div slot="header">目标ip</div>
           <el-select
               v-model="scanTarget"
               placeholder="请输入或选择要扫描的目标，例如：192.168.1.0"
@@ -29,12 +30,16 @@
 <!--              v-model="scanTarget"-->
 <!--              @input="validateInput">-->
 <!--          </el-input>-->
+          <div style="margin-bottom: 10px; color: #409EFF; font-size: 13px;">
+            <i class="el-icon-warning-outline" style="margin-right: 5px;"></i>如果该资产未进行过端口扫描，需要进行预扫描。
+          </div>
           <div class="scan-button">
 <!--            <el-button size="small" @click="debouncedDetect">扫描</el-button>-->
             <el-button
                 @click="debouncedDetect"
                 :loading="debouncedDetectLoading"
                 icon="el-icon-search"
+                size="small"
                 type="primary">
               扫描
             </el-button>
@@ -147,7 +152,8 @@
                 @click="debouncedServiceDetect"
                 :loading="debouncedServiceDetectLoading"
                 icon="el-icon-search"
-                type="primary">
+                type="primary"
+                size="small">
               检测
             </el-button>
           </div>

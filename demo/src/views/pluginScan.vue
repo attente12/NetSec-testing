@@ -36,8 +36,22 @@
 <!--              v-model="scanTarget"-->
 <!--              @input="validateInput">-->
 <!--          </el-input>-->
+<!--          <div style="margin-bottom: 10px; color: #E6A23C; font-size: 13px;">-->
+<!--            <i class="el-icon-warning-outline" style="margin-right: 5px;"></i>如果该资产未进行过端口扫描，需要进行预扫描。-->
+<!--          </div>-->
+          <div style="margin-bottom: 10px; color: #409EFF; font-size: 13px;">
+            <i class="el-icon-warning-outline" style="margin-right: 5px;"></i>如果该资产未进行过端口扫描，需要进行预扫描。
+          </div>
           <div class="scan-button" style="margin-bottom: 74px;">
-            <el-button size="small" @click="detect">扫描</el-button>
+<!--            <el-button size="small" @click="chooseDetect">扫描</el-button>-->
+            <el-button
+                size="small"
+                @click="chooseDetect"
+                :loading="detectState"
+                icon="el-icon-search"
+                type="primary">
+              预扫描
+            </el-button>
           </div>
         </el-card>
       </el-col>
@@ -70,7 +84,15 @@
               <el-checkbox v-model="portValidityCheck">端口有效性检查</el-checkbox>
             </div>
             <div class="scan-button">
-              <el-button size="small" @click="runPoc">执行poc</el-button>
+<!--              <el-button size="small" @click="runPoc">执行poc</el-button>-->
+              <el-button
+                  size="small"
+                  @click="runPoc"
+                  :loading="runPocState"
+                  icon="el-icon-search"
+                  type="primary">
+                执行poc
+              </el-button>
             </div>
           </el-col>
         </el-card>
@@ -179,6 +201,7 @@ import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import _ from 'lodash';
+import {Message} from "element-ui";
 
 export default {
   data() {
@@ -192,6 +215,8 @@ export default {
       portValidityCheck: true,
       result: { ports: [] }, // 初始化为包含空ports数组的对象
       aliveHosts: [], // 新增：存储活跃IP列表
+      detectState:false,
+      runPocState:false,
     };
   },
 
@@ -226,6 +251,58 @@ export default {
   },
 
   methods: {
+    chooseDetect(){
+      if(this.all_ports===true){
+        this.detectAll();
+      }else{
+        this.detect();
+      }
+    },
+    detect() {
+      this.detectState=true;
+      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      const target = { ip: this.scanTarget };
+      axios.post('/api/getNmapIp', target)
+          .then(response => {
+            console.log('Scan result:', response.data);
+            Message.success('扫描完成');
+            setTimeout(() => {
+              this.detectState=false;
+              window.location.reload(); // 刷新页面
+            }, 2000); // 显示提示2秒后刷新页面
+            // 在这里处理成功响应的数据
+          })
+          .catch(error => {
+            this.detectState=false;
+            console.error('There was an error scanning the target:', error);
+            // 在这里处理错误
+          });
+    },
+    detectAll() {
+      this.detectState=true;//检测中状态
+      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      //const target = { ip: this.scanTarget };
+      // 生成请求体，默认包含 all_ports: true
+      const target = {
+        ip: this.scanTarget,
+        all_ports: true // 默认发送 all_ports 为 true
+      };
+      axios.post('/api/getNmapIp', target)
+          .then(response => {
+            console.log('Scan result:', response.data);
+            Message.success('扫描完成');
+            setTimeout(() => {
+              this.detectState=false;//关闭检测中状态
+              window.location.reload(); // 刷新页面
+            }, 2000); // 显示提示2秒后刷新页面
+            // 在这里处理成功响应的数据
+          })
+          .catch(error => {
+            console.error('There was an error scanning the target:', error);
+            this.detectState=false;//关闭检测中状态
+            // 在这里处理错误
+          });
+    },
     // 新增：获取活跃IP列表的方法
     fetchAliveHosts() {
       axios.get('/api/getAliveHosts')
@@ -265,6 +342,7 @@ export default {
         this.$message.error('请选择有效的IP地址');
         return;
       }
+      this.runPocState=true;
       localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       this.selectedPoc = this.checkedPocs.map(poc => poc.id);
 
@@ -292,6 +370,8 @@ export default {
           .catch(error => {
             console.error('error:', error);
           });
+      this.runPocState=false;
+      this.loadTableData();
     },
 
     autoSelect() {
