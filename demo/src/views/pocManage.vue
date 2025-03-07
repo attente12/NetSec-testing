@@ -644,24 +644,34 @@ export default {
       }
 
       // 创建一个 Promise 来读取文件内容
+      // 创建一个 Promise 来读取文件内容
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (event) => {
           const content = event.target.result;
 
           // 定义需要包含的内容的正则表达式或简单字符串
+
           const requiredPatterns = [
             /class\s+DemoPOC:/,             // 检查是否有 class DemoPOC:
-            /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/, // 检查是否有 def __init__(self, url, ip, port)
             /def\s+_verify\s*\(self\)/,     // 检查是否有 def _verify(self)
             /result\[['"]VerifyInfo['"]\]/, // 检查是否有 result['VerifyInfo'] 或 result["VerifyInfo"]
             /\[!\]/,                       // 检查是否有 [!]
             /\[SAFE\]/                     // 检查是否有 [SAFE]
           ];
 
-          // 检查内容是否满足要求
-          const isValid = requiredPatterns.every((pattern) => pattern.test(content));
-          if (!isValid) {
+          // 检查两种初始化方法中的任意一个
+          const initPatterns = [
+            /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/, // 检查是否有 def __init__(self, url, ip, port)
+            /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port,\s*server_ip,\s*server_port\)/ // 检查是否有 def __init__(self, url, ip, port, server_ip, server_port)
+          ];
+
+          // 检查必要内容是否满足要求
+          const isValidRequiredPatterns = requiredPatterns.every((pattern) => pattern.test(content));
+          // 检查两种初始化方法中是否有一个满足要求
+          const isValidInitPattern = initPatterns.some((pattern) => pattern.test(content));
+
+          if (!isValidRequiredPatterns || !isValidInitPattern) {
             this.$message.error('poc格式不规范');
             reject(false);
           } else {
@@ -677,6 +687,40 @@ export default {
         // 读取文件内容为文本
         reader.readAsText(file);
       });
+      // return new Promise((resolve, reject) => {
+      //   const reader = new FileReader();
+      //   reader.onload = (event) => {
+      //     const content = event.target.result;
+      //
+      //     // 定义需要包含的内容的正则表达式或简单字符串
+      //
+      //     const requiredPatterns = [
+      //       /class\s+DemoPOC:/,             // 检查是否有 class DemoPOC:
+      //       /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/, // 检查是否有 def __init__(self, url, ip, port)
+      //       /def\s+_verify\s*\(self\)/,     // 检查是否有 def _verify(self)
+      //       /result\[['"]VerifyInfo['"]\]/, // 检查是否有 result['VerifyInfo'] 或 result["VerifyInfo"]
+      //       /\[!\]/,                       // 检查是否有 [!]
+      //       /\[SAFE\]/                     // 检查是否有 [SAFE]
+      //     ];
+      //
+      //     // 检查内容是否满足要求
+      //     const isValid = requiredPatterns.every((pattern) => pattern.test(content));
+      //     if (!isValid) {
+      //       this.$message.error('poc格式不规范');
+      //       reject(false);
+      //     } else {
+      //       resolve(true);
+      //     }
+      //   };
+      //
+      //   reader.onerror = () => {
+      //     this.$message.error('文件读取失败');
+      //     reject(false);
+      //   };
+      //
+      //   // 读取文件内容为文本
+      //   reader.readAsText(file);
+      // });
     },
 
     handleFileUpload(param) {
@@ -708,14 +752,19 @@ export default {
       // 正则表达式数组（多行模式，处理空格和换行）
       const requiredFields = [
         { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义
-        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
         { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
         { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']
         { regex: /\[!\]/m, label: '[!]' },  // [!]
         { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]
       ];
 
-      // 检查每个正则表达式是否匹配代码
+      // 初始化方法的两种可能模式
+      const initMethods = [
+        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },
+        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port,\s*server_ip,\s*server_port\)/m, label: 'def __init__(self,url,ip,port,server_ip,server_port)' }
+      ];
+
+      // 检查每个必须字段是否匹配代码
       let allFieldsPresent = true;
       requiredFields.forEach(field => {
         const isMatch = field.regex.test(this.tempnewcode);
@@ -726,15 +775,62 @@ export default {
         }
       });
 
+      // 检查初始化方法是否匹配其中一种模式
+      const initMethodMatch = initMethods.some(method => method.regex.test(this.tempnewcode));
+      console.log(`Checking init methods. Match: ${initMethodMatch}`);  // 调试输出
+      if (!initMethodMatch) {
+        this.$message.error(`代码中缺少必要的初始化方法，需要包含以下两种之一：
+    - def __init__(self,url,ip,port)
+    - def __init__(self,url,ip,port,server_ip,server_port)`);
+        allFieldsPresent = false;
+      }
+
       if (!allFieldsPresent) {
         return;  // 停止保存流程
       }
 
       // 如果检查都通过，保存临时变量到实际变量中
       this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量
-      this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量
+      this.newcode = this.tempnewcode;        // 将临时代码赋值给实际代码变量
       this.codeDialogVisible = false;         // 关闭对话框
     },
+    // saveCode() {
+    //   // 检查文件名是否以 .py 结尾
+    //   if (!this.tempFilename.endsWith('.py')) {
+    //     this.$message.error('文件名错误，必须以 .py 结尾');
+    //     return;  // 停止保存流程
+    //   }
+    //
+    //   // 正则表达式数组（多行模式，处理空格和换行）
+    //   const requiredFields = [
+    //     { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义
+    //     { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
+    //     { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
+    //     { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']
+    //     { regex: /\[!\]/m, label: '[!]' },  // [!]
+    //     { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]
+    //   ];
+    //
+    //   // 检查每个正则表达式是否匹配代码
+    //   let allFieldsPresent = true;
+    //   requiredFields.forEach(field => {
+    //     const isMatch = field.regex.test(this.tempnewcode);
+    //     console.log(`Checking field: ${field.label}, Match: ${isMatch}`);  // 调试输出
+    //     if (!isMatch) {
+    //       this.$message.error(`代码中缺少必要的字段：${field.label}`);
+    //       allFieldsPresent = false;  // 如果任意字段未匹配，标记为 false
+    //     }
+    //   });
+    //
+    //   if (!allFieldsPresent) {
+    //     return;  // 停止保存流程
+    //   }
+    //
+    //   // 如果检查都通过，保存临时变量到实际变量中
+    //   this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量
+    //   this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量
+    //   this.codeDialogVisible = false;         // 关闭对话框
+    // },
 
     // 编辑poc的保存代码
     saveCode2() {
@@ -747,14 +843,19 @@ export default {
       // 正则表达式数组（多行模式，处理空格和换行）
       const requiredFields = [
         { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义
-        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
         { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
         { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']
         { regex: /\[!\]/m, label: '[!]' },  // [!]
         { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]
       ];
 
-      // 检查每个正则表达式是否匹配代码
+      // 初始化方法的两种可能模式
+      const initMethods = [
+        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },
+        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port,\s*server_ip,\s*server_port\)/m, label: 'def __init__(self,url,ip,port,server_ip,server_port)' }
+      ];
+
+      // 检查每个必须字段是否匹配代码
       let allFieldsPresent = true;
       requiredFields.forEach(field => {
         const isMatch = field.regex.test(this.tempnewcode);
@@ -765,15 +866,63 @@ export default {
         }
       });
 
+      // 检查初始化方法是否匹配其中一种模式
+      const initMethodMatch = initMethods.some(method => method.regex.test(this.tempnewcode));
+      console.log(`Checking init methods. Match: ${initMethodMatch}`);  // 调试输出
+      if (!initMethodMatch) {
+        this.$message.error(`代码中缺少必要的初始化方法，需要包含以下两种之一：
+    - def __init__(self,url,ip,port)或
+    - def __init__(self,url,ip,port,server_ip,server_port)`);
+        allFieldsPresent = false;
+      }
+
       if (!allFieldsPresent) {
         return;  // 停止保存流程
       }
 
       // 如果检查都通过，保存临时变量到实际变量中
       this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量
-      this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量
-      this.editPocCodeDialogVisible = false;         // 关闭对话框
+      this.newcode = this.tempnewcode;        // 将临时代码赋值给实际代码变量
+      this.editPocCodeDialogVisible = false;  // 关闭对话框
     },
+    //以下只验证了一种初始化方法
+    // saveCode2() {
+    //   // 检查文件名是否以 .py 结尾
+    //   if (!this.tempFilename.endsWith('.py')) {
+    //     this.$message.error('文件名错误，必须以 .py 结尾');
+    //     return;  // 停止保存流程
+    //   }
+    //
+    //   // 正则表达式数组（多行模式，处理空格和换行）
+    //   const requiredFields = [
+    //     { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义
+    //     { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
+    //     { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
+    //     { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']
+    //     { regex: /\[!\]/m, label: '[!]' },  // [!]
+    //     { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]
+    //   ];
+    //
+    //   // 检查每个正则表达式是否匹配代码
+    //   let allFieldsPresent = true;
+    //   requiredFields.forEach(field => {
+    //     const isMatch = field.regex.test(this.tempnewcode);
+    //     console.log(`Checking field: ${field.label}, Match: ${isMatch}`);  // 调试输出
+    //     if (!isMatch) {
+    //       this.$message.error(`代码中缺少必要的字段：${field.label}`);
+    //       allFieldsPresent = false;  // 如果任意字段未匹配，标记为 false
+    //     }
+    //   });
+    //
+    //   if (!allFieldsPresent) {
+    //     return;  // 停止保存流程
+    //   }
+    //
+    //   // 如果检查都通过，保存临时变量到实际变量中
+    //   this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量
+    //   this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量
+    //   this.editPocCodeDialogVisible = false;         // 关闭对话框
+    // },
 
     // 清空代码并关闭窗口
     clearCode() {
