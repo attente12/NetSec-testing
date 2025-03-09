@@ -67,12 +67,51 @@
                 </el-tag>
               </template>
             </el-table-column>
+<!--            &lt;!&ndash; 新增三列: 账号、弱密码和验证时间 &ndash;&gt;-->
+<!--            <el-table-column prop="weak_username" label="账号" width="120"></el-table-column>-->
+<!--            <el-table-column prop="weak_password" label="弱密码" width="120"></el-table-column>-->
+<!--            <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
           </el-table>
         </div>
       </div>
 
+      <!-- 新增弱口令项模块 -->
+      <div class="weak-password-section">
+        <h2>访问安全风险</h2>
+        <el-table
+            :data="weakPasswordPorts"
+            border
+            stripe
+            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+<!--          <el-table-column prop="product" label="产品" width="150"></el-table-column>-->
+          <el-table-column prop="product" label="产品" width="150">
+            <template slot-scope="scope">
+              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="port" label="端口" width="80"></el-table-column>
+          <el-table-column prop="protocol" label="协议" width="80"></el-table-column>
+          <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>
+
+          <el-table-column prop="software_type" label="软件类型" width="120"></el-table-column>
+          <el-table-column prop="weak_username" label="账号" width="120">
+            <template slot-scope="scope">
+              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_username }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="weak_password" label="弱密码" width="120">
+            <template slot-scope="scope">
+              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_password }}</span>
+            </template>
+          </el-table-column>
+<!--          <el-table-column prop="weak_username" label="账号" width="120"></el-table-column>-->
+<!--          <el-table-column prop="weak_password" label="弱密码" width="120"></el-table-column>-->
+          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>
+        </el-table>
+      </div>
+
       <h2 class="flex justify-between items-center">
-        <span style="font-size: 18px;">所含漏洞信息</span>
+        <span style="font-size: 18px;">资产漏洞信息</span>
         <div class="chart-toggle">
           <el-radio-group v-model="displayType" size="small">
             <el-radio-button label="assetType">按资产类型分布</el-radio-button>
@@ -360,6 +399,14 @@ export default {
         return groups;
       }, {});
     },
+    weakPasswordPorts() {
+      if (!this.currentAsset || !this.currentAsset.ports) {
+        return [];
+      }
+      return this.currentAsset.ports.filter(port =>
+          port.weak_username && port.weak_password && port.verify_time
+      );
+    }
   },
   methods: {
     getResults() {
@@ -740,6 +787,19 @@ export default {
 }
 
 .ports-section h2 {
+  color: #303133;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.weak-password-section {
+  margin-bottom: 30px;
+}
+
+.weak-password-section h2 {
   color: #303133;
   font-size: 18px;
   font-weight: 600;
