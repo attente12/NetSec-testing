@@ -18,7 +18,7 @@ import toVerify from "@/views/toVerify.vue";
 import pluginScan from "@/views/pluginScan.vue";
 import assetManage from "@/views/assetManage.vue";
 import hostDiscovery from "@/views/hostDiscovery.vue";
-
+import test from "@/views/test.vue";
 
 export default new Router({
     routes: [
@@ -108,6 +108,12 @@ export default new Router({
             name: 'assetManage',
             component: assetManage,
             meta:{title:'资产管理'}
+        },
+        {
+            path: '/test',
+            name: 'test',
+            component: test,
+            meta:{title:'测试'}
         },
 
     ]

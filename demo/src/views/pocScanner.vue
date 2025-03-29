@@ -69,18 +69,18 @@
               :label="'主机: ' + result.ip">
 
             <div class="result-section">
-              <div class="section-title">
-                <i class="el-icon-cpu"></i> 硬件与系统信息
-              </div>
+<!--              <div class="section-title">-->
+<!--                <i class="el-icon-cpu"></i> 硬件与系统信息-->
+<!--              </div>-->
 
-              <el-row :gutter="20">
-                <el-col :span="24">
-                  <div class="ip-info">
-                    <span class="label">扫描IP：</span>
-                    <el-tag size="medium">{{ result.ip }}</el-tag>
-                  </div>
-                </el-col>
-              </el-row>
+<!--              <el-row :gutter="20">-->
+<!--                <el-col :span="24">-->
+<!--                  <div class="ip-info">-->
+<!--                    <span class="label">扫描IP：</span>-->
+<!--                    <el-tag size="medium">{{ result.ip }}</el-tag>-->
+<!--                  </div>-->
+<!--                </el-col>-->
+<!--              </el-row>-->
 
               <div class="section-subtitle">
                 <i class="el-icon-notebook-2"></i> CPE列表 (组件与产品)
