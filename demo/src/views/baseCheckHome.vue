@@ -30,14 +30,18 @@
                 </el-form-item>
                 <p class="versionSelector" v-show="flag">
                     <span>请选择Windows版本：</span>
-                    <el-select v-model="checkedVersions" placeholder="请选择">
-                        <el-option v-for="item in winVersions" :key="item.value" :label="item.label" :value="item.value">
+                    <el-select v-model="value" placeholder="请选择">
+                        <el-option v-for="item in winVersions" :key="item.value" :label="item.label"
+                            :value="item.value">
                         </el-option>
                     </el-select>
+                    <el-button type="primary" class="versionSelectBT" @click="versionDetect">自动检测版本</el-button>
                 </p>
 
                 <el-form-item>
-                    <el-button type="primary" @click="submitForm">开始检测</el-button>
+                    <el-button v-show="!flag" type="primary" @click="submitForm">开始检测</el-button>
+                    <el-button v-show="flag" type="primary" :disabled="versionFlag ? null : true"
+                        @click="submitForm">检测全部</el-button>
                     <el-button type="primary" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
                 </el-form-item>
             </el-form>
@@ -54,7 +58,7 @@
 
             <el-checkbox-group v-model="selectedItems">
                 <el-row :gutter="20">
-                    <el-col v-show="flag" :span="8" v-for="item in checkItemsW" :key="item.id">
+                    <el-col v-show="versionFlag" :span="8" v-for="item in checkItemsW" :key="item.id">
                         <el-checkbox :label="item.id">
                             <el-tooltip :content="item.name" placement="top">
                                 <span class="checkbox-label">{{ item.name }}</span>
@@ -91,6 +95,7 @@ export default {
     data() {
         return {
             flag: false,
+            versionFlag: false,
             ip: '',
             adminName: '',
             pd: '',
@@ -190,61 +195,143 @@ export default {
                 { id: 89, name: '检查内核版本是否处于CVE-2021-43267漏洞影响版本' }
             ],
             checkItemsW: [
-                { id: 1, name: '检测强制密码历史值为5或更高' },
-                { id: 2, name: '检测密码最长使用期限值为90天或更少，但不为0' },
-                { id: 3, name: '检测密码最短使用期限值为1或更多' },
-                { id: 4, name: '检测密码必须符合复杂性要求值为enabled' },
-                { id: 5, name: '检测用可还原的加密来存储密码值为Disabled' },
-                { id: 6, name: '检测密码长度最小值值为8或更高' },
-                { id: 7, name: '检测账户锁定时间值为15分钟或更长' },
-                { id: 8, name: '检测账户锁定阈值值为5或更少，但不为0' },
-                { id: 9, name: '检测重置账户锁定计数器值为15分钟或更多，但值要小于Account lockout duration的值' },
-                { id: 10, name: '检测审核策略更改：成功' },
-                { id: 11, name: '检测审核登录事件：成功，失败' },
-                { id: 12, name: '检测审核对象访问：成功' },
-                { id: 13, name: '检测审核进程跟踪：成功，失败' },
-                { id: 14, name: '检测审核目录服务访问：成功，失败' },
-                { id: 15, name: '检测审核系统事件：成功，失败' },
-                { id: 16, name: '检测审核帐户登录事件：成功，失败' },
-                { id: 17, name: '检测审核帐户管理：成功，失败' },
-                { id: 18, name: '检测作为受信任的呼叫方访问凭据管理器值为空，没有设置任何用户' },
-                { id: 19, name: '检测以操作系统方式执行值为空，没有设置任何用户。' },
-                { id: 20, name: '检测将工作站添加到域值仅为特定的用户或用户组,不能有513，514，515' },
-                { id: 21, name: '检测创建全局对象值为空' },
-                { id: 22, name: '检测拒绝作为批处理作业登录包含Guests' },
-                { id: 23, name: '检测拒绝以服务身份登录包含Guests' },
-                { id: 24, name: '拒绝本地登录包含Guests' },
-                { id: 25, name: '检测从远程系统强制关机值为administrators本地组和s-1-5-32-549(域控的一个内置组' },
-                { id: 26, name: '检测修改对象标签值为空' },
-                { id: 27, name: '检测同步目录服务数据值为空' }
-                //{ id: 28, name: '' }
+                { id: 1, name: '检查密码长度最小值' },
+                { id: 2, name: '检查是否已启用密码复杂性要求' },
+                { id: 3, name: '检查是否已禁用来宾 (Guest) 帐户' },
+                { id: 4, name: '检查“强制密码历史”个数' },
+                { id: 5, name: '检查已启用的本地用户的个数' },
+                { id: 6, name: '检查密码最长使用期限' },
+                { id: 7, name: '检查密码最长使用期限是否不为0' },
+                { id: 8, name: '检查帐户锁定阈值' },
+                { id: 9, name: '检查帐户锁定阈值是否不为0' },
+                { id: 10, name: '检查“取得文件或其它对象的所有权”的帐户和组' },
+                { id: 11, name: '检查可从远端关闭系统的帐户和组' },
+                { id: 12, name: '检查是否已禁止 SAM 帐户的匿名枚举' },
+                { id: 13, name: '检查是否已禁止 SAM 帐户和共享的匿名枚举' },
+                { id: 14, name: '检查可远程访问的注册表路径' },
+                { id: 15, name: '检查可匿名访问的共享' },
+                { id: 16, name: '检查可匿名访问的命名管道' },
+                { id: 17, name: '检查是否只有授权用户或组通过远程桌面服务连接访问远程设备' },
+                { id: 18, name: '检查允许本地登录的用户和组' },
+                { id: 19, name: '检查应用程序日志文件达到最大大小时的动作' },
+                { id: 20, name: '检查应用程序日志文件最大大小' },
+                { id: 21, name: '检查“审核对象访问”级别' },
+                { id: 22, name: '检查“审核特权使用”级别' },
+                { id: 23, name: '检查“审核进程跟踪”级别' },
+                { id: 24, name: '检查“审核登录事件”级别' },
+                { id: 25, name: '检查“审核目录服务访问”级别' },
+                { id: 26, name: '检查“审核系统事件”级别' },
+                { id: 27, name: '检查“审核帐户登录事件”级别' },
+                { id: 28, name: '检查“审核策略更改”级别' },
+                { id: 29, name: '检查“审核帐户管理”级别' },
+                { id: 30, name: '检查 Windows 防火墙状态' },
+                { id: 31, name: '检查远程桌面 (RDP) 服务端口' },
+                { id: 32, name: '检查源路由配置' },
+                { id: 33, name: '检查 TCP 连接请求阈值' },
+                { id: 34, name: '检查是否已启用 SYN 攻击保护' },
+                { id: 35, name: '检查取消尝试响应 SYN 请求之前要重新传输 SYN-ACK 的次数' },
+                { id: 36, name: '检查处于SYN_RCVD状态下的TCP连接阈值' },
+                { id: 37, name: '检查处于SYN_RCVD状态下，且至少已经进行了一次重新传输的TCP连接阈值' },
+                { id: 38, name: '检查是否已删除SNMP服务的默认public团体' },
+                { id: 39, name: '检查是否已启用TCP最大传输单元(MTU)大小自动探测' },
+                { id: 40, name: '检查Remote Access Connection Manager服务状态' },
+                { id: 41, name: '检查Message Queuing服务状态' },
+                { id: 42, name: '检查DHCP Server服务状态' },
+                { id: 43, name: '检查DHCP Client服务状态' },
+                { id: 44, name: '检查Simple Mail Transport Protocol (SMTP)服务状态' },
+                { id: 45, name: '检查Windows Internet Name Service (WINS)服务状态' },
+                { id: 46, name: '检查Simple TCP/IP Services服务状态' },
+                { id: 47, name: '检查Windows 自动登录设置' },
+                { id: 48, name: '检查共享文件夹的共享权限' },
+                { id: 49, name: '检查所有磁盘分区的文件系统格式' },
+                { id: 50, name: '检查是否已对所有驱动器关闭 Windows 自动播放' },
+                { id: 51, name: '检查是否已禁用 Windows 硬盘默认共享' },
+                { id: 52, name: '检查服务器在暂停会话前所需的空闲时间量' },
+                { id: 53, name: '检查是否正确配置 NTP 时间同步服务器' },
+                { id: 54, name: '检查是否正确配置 DNS 服务器' },
+                { id: 55, name: '检查是否已开启数据DEP功能' },
+                { id: 56, name: '检查是否已开启 UAC 安全提示' }
             ],
-            winVersions:[
-            { value: 1, label: 'Windows11' },
-            { value: 2, label: 'Windows10' },
-            { value: 3, label: 'Windows8' },
-            { value: 4, label: 'Windows7' },
-            { value: 5, label: 'Windows xp' },
-            { value: 6, label: 'Window server 2025' },
-            { value: 6, label: 'Window server 2022' },
-            { value: 6, label: 'Window server 2019' },
-            { value: 6, label: 'Window server 2016' },
-            { value: 6, label: 'Window server 2012' },
+            winVersions: [
+                { value: 1, label: 'Windows11' },
+                { value: 2, label: 'Windows10' },
+                { value: 3, label: 'Windows8' },
+                { value: 4, label: 'Windows7' },
+                { value: 5, label: 'Windows xp' },
+                { value: 6, label: 'Window server 2025' },
+                { value: 7, label: 'Window server 2022' },
+                { value: 8, label: 'Window server 2019' },
+                { value: 9, label: 'Window server 2016' },
+                { value: 10, label: 'Window server 2012' },
             ],
-            checkedVersion: ''
+            value: ''
         };
+    },
+    watch: {
+        // 监听 myVariable 的变化
+        value(newValue, oldValue) {
+            if (newValue !== '') {
+                console.log(oldValue)
+                this.versionFlag = true
+            }
+        },
     },
     methods: {
         //切换Windows或Linux方法
         turnFlag() {
             this.flag = !this.flag
+            this.versionFlag = false
+            this.value = ''
             this.pd = ''
             this.ip = ''
             this.adminName = ''
         },
-
+        versionDetect() {
+            this.value = this.winVersions[4].label
+            this.versionFlag = true
+        },
         WindowsSubmitForm() {
-            window.alert('ok, 200')
+            const payload = {
+                hostname: this.adminName,
+                ip: this.ip,
+                pd: this.pd
+            };
+            console.log("Submitting form...", payload);
+
+            fetch('/api/win_login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 500) {
+                            // 处理特定的500内部错误
+                            alert("请求失败，SSH会话无法启动");
+                            return null; // 返回null但不结束Promise链，以防止进一步的.then执行
+                        }
+                        // 对于除500外的其他错误，抛出错误并附带状态码
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 检查data是否为null来避免执行不需要的代码
+                    if (data === null) return;
+
+                    console.log("Response received:", data);
+                    // 仅在成功响应时执行UI操作
+                    this.progressBarWidth = 0; // 初始化进度为0
+                    this.showModal = true;
+                    this.runProgress();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    // 显示除500外的其他HTTP错误的错误码
+                    alert(`发生错误：${error.message}`);
+                });
         },
         LinuxSubmitForm() {
             const payload = {
@@ -429,7 +516,15 @@ export default {
     margin-bottom: 20px;
 }
 
-.versionSelector{
+.versionSelector {
     font-size: 14px;
+}
+
+.versionSelector>.el-select {
+    width: 40%;
+}
+
+.versionSelectBT {
+    margin-left: 1em;
 }
 </style>
