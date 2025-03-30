@@ -84,14 +84,14 @@
       <div class="result-section" v-loading="allHostsLoading">
         <div class="result-header" v-if="allHostsList.length">
           <span>当前共有 {{ allHostsList.length }} 个存活主机</span>
-          <div>
-            <el-button type="text" icon="el-icon-download" @click="exportAllHostsResults">
-              导出CSV
-            </el-button>
-            <el-button type="text" icon="el-icon-document" @click="exportAllHostsPDF">
-              导出PDF
-            </el-button>
-          </div>
+<!--          <div>-->
+<!--            <el-button type="text" icon="el-icon-download" @click="exportAllHostsResults">-->
+<!--              导出CSV-->
+<!--            </el-button>-->
+<!--            <el-button type="text" icon="el-icon-document" @click="exportAllHostsPDF">-->
+<!--              导出PDF-->
+<!--            </el-button>-->
+<!--          </div>-->
         </div>
 
         <el-table

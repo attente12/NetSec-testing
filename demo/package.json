@@ -19,6 +19,8 @@
     "jspdf-autotable": "^3.8.4",
     "jspdf-font": "^1.0.7",
     "lodash": "^4.17.21",
+    "markdown-it": "^14.1.0",
+    "marked": "^15.0.7",
     "vue": "^2.6.11",
     "vue-codemirror": "^4.0.6",
     "xlsx": "^0.18.5"

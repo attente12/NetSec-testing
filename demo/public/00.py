@@ -19,12 +19,6 @@ class DemoPOC:
     Vul_Date = ""             # 漏洞公开日期
 
 
-    def __init__(self, url, ip, port):
-        self.url = url
-        self.ip = ip
-        self.port = port
-        self.file_path = '/etc/passwd'  # 修改这个路径以读取其他文件
-
 
 
     def check_and_install_dependencies(self):

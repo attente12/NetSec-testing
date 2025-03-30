@@ -108,14 +108,14 @@
           <div class="compliance-details">
             <div class="detail-row">
               <div class="detail-label">
-                <el-tag type="info">严重</el-tag>
+                <el-tag type="info">高危</el-tag>
               </div>
               <div class="detail-progress">
                 <el-progress
                     :percentage="(currentAsset.baseline_summary.critical_compliant / currentAsset.baseline_summary.critical_items) * 100"
                     :format="format"
                     :stroke-width="15"
-                    :color="'#91dc69'">
+                    :color="'#e5445d'">
                 </el-progress>
               </div>
               <div class="detail-numbers" style="color: #303133;">
@@ -124,14 +124,14 @@
             </div>
             <div class="detail-row">
               <div class="detail-label">
-                <el-tag type="info">高危</el-tag>
+                <el-tag type="info">中危</el-tag>
               </div>
               <div class="detail-progress">
                 <el-progress
                     :percentage="(currentAsset.baseline_summary.high_compliant / currentAsset.baseline_summary.high_items) * 100"
                     :format="format"
                     :stroke-width="15"
-                    :color="'#91dc69'">
+                    :color="'#ea8e04'">
                 </el-progress>
               </div>
               <div class="detail-numbers" style="color: #303133;">
@@ -140,14 +140,14 @@
             </div>
             <div class="detail-row">
               <div class="detail-label">
-                <el-tag type="info">中危</el-tag>
+                <el-tag type="info">低危</el-tag>
               </div>
               <div class="detail-progress">
                 <el-progress
                     :percentage="(currentAsset.baseline_summary.medium_compliant / currentAsset.baseline_summary.medium_items) * 100"
                     :format="format"
                     :stroke-width="15"
-                    :color="'#91dc69'">
+                    :color="'#fcdb55'">
                 </el-progress>
               </div>
               <div class="detail-numbers" style="color: #303133;">
@@ -171,8 +171,18 @@
             <el-table-column prop="port" label="端口" width="80"></el-table-column>
             <el-table-column prop="protocol" label="协议" width="80"></el-table-column>
             <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>
-            <el-table-column prop="product" label="产品" width="150"></el-table-column>
-            <el-table-column prop="version" label="版本" width="150"></el-table-column>
+            <el-table-column prop="product" label="产品" width="150">
+              <template slot-scope="scope">
+                {{ scope.row.product || '未识别' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="version" label="版本" width="150">
+              <template slot-scope="scope">
+                {{ scope.row.version || '未识别' }}
+              </template>
+            </el-table-column>
+<!--            <el-table-column prop="product" label="产品" width="150"></el-table-column>-->
+<!--            <el-table-column prop="version" label="版本" width="150"></el-table-column>-->
             <el-table-column prop="status" label="状态" width="100">
               <template slot-scope="scope">
                 <el-tag :type="scope.row.status === 'open' ? 'success' : 'danger'">

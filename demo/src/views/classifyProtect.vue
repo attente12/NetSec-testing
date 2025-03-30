@@ -72,14 +72,14 @@
               size="medium">
             计算评分
           </el-button>
-          <el-button
-              @click="onExportToPDF"
-              :loading="pdfLoading"
-              type="success"
-              icon="el-icon-document"
-              size="medium">
-            导出PDF报告
-          </el-button>
+<!--          <el-button-->
+<!--              @click="onExportToPDF"-->
+<!--              :loading="pdfLoading"-->
+<!--              type="success"-->
+<!--              icon="el-icon-document"-->
+<!--              size="medium">-->
+<!--            导出PDF报告-->
+<!--          </el-button>-->
 
           <!-- 显示结果 -->
           <div class="result-display">
@@ -287,6 +287,8 @@
 <script>
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+// import {Message} from "element-ui";
+import axios from "axios";
 
 export default {
   name: "baseCheck",
@@ -294,7 +296,7 @@ export default {
     return {
       checkresults: [],
       serverInfo: {},
-      serverIPs: ['192.168.1.1', '192.168.1.2', '192.168.1.3', '10.0.0.1', '10.0.0.2'], // 示例IP列表
+      serverIPs: [], // 示例IP列表
       selectedIP: '',
       protectionLevel: '2', // 默认二级等保
       selectedStatus: 'all',
@@ -333,6 +335,41 @@ export default {
     }
   },
   methods: {
+    // fetchAliveHosts() {
+    //   fetch('/api/getAliveHosts')
+    //       .then(response => {
+    //         if (!response.ok) {
+    //           throw new Error(`HTTP status ${response.status}`);
+    //         }
+    //         return response.json();
+    //       })
+    //       .then(data => {
+    //         this.serverIPs = data.alive_hosts;
+    //         if (this.serverIPs && this.serverIPs.length > 0) {
+    //           this.selectedIP = this.serverIPs[0];
+    //           this.fetchAndDisplayChenckResults();
+    //         }
+    //         // this.selectedIP=data.alive_hosts[0];
+    //       })
+    //       .catch(error => {
+    //         Message.error('获取活跃IP列表失败：' + error.message);
+    //       });
+    // },
+    fetchAliveHosts() {
+      axios.get('/api/getAliveHosts')
+          .then(response => {
+            this.serverIPs = response.data.alive_hosts;
+            // 如果有IP，默认选择第一个
+            if (this.serverIPs && this.serverIPs.length > 0) {
+              this.selectedIP = this.serverIPs[0];
+              this.fetchAndDisplayCheckResults();
+            }
+          })
+          .catch(error => {
+            console.error('获取活跃IP列表失败:', error);
+            this.$message.error('获取活跃IP列表失败');
+          });
+    },
     // 切换服务器信息显示
     toggleServerInfo() {
       this.showServerInfo = !this.showServerInfo;
@@ -381,17 +418,17 @@ export default {
       if (this.selectedIP) {
         params.append('ip', this.selectedIP);
       }
-      params.append('level', this.protectionLevel);
+      //params.append('level', this.protectionLevel);
 
       // 发送请求
       fetch(`/api/userinfo?${params.toString()}`)
           .then(response => response.json())
           .then(data => {
-            this.checkresults = data.Event_result.map(item => ({
+            this.checkresults = data.checkResults.map(item => ({
               ...item,
               score: item.IsComply === 'true' ? '1' : '0.5'
             }));
-            this.serverInfo = data.ServerInfo;
+            this.serverInfo = data.serverInfo;
             this.loading = false;
           })
           .catch(error => {
@@ -541,7 +578,8 @@ export default {
     }
   },
   mounted() {
-    this.fetchAndDisplayCheckResults();
+    // this.fetchAndDisplayCheckResults();
+    this.fetchAliveHosts();
   }
 }
 </script>

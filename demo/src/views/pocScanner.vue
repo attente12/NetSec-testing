@@ -167,14 +167,14 @@
     <el-card class="ports-card" shadow="hover">
       <div slot="header" class="card-header">
         <span><i class="el-icon-connection"></i> 端口扫描结果</span>
-        <el-button
-            @click="exportScanResults"
-            size="small"
-            icon="el-icon-download"
-            type="text"
-            v-if="scanResults.length > 0">
-          导出结果
-        </el-button>
+<!--        <el-button-->
+<!--            @click="exportScanResults"-->
+<!--            size="small"-->
+<!--            icon="el-icon-download"-->
+<!--            type="text"-->
+<!--            v-if="scanResults.length > 0">-->
+<!--          导出结果-->
+<!--        </el-button>-->
       </div>
 
       <div class="ports-content">
@@ -251,8 +251,19 @@
                 </el-table-column>
 
                 <el-table-column prop="service_name" label="服务" width="100"></el-table-column>
-                <el-table-column prop="product" label="应用" width="120"></el-table-column>
-                <el-table-column prop="version" label="版本" width="120"></el-table-column>
+<!--                <el-table-column prop="product" label="应用" width="120"></el-table-column>-->
+<!--                <el-table-column prop="version" label="版本" width="120"></el-table-column>-->
+
+                <el-table-column prop="product" label="应用" width="120">
+                  <template slot-scope="scope">
+                    {{ scope.row.product || '未识别' }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="version" label="版本" width="120">
+                  <template slot-scope="scope">
+                    {{ scope.row.version || '未识别' }}
+                  </template>
+                </el-table-column>
 
                 <el-table-column label="潜在漏洞">
                   <template #default="port">
