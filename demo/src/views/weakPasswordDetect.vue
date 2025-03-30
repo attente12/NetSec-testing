@@ -501,12 +501,13 @@ export default {
           this.$message.warning('检测完成，但未发现弱口令');
         }
       } catch (error) {
-        if (error.response?.data?.error === "Service not found") {
-          this.$message.error(`${error.response.data.service_name}: Service not found`);
-        } else {
-          this.$message.error('检测失败，请检查网络或服务器');
-        }
-        console.error('Service detect error:', error);
+        this.$message.error(error.response.data.error);
+        // if (error.response?.data?.error === "Service not found") {
+        //   this.$message.error(`${error.response.data.service_name}: Service not found`);
+        // } else {
+        //   this.$message.error('检测失败，请检查网络或服务器');
+        // }
+        // console.error('Service detect error:', error);
       } finally {
         this.isDetecting = false;
         this.debouncedServiceDetectLoading = false;

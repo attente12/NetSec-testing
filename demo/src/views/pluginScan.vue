@@ -67,10 +67,10 @@
               <el-button size="small" @click="autoSelect">自动选择poc</el-button>
             </div>
             <div style="margin-top: 10px;">
-              <el-checkbox v-model="match_infra">受影响的基础设施匹配</el-checkbox>
+              <el-checkbox v-model="match_infra" disabled>受影响的基础设施匹配</el-checkbox>
             </div>
             <div style="margin-top: 10px;">
-              <el-checkbox v-model="portValidityCheck">端口有效性检查</el-checkbox>
+              <el-checkbox v-model="portValidityCheck" disabled>端口有效性检查</el-checkbox>
             </div>
             <div class="scan-button">
               <!--              <el-button size="small" @click="runPoc">执行poc</el-button>-->

@@ -193,6 +193,7 @@
                 <span>已扫描主机: {{ scanResults.length }} 台</span>
                 <span>发现开放端口: {{ getTotalOpenPorts() }} 个</span>
                 <span>潜在漏洞: {{ getTotalCves() }} 个</span>
+                <span>是否全端口扫描: {{ resultAllPorts }} </span>
               </div>
             </template>
           </el-alert>
@@ -353,7 +354,8 @@ export default {
       aliveHosts: [],
       detectAllState: false,
       detectState: false,
-      tableLoading: false
+      tableLoading: false,
+      resultAllPorts:'',
     };
   },
   methods: {
@@ -443,6 +445,7 @@ export default {
       axios.get('/api/cveScan')
           .then(response => {
             this.scanResults = response.data;
+            this.resultAllPorts=response.data[0].allPorts;
             this.tableLoading = false;
           })
           .catch(error => {
