@@ -25,6 +25,8 @@ Vue.use(VueCodemirror); // 注册插件
 
 Vue.config.productionTip = false
 
+export const EventBus = new Vue()
+
 new Vue({
   router,
   render: h => h(App),

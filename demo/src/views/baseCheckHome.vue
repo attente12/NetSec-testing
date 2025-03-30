@@ -35,7 +35,7 @@
                             :value="item.value">
                         </el-option>
                     </el-select>
-                    <el-button type="primary" class="versionSelectBT" @click="versionDetect">自动检测版本</el-button>
+                    <el-button type="primary" class="versionSelectBT" @click="submitForm">自动检测版本</el-button>
                 </p>
 
                 <el-form-item>
@@ -89,6 +89,7 @@
 
 <script>
 import { Message } from "element-ui"
+import { EventBus } from "../main";
 
 export default {
     name: "home",
@@ -253,10 +254,10 @@ export default {
                 { id: 56, name: '检查是否已开启 UAC 安全提示' }
             ],
             winVersions: [
-                { value: 1, label: 'Windows11' },
-                { value: 2, label: 'Windows10' },
-                { value: 3, label: 'Windows8' },
-                { value: 4, label: 'Windows7' },
+                { value: 1, label: 'Windows 11' },
+                { value: 2, label: 'Windows 10' },
+                { value: 3, label: 'Windows 8' },
+                { value: 4, label: 'Windows 7' },
                 { value: 5, label: 'Windows xp' },
                 { value: 6, label: 'Window server 2025' },
                 { value: 7, label: 'Window server 2022' },
@@ -264,7 +265,8 @@ export default {
                 { value: 9, label: 'Window server 2016' },
                 { value: 10, label: 'Window server 2012' },
             ],
-            value: ''
+            value: '',
+            valueTemp: ''
         };
     },
     watch: {
@@ -286,10 +288,11 @@ export default {
             this.ip = ''
             this.adminName = ''
         },
-        versionDetect() {
-            this.value = this.winVersions[4].label
-            this.versionFlag = true
+
+        sendData(data){
+            EventBus.$emit('userData',data)
         },
+
         WindowsSubmitForm() {
             const payload = {
                 hostname: this.adminName,
@@ -322,9 +325,12 @@ export default {
                     if (data === null) return;
 
                     console.log("Response received:", data);
+                    if (!this.value) this.value = data.ServerInfo.version
                     // 仅在成功响应时执行UI操作
+                    this.sendData(data)
+                    this.versionFlag = true
                     this.progressBarWidth = 0; // 初始化进度为0
-                    this.showModal = true;
+                    // this.showModal = true;
                     this.runProgress();
                 })
                 .catch((error) => {
@@ -333,6 +339,8 @@ export default {
                     alert(`发生错误：${error.message}`);
                 });
         },
+
+
         LinuxSubmitForm() {
             const payload = {
                 ip: this.ip,
@@ -357,6 +365,7 @@ export default {
                         // 对于除500外的其他错误，抛出错误并附带状态码
                         throw new Error(`HTTP status ${response.status}`);
                     }
+                    console.log(response.json)
                     return response.json();
                 })
                 .then(data => {

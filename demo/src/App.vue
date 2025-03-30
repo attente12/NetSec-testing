@@ -1,5 +1,3 @@
-
-
 <template>
   <div class="app">
     <!-- 整个页面容器 -->
@@ -30,37 +28,42 @@
 </template>
 
 <script>
-  import HeaderComp from "@/components/header"  // 确保这里的路径和组件名称与你的项目结构匹配
-  import asideNav from "@/components/asideNav"
+import HeaderComp from "@/components/header"  // 确保这里的路径和组件名称与你的项目结构匹配
+import asideNav from "@/components/asideNav"
 
-  export default {
-    name: "App",
-    components: {
-      HeaderComp,  // 将 myHeader 替换为 HeaderComp
-      asideNav,
-    }
+export default {
+  name: "App",
+  components: {
+    HeaderComp,  // 将 myHeader 替换为 HeaderComp
+    asideNav,
   }
+}
 </script>
 
 <style>
-  html,
-  body{
-    height: 100%;
-    margin: 0;
-    border: 0;
-    padding: 0;
-  }
-  .el-aside {
-    background-color: #333; /* 举例的颜色，您可以根据需要调整 */
-  }
+html,
+body {
+  height: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
 
-  .el-header {
-    background-color: #fff; /* 举例的颜色，您可以根据需要调整 */
-    box-shadow: 0 2px 4px rgba(0,0,0,.1); /* 添加阴影效果 */
-  }
+.el-aside {
+  background-color: #333;
+  /* 举例的颜色，您可以根据需要调整 */
+}
 
-  /* 确保主内容区域的顶部不被覆盖 */
-  .el-main {
-    padding-top: 60px; /* 头部高度 */
-  }
+.el-header {
+  background-color: #fff;
+  /* 举例的颜色，您可以根据需要调整 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+  /* 添加阴影效果 */
+}
+
+/* 确保主内容区域的顶部不被覆盖 */
+.el-main {
+  padding-top: 60px;
+  /* 头部高度 */
+}
 </style>
