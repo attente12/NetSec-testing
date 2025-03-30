@@ -25,6 +25,7 @@
       </el-popconfirm>
     </div>
 
+    <!-- 新增POC对话框 -->
     <el-dialog :visible.sync="addDialogVisible" title="新增POC" width="500px" :close-on-click-modal="false">
       <el-form :model="newPoc" ref="newPocForm">
         <el-form-item label="CVE编号">
@@ -33,8 +34,16 @@
         <el-form-item label="漏洞名称">
           <el-input v-model="newPoc.vul_name"></el-input>
         </el-form-item>
+        <!-- 修改为下拉选择框 -->
         <el-form-item label="漏洞类型">
-          <el-input v-model="newPoc.type"></el-input>
+          <el-select v-model="newPoc.type" placeholder="请选择漏洞类型" style="width: 100%;">
+            <el-option
+                v-for="type in vulTypes"
+                :key="type"
+                :label="type"
+                :value="type">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="漏洞描述">
           <el-input type="textarea" v-model="newPoc.description"></el-input>
@@ -55,16 +64,6 @@
             <i class="el-icon-warning"></i> 请从列表中选择一个有效选项
           </div>
         </el-form-item>
-<!--        <el-form-item label="受影响的基础设施（操作系统或软件或协议）">-->
-<!--          <el-autocomplete-->
-<!--              v-model="newPoc.affected_infra"-->
-<!--              :fetch-suggestions="querySearch"-->
-<!--              placeholder="请输入内容"-->
-<!--              @select="handleSelect"-->
-<!--              style="width: 300px;"-->
-<!--          />-->
-<!--          &lt;!&ndash;          <el-input v-model="newPoc.affected_infra"></el-input>&ndash;&gt;-->
-<!--        </el-form-item>-->
         <el-form-item label="POC类型">
           <el-select v-model="newPoc.script_type" placeholder="请选择">
             <el-option label="python" value="python"></el-option>
@@ -148,12 +147,9 @@
           <el-form-item style="margin-bottom: 0px;">
             <CodeEditor v-model="tempnewcode" />
           </el-form-item>
-          <!--          <el-form-item label="代码" style="margin-bottom: 0px; font-weight: bold;">-->
-          <!--            <el-input type="textarea" v-model="tempnewcode" rows="15"></el-input> &lt;!&ndash; 临时变量 &ndash;&gt;-->
-          <!--          </el-form-item>-->
         </el-form>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="clearCode">清空</el-button> <!-- 添加“清空”按钮 -->
+          <el-button @click="clearCode">清空</el-button> <!-- 添加"清空"按钮 -->
           <el-button @click="codeDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="saveCode">保存</el-button>
         </span>
@@ -164,7 +160,7 @@
       <pre style="height: 500px; overflow-y: scroll;"><code class="language-python">{{ selectedPocCode }}</code></pre>
     </el-dialog>
 
-    <!--    编辑poc代码   -->
+    <!-- 编辑POC对话框 -->
     <el-dialog :visible.sync="editDialogVisible" title="编辑POC" width="500px" :close-on-click-modal="false">
       <el-form :model="editPoc" ref="editPocForm">
         <el-form-item label="CVE编号">
@@ -173,8 +169,16 @@
         <el-form-item label="漏洞名称">
           <el-input v-model="editPoc.vul_name"></el-input>
         </el-form-item>
+        <!-- 修改为下拉选择框 -->
         <el-form-item label="漏洞类型">
-          <el-input v-model="editPoc.type"></el-input>
+          <el-select v-model="editPoc.type" placeholder="请选择漏洞类型" style="width: 100%;">
+            <el-option
+                v-for="type in vulTypes"
+                :key="type"
+                :label="type"
+                :value="type">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="漏洞描述">
           <el-input type="textarea" v-model="editPoc.description"></el-input>
@@ -195,16 +199,6 @@
             <i class="el-icon-warning"></i> 请从列表中选择一个有效选项
           </div>
         </el-form-item>
-<!--        <el-form-item label="受影响的基础设施（操作系统或软件或协议）">-->
-<!--          <el-autocomplete-->
-<!--              v-model="editPoc.affected_infra"-->
-<!--              :fetch-suggestions="querySearch"-->
-<!--              placeholder="请输入内容"-->
-<!--              @select="handleSelect"-->
-<!--              style="width: 300px;"-->
-<!--          />-->
-<!--          &lt;!&ndash;          <el-input v-model="editPoc.affected_infra"></el-input>&ndash;&gt;-->
-<!--        </el-form-item>-->
         <el-form-item label="POC类型">
           <el-select v-model="editPoc.script_type" placeholder="请选择">
             <el-option label="python" value="python"></el-option>
@@ -223,19 +217,17 @@
               :limit="1"
               accept=".py">
             <el-button>选择文件</el-button>
-            <!--            <span slot="tip" class="el-upload__tip">只能上传.py文件</span>-->
           </el-upload>
           <el-button @click="editPocCode" style="margin-top: 10px;margin-left: 69px">编辑poc代码</el-button>
           <i v-if="newcode" class="el-icon-circle-check" style="color: green;"></i>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-<!--        <el-button @click="editDialogVisible = false">取消</el-button>-->
         <el-button @click="cancelEdit">取消</el-button>
         <el-button type="primary" @click="submitEditPoc">确定</el-button>
       </span>
 
-      <!--      编辑poc-编辑poc代码       -->
+      <!-- 编辑poc-编辑poc代码 -->
       <el-dialog
           :visible.sync="editPocCodeDialogVisible"
           :append-to-body="true"
@@ -249,7 +241,6 @@
           </div>
         </template>
         <el-form>
-
           <el-form-item label="文件名" style="margin-bottom: 0px; font-weight: bold;">
             <el-input type="textarea" v-model="tempFilename" rows="1"></el-input> <!-- 临时变量 -->
           </el-form-item>
@@ -257,20 +248,14 @@
           <el-form-item style="margin-bottom: 0px;">
             <CodeEditor v-model="tempnewcode" />
           </el-form-item>
-          <!--          <el-form-item label="代码" style="margin-bottom: 0px; font-weight: bold;">-->
-          <!--            <CodeEditor v-model="tempnewcode"/>-->
-          <!--&lt;!&ndash;            <el-input type="textarea" v-model="tempnewcode" rows="15"></el-input> &lt;!&ndash; 临时变量 &ndash;&gt;&ndash;&gt;-->
-          <!--          </el-form-item>-->
         </el-form>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="clearCode">清空</el-button> <!-- 添加“清空”按钮 -->
+          <el-button @click="clearCode">清空</el-button> <!-- 添加"清空"按钮 -->
           <el-button @click="editPocCodeDialogVisible = false">取消</el-button>
           <el-button type="primary" @click="saveCode2">保存</el-button>
         </span>
       </el-dialog>
     </el-dialog>
-
-
 
     <el-table :data="paginatedData" style="width: 100%" ref="table">
       <el-table-column type="selection" width="55"></el-table-column>
@@ -340,6 +325,25 @@ export default {
     return{
       addDialogVisible: false,
       codeDialogVisible: false,
+      // 添加漏洞类型列表
+      vulTypes: [
+        "缓冲区溢出",
+        "文件上传漏洞",
+        "代码注入",
+        "SQL 注入",
+        "跨站脚本攻击 (XSS)",
+        "权限提升",
+        "拒绝服务攻击 (DoS)",
+        "身份验证绕过",
+        "路径遍历",
+        "信息泄露",
+        "跨站请求伪造 (CSRF)",
+        "XML 外部实体注入 (XXE)",
+        "远程代码执行 (RCE)",
+        "会话劫持",
+        "未经授权的访问",
+        "其他类型"
+      ],
       newPoc: {
         type: '',
         cve_id: '',
@@ -392,16 +396,9 @@ export default {
       vulnerabilityType: 0, // 漏洞类型
       authRequired: 1, // 身份验证，默认是Yes
       canGetCommandResult: 1, // 命令执行结果，默认是Yes
+      submitAttempted: false, // 提交尝试标记
+      editSubmitAttempted: false, // 编辑提交尝试标记
       suggestions: [], // 将文件内容读取后填充到此数组，格式为 { value: "文本" }
-      // codeMirrorOptions: {
-      //   mode: 'python',      // 设置为 Python 模式
-      //   theme: 'material',   // 设置编辑器的主题
-      //   lineNumbers: true,   // 显示行号
-      //   tabSize: 4,          // 缩进为 4 个空格
-      //   indentUnit: 4,       // 缩进单位
-      //   indentWithTabs: true,
-      //   lineWrapping: true,  // 自动换行
-      // },
     };
   },
   watch: {
@@ -418,8 +415,6 @@ export default {
     editPocCodeDialogVisible(newVal) {
       if (newVal) { // 当对话框变为可见时
         // 当对话框打开时，将实际变量的值赋给临时变量
-        // this.tempFilename = this.tempCode;
-        // this.tempnewcode = this.selectedPocCode;
         // 修改：优先使用newcode，如果newcode为空则使用selectedPocCode
         this.tempFilename = this.editFilename || this.tempCode; // 优先使用已保存的文件名
         this.tempnewcode = this.newcode || this.selectedPocCode; // 优先使用已保存的代码
@@ -428,18 +423,15 @@ export default {
         });
       }
     },
-    watch: {
-      dialogVisible(newVal) {
-        if (!newVal) {
-          this.selectedPocCode = ''; // 当对话框关闭时清空代码
-        } else {
-          this.$nextTick(() => {
-            Prism.highlightAll();  // 应用 Prism 高亮
-          });
-        }
+    dialogVisible(newVal) {
+      if (!newVal) {
+        this.selectedPocCode = ''; // 当对话框关闭时清空代码
+      } else {
+        this.$nextTick(() => {
+          Prism.highlightAll();  // 应用 Prism 高亮
+        });
       }
     }
-
   },
   computed: {
     paginatedData() {
@@ -451,8 +443,6 @@ export default {
   methods:{
     //搜索的实现
     load() {
-      // let keyword = encodeURIComponent(this.searchKeyword.trim());
-      // let query = new URLSearchParams({ keyword }).toString();
       let query = new URLSearchParams({ keyword: this.searchKeyword.trim() }).toString();
       fetch(`/api/searchData?${query}`)
           .then(response => {
@@ -644,7 +634,6 @@ export default {
       }
 
       // 创建一个 Promise 来读取文件内容
-      // 创建一个 Promise 来读取文件内容
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -687,40 +676,6 @@ export default {
         // 读取文件内容为文本
         reader.readAsText(file);
       });
-      // return new Promise((resolve, reject) => {
-      //   const reader = new FileReader();
-      //   reader.onload = (event) => {
-      //     const content = event.target.result;
-      //
-      //     // 定义需要包含的内容的正则表达式或简单字符串
-      //
-      //     const requiredPatterns = [
-      //       /class\s+DemoPOC:/,             // 检查是否有 class DemoPOC:
-      //       /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/, // 检查是否有 def __init__(self, url, ip, port)
-      //       /def\s+_verify\s*\(self\)/,     // 检查是否有 def _verify(self)
-      //       /result\[['"]VerifyInfo['"]\]/, // 检查是否有 result['VerifyInfo'] 或 result["VerifyInfo"]
-      //       /\[!\]/,                       // 检查是否有 [!]
-      //       /\[SAFE\]/                     // 检查是否有 [SAFE]
-      //     ];
-      //
-      //     // 检查内容是否满足要求
-      //     const isValid = requiredPatterns.every((pattern) => pattern.test(content));
-      //     if (!isValid) {
-      //       this.$message.error('poc格式不规范');
-      //       reject(false);
-      //     } else {
-      //       resolve(true);
-      //     }
-      //   };
-      //
-      //   reader.onerror = () => {
-      //     this.$message.error('文件读取失败');
-      //     reject(false);
-      //   };
-      //
-      //   // 读取文件内容为文本
-      //   reader.readAsText(file);
-      // });
     },
 
     handleFileUpload(param) {
@@ -794,43 +749,6 @@ export default {
       this.newcode = this.tempnewcode;        // 将临时代码赋值给实际代码变量
       this.codeDialogVisible = false;         // 关闭对话框
     },
-    // saveCode() {
-    //   // 检查文件名是否以 .py 结尾
-    //   if (!this.tempFilename.endsWith('.py')) {
-    //     this.$message.error('文件名错误，必须以 .py 结尾');
-    //     return;  // 停止保存流程
-    //   }
-    //
-    //   // 正则表达式数组（多行模式，处理空格和换行）
-    //   const requiredFields = [
-    //     { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义
-    //     { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
-    //     { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
-    //     { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']
-    //     { regex: /\[!\]/m, label: '[!]' },  // [!]
-    //     { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]
-    //   ];
-    //
-    //   // 检查每个正则表达式是否匹配代码
-    //   let allFieldsPresent = true;
-    //   requiredFields.forEach(field => {
-    //     const isMatch = field.regex.test(this.tempnewcode);
-    //     console.log(`Checking field: ${field.label}, Match: ${isMatch}`);  // 调试输出
-    //     if (!isMatch) {
-    //       this.$message.error(`代码中缺少必要的字段：${field.label}`);
-    //       allFieldsPresent = false;  // 如果任意字段未匹配，标记为 false
-    //     }
-    //   });
-    //
-    //   if (!allFieldsPresent) {
-    //     return;  // 停止保存流程
-    //   }
-    //
-    //   // 如果检查都通过，保存临时变量到实际变量中
-    //   this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量
-    //   this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量
-    //   this.codeDialogVisible = false;         // 关闭对话框
-    // },
 
     // 编辑poc的保存代码
     saveCode2() {
@@ -885,44 +803,6 @@ export default {
       this.newcode = this.tempnewcode;        // 将临时代码赋值给实际代码变量
       this.editPocCodeDialogVisible = false;  // 关闭对话框
     },
-    //以下只验证了一种初始化方法
-    // saveCode2() {
-    //   // 检查文件名是否以 .py 结尾
-    //   if (!this.tempFilename.endsWith('.py')) {
-    //     this.$message.error('文件名错误，必须以 .py 结尾');
-    //     return;  // 停止保存流程
-    //   }
-    //
-    //   // 正则表达式数组（多行模式，处理空格和换行）
-    //   const requiredFields = [
-    //     { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义
-    //     { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
-    //     { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
-    //     { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']
-    //     { regex: /\[!\]/m, label: '[!]' },  // [!]
-    //     { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]
-    //   ];
-    //
-    //   // 检查每个正则表达式是否匹配代码
-    //   let allFieldsPresent = true;
-    //   requiredFields.forEach(field => {
-    //     const isMatch = field.regex.test(this.tempnewcode);
-    //     console.log(`Checking field: ${field.label}, Match: ${isMatch}`);  // 调试输出
-    //     if (!isMatch) {
-    //       this.$message.error(`代码中缺少必要的字段：${field.label}`);
-    //       allFieldsPresent = false;  // 如果任意字段未匹配，标记为 false
-    //     }
-    //   });
-    //
-    //   if (!allFieldsPresent) {
-    //     return;  // 停止保存流程
-    //   }
-    //
-    //   // 如果检查都通过，保存临时变量到实际变量中
-    //   this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量
-    //   this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量
-    //   this.editPocCodeDialogVisible = false;         // 关闭对话框
-    // },
 
     // 清空代码并关闭窗口
     clearCode() {
@@ -991,10 +871,10 @@ export default {
       formData.append('id', this.editPoc.id);
       formData.append('cve_id', this.editPoc.cve_id);
       formData.append('vul_name', this.editPoc.vul_name);
-      formData.append('type', this.editPoc.type); // 确保字段名称正确
+      formData.append('type', this.editPoc.type);
       formData.append('description', this.editPoc.description);
       formData.append('script_type', this.editPoc.script_type);
-      formData.append('affected_infra', this.editPoc.affected_infra);//漏写
+      formData.append('affected_infra', this.editPoc.affected_infra);
 
       // 添加文件，如果有的话
       if (this.fileList.length > 0) {
@@ -1101,21 +981,6 @@ export default {
       this.editAffectedInfraValid = true;
     },
 
-
-    // querySearch(queryString, callback) {
-    //   console.log("querySearch triggered with:", queryString); // 调试信息
-    //   // 仅当输入字符数达到或超过3个并且为连续匹配时才执行匹配
-    //   if (queryString.length >= 3) {
-    //     const results = this.suggestions.filter(item =>
-    //         item.value.toLowerCase().includes(queryString.toLowerCase())
-    //     );
-    //     console.log("Filtered results:", results); // 调试信息
-    //     callback(results);
-    //   } else {
-    //     // 输入字符数不足时返回空数组
-    //     callback([]);
-    //   }
-    // },
     handleSelect(item) {
       console.log("Selected:", item);
     },
@@ -1132,9 +997,7 @@ export default {
       this.editSearchAffectedInfra = '';
       this.editSubmitAttempted = false;
     }
-
   },
-
 
   created() {
     this.loadData();
@@ -1175,10 +1038,7 @@ pre[class*="language-"] {
   -ms-hyphens: none;
   hyphens: none;
 }
-
-
 </style>
-
 
 
 
@@ -1223,16 +1083,32 @@ pre[class*="language-"] {
 <!--        <el-form-item label="漏洞描述">-->
 <!--          <el-input type="textarea" v-model="newPoc.description"></el-input>-->
 <!--        </el-form-item>-->
-<!--        <el-form-item label="受影响的基础设施（操作系统或软件或协议）">-->
+
+<!--        <el-form-item label="受影响的基础设施（操作系统或软件或协议）" required>-->
 <!--          <el-autocomplete-->
-<!--              v-model="newPoc.affected_infra"-->
+<!--              v-model="searchAffectedInfra"-->
 <!--              :fetch-suggestions="querySearch"-->
-<!--              placeholder="请输入内容"-->
-<!--              @select="handleSelect"-->
+<!--              placeholder="请输入关键字进行搜索，然后从列表中选择"-->
+<!--              @select="handleSelectNew"-->
 <!--              style="width: 300px;"-->
 <!--          />-->
-<!--          &lt;!&ndash;          <el-input v-model="newPoc.affected_infra"></el-input>&ndash;&gt;-->
+<!--          <div v-if="newPoc.affected_infra" style="margin-top: 5px; color: #67C23A;">-->
+<!--            <i class="el-icon-check"></i> 已选择: {{ newPoc.affected_infra }}-->
+<!--          </div>-->
+<!--          <div v-if="!affectedInfraValid && submitAttempted" style="color: #F56C6C; margin-top: 5px;">-->
+<!--            <i class="el-icon-warning"></i> 请从列表中选择一个有效选项-->
+<!--          </div>-->
 <!--        </el-form-item>-->
+<!--&lt;!&ndash;        <el-form-item label="受影响的基础设施（操作系统或软件或协议）">&ndash;&gt;-->
+<!--&lt;!&ndash;          <el-autocomplete&ndash;&gt;-->
+<!--&lt;!&ndash;              v-model="newPoc.affected_infra"&ndash;&gt;-->
+<!--&lt;!&ndash;              :fetch-suggestions="querySearch"&ndash;&gt;-->
+<!--&lt;!&ndash;              placeholder="请输入内容"&ndash;&gt;-->
+<!--&lt;!&ndash;              @select="handleSelect"&ndash;&gt;-->
+<!--&lt;!&ndash;              style="width: 300px;"&ndash;&gt;-->
+<!--&lt;!&ndash;          />&ndash;&gt;-->
+<!--&lt;!&ndash;          &lt;!&ndash;          <el-input v-model="newPoc.affected_infra"></el-input>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        </el-form-item>&ndash;&gt;-->
 <!--        <el-form-item label="POC类型">-->
 <!--          <el-select v-model="newPoc.script_type" placeholder="请选择">-->
 <!--            <el-option label="python" value="python"></el-option>-->
@@ -1347,16 +1223,32 @@ pre[class*="language-"] {
 <!--        <el-form-item label="漏洞描述">-->
 <!--          <el-input type="textarea" v-model="editPoc.description"></el-input>-->
 <!--        </el-form-item>-->
-<!--        <el-form-item label="受影响的基础设施（操作系统或软件或协议）">-->
+
+<!--        <el-form-item label="受影响的基础设施（操作系统或软件或协议）" required>-->
 <!--          <el-autocomplete-->
-<!--              v-model="editPoc.affected_infra"-->
+<!--              v-model="editSearchAffectedInfra"-->
 <!--              :fetch-suggestions="querySearch"-->
-<!--              placeholder="请输入内容"-->
-<!--              @select="handleSelect"-->
+<!--              placeholder="请输入关键字进行搜索，然后从列表中选择"-->
+<!--              @select="handleSelectEdit"-->
 <!--              style="width: 300px;"-->
 <!--          />-->
-<!--          &lt;!&ndash;          <el-input v-model="editPoc.affected_infra"></el-input>&ndash;&gt;-->
+<!--          <div v-if="editPoc.affected_infra" style="margin-top: 5px; color: #67C23A;">-->
+<!--            <i class="el-icon-check"></i> 已选择: {{ editPoc.affected_infra }}-->
+<!--          </div>-->
+<!--          <div v-if="!editAffectedInfraValid && editSubmitAttempted" style="color: #F56C6C; margin-top: 5px;">-->
+<!--            <i class="el-icon-warning"></i> 请从列表中选择一个有效选项-->
+<!--          </div>-->
 <!--        </el-form-item>-->
+<!--&lt;!&ndash;        <el-form-item label="受影响的基础设施（操作系统或软件或协议）">&ndash;&gt;-->
+<!--&lt;!&ndash;          <el-autocomplete&ndash;&gt;-->
+<!--&lt;!&ndash;              v-model="editPoc.affected_infra"&ndash;&gt;-->
+<!--&lt;!&ndash;              :fetch-suggestions="querySearch"&ndash;&gt;-->
+<!--&lt;!&ndash;              placeholder="请输入内容"&ndash;&gt;-->
+<!--&lt;!&ndash;              @select="handleSelect"&ndash;&gt;-->
+<!--&lt;!&ndash;              style="width: 300px;"&ndash;&gt;-->
+<!--&lt;!&ndash;          />&ndash;&gt;-->
+<!--&lt;!&ndash;          &lt;!&ndash;          <el-input v-model="editPoc.affected_infra"></el-input>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        </el-form-item>&ndash;&gt;-->
 <!--        <el-form-item label="POC类型">-->
 <!--          <el-select v-model="editPoc.script_type" placeholder="请选择">-->
 <!--            <el-option label="python" value="python"></el-option>-->
@@ -1501,6 +1393,9 @@ pre[class*="language-"] {
 <!--        affected_infra: '',-->
 <!--        //script: ''-->
 <!--      },-->
+<!--      // 搜索时使用的输入值（不会被提交）-->
+<!--      searchAffectedInfra: '',-->
+
 <!--      //用来编辑poc-->
 <!--      editPoc: {-->
 <!--        id: '',-->
@@ -1512,6 +1407,14 @@ pre[class*="language-"] {
 <!--        script_type: '',-->
 <!--        script: '',-->
 <!--      },-->
+
+<!--      // 搜索时使用的输入值（不会被提交）-->
+<!--      editSearchAffectedInfra: '',-->
+
+<!--      // 验证标记-->
+<!--      affectedInfraValid: false,-->
+<!--      editAffectedInfraValid: false,-->
+
 <!--      editDialogVisible: false,-->
 <!--      codeEditDialogVisible: false,-->
 <!--      editPocCodeDialogVisible:false,-->
@@ -1691,12 +1594,36 @@ pre[class*="language-"] {
 <!--    },-->
 <!--    handleAdd() {-->
 <!--      this.addDialogVisible = true;-->
+<!--      this.submitAttempted = false;-->
+<!--      this.affectedInfraValid = false;-->
+<!--      this.searchAffectedInfra = '';-->
+<!--      this.newPoc = {-->
+<!--        type: '',-->
+<!--        cve_id: '',-->
+<!--        vul_name: '',-->
+<!--        description: '',-->
+<!--        script_type: '',-->
+<!--        affected_infra: '',-->
+<!--        // 其他属性的重置...-->
+<!--      };-->
 <!--    },-->
 
 <!--    //编辑poc-->
 <!--    handleEdit(row) {-->
 <!--      this.editPoc = { ...row }; // 复制行数据到编辑数据对象-->
 <!--      this.tempCode = row.script; // Set the temporary code to the existing script-->
+<!--      // 如果有affected_infra，则初始化为有效-->
+<!--      if (row.affected_infra && this.suggestions.some(item => item.value === row.affected_infra)) {-->
+<!--        this.editAffectedInfraValid = true;-->
+<!--        this.editSearchAffectedInfra = row.affected_infra; // 显示已有的值-->
+<!--      } else {-->
+<!--        this.editAffectedInfraValid = false;-->
+<!--        this.editSearchAffectedInfra = '';-->
+<!--        this.editPoc.affected_infra = '';-->
+<!--      }-->
+
+<!--      this.editSubmitAttempted = false;-->
+
 <!--      axios.get('/api/getPOCContent', {-->
 <!--        params: {-->
 <!--          id: row.id-->
@@ -1761,24 +1688,34 @@ pre[class*="language-"] {
 <!--      }-->
 
 <!--      // 创建一个 Promise 来读取文件内容-->
+<!--      // 创建一个 Promise 来读取文件内容-->
 <!--      return new Promise((resolve, reject) => {-->
 <!--        const reader = new FileReader();-->
 <!--        reader.onload = (event) => {-->
 <!--          const content = event.target.result;-->
 
 <!--          // 定义需要包含的内容的正则表达式或简单字符串-->
+
 <!--          const requiredPatterns = [-->
 <!--            /class\s+DemoPOC:/,             // 检查是否有 class DemoPOC:-->
-<!--            /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/, // 检查是否有 def __init__(self, url, ip, port)-->
 <!--            /def\s+_verify\s*\(self\)/,     // 检查是否有 def _verify(self)-->
 <!--            /result\[['"]VerifyInfo['"]\]/, // 检查是否有 result['VerifyInfo'] 或 result["VerifyInfo"]-->
 <!--            /\[!\]/,                       // 检查是否有 [!]-->
 <!--            /\[SAFE\]/                     // 检查是否有 [SAFE]-->
 <!--          ];-->
 
-<!--          // 检查内容是否满足要求-->
-<!--          const isValid = requiredPatterns.every((pattern) => pattern.test(content));-->
-<!--          if (!isValid) {-->
+<!--          // 检查两种初始化方法中的任意一个-->
+<!--          const initPatterns = [-->
+<!--            /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/, // 检查是否有 def __init__(self, url, ip, port)-->
+<!--            /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port,\s*server_ip,\s*server_port\)/ // 检查是否有 def __init__(self, url, ip, port, server_ip, server_port)-->
+<!--          ];-->
+
+<!--          // 检查必要内容是否满足要求-->
+<!--          const isValidRequiredPatterns = requiredPatterns.every((pattern) => pattern.test(content));-->
+<!--          // 检查两种初始化方法中是否有一个满足要求-->
+<!--          const isValidInitPattern = initPatterns.some((pattern) => pattern.test(content));-->
+
+<!--          if (!isValidRequiredPatterns || !isValidInitPattern) {-->
 <!--            this.$message.error('poc格式不规范');-->
 <!--            reject(false);-->
 <!--          } else {-->
@@ -1794,6 +1731,40 @@ pre[class*="language-"] {
 <!--        // 读取文件内容为文本-->
 <!--        reader.readAsText(file);-->
 <!--      });-->
+<!--      // return new Promise((resolve, reject) => {-->
+<!--      //   const reader = new FileReader();-->
+<!--      //   reader.onload = (event) => {-->
+<!--      //     const content = event.target.result;-->
+<!--      //-->
+<!--      //     // 定义需要包含的内容的正则表达式或简单字符串-->
+<!--      //-->
+<!--      //     const requiredPatterns = [-->
+<!--      //       /class\s+DemoPOC:/,             // 检查是否有 class DemoPOC:-->
+<!--      //       /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/, // 检查是否有 def __init__(self, url, ip, port)-->
+<!--      //       /def\s+_verify\s*\(self\)/,     // 检查是否有 def _verify(self)-->
+<!--      //       /result\[['"]VerifyInfo['"]\]/, // 检查是否有 result['VerifyInfo'] 或 result["VerifyInfo"]-->
+<!--      //       /\[!\]/,                       // 检查是否有 [!]-->
+<!--      //       /\[SAFE\]/                     // 检查是否有 [SAFE]-->
+<!--      //     ];-->
+<!--      //-->
+<!--      //     // 检查内容是否满足要求-->
+<!--      //     const isValid = requiredPatterns.every((pattern) => pattern.test(content));-->
+<!--      //     if (!isValid) {-->
+<!--      //       this.$message.error('poc格式不规范');-->
+<!--      //       reject(false);-->
+<!--      //     } else {-->
+<!--      //       resolve(true);-->
+<!--      //     }-->
+<!--      //   };-->
+<!--      //-->
+<!--      //   reader.onerror = () => {-->
+<!--      //     this.$message.error('文件读取失败');-->
+<!--      //     reject(false);-->
+<!--      //   };-->
+<!--      //-->
+<!--      //   // 读取文件内容为文本-->
+<!--      //   reader.readAsText(file);-->
+<!--      // });-->
 <!--    },-->
 
 <!--    handleFileUpload(param) {-->
@@ -1825,14 +1796,19 @@ pre[class*="language-"] {
 <!--      // 正则表达式数组（多行模式，处理空格和换行）-->
 <!--      const requiredFields = [-->
 <!--        { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义-->
-<!--        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数-->
 <!--        { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法-->
 <!--        { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']-->
 <!--        { regex: /\[!\]/m, label: '[!]' },  // [!]-->
 <!--        { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]-->
 <!--      ];-->
 
-<!--      // 检查每个正则表达式是否匹配代码-->
+<!--      // 初始化方法的两种可能模式-->
+<!--      const initMethods = [-->
+<!--        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },-->
+<!--        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port,\s*server_ip,\s*server_port\)/m, label: 'def __init__(self,url,ip,port,server_ip,server_port)' }-->
+<!--      ];-->
+
+<!--      // 检查每个必须字段是否匹配代码-->
 <!--      let allFieldsPresent = true;-->
 <!--      requiredFields.forEach(field => {-->
 <!--        const isMatch = field.regex.test(this.tempnewcode);-->
@@ -1843,15 +1819,62 @@ pre[class*="language-"] {
 <!--        }-->
 <!--      });-->
 
+<!--      // 检查初始化方法是否匹配其中一种模式-->
+<!--      const initMethodMatch = initMethods.some(method => method.regex.test(this.tempnewcode));-->
+<!--      console.log(`Checking init methods. Match: ${initMethodMatch}`);  // 调试输出-->
+<!--      if (!initMethodMatch) {-->
+<!--        this.$message.error(`代码中缺少必要的初始化方法，需要包含以下两种之一：-->
+<!--    - def __init__(self,url,ip,port)-->
+<!--    - def __init__(self,url,ip,port,server_ip,server_port)`);-->
+<!--        allFieldsPresent = false;-->
+<!--      }-->
+
 <!--      if (!allFieldsPresent) {-->
 <!--        return;  // 停止保存流程-->
 <!--      }-->
 
 <!--      // 如果检查都通过，保存临时变量到实际变量中-->
 <!--      this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量-->
-<!--      this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量-->
+<!--      this.newcode = this.tempnewcode;        // 将临时代码赋值给实际代码变量-->
 <!--      this.codeDialogVisible = false;         // 关闭对话框-->
 <!--    },-->
+<!--    // saveCode() {-->
+<!--    //   // 检查文件名是否以 .py 结尾-->
+<!--    //   if (!this.tempFilename.endsWith('.py')) {-->
+<!--    //     this.$message.error('文件名错误，必须以 .py 结尾');-->
+<!--    //     return;  // 停止保存流程-->
+<!--    //   }-->
+<!--    //-->
+<!--    //   // 正则表达式数组（多行模式，处理空格和换行）-->
+<!--    //   const requiredFields = [-->
+<!--    //     { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义-->
+<!--    //     { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数-->
+<!--    //     { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法-->
+<!--    //     { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']-->
+<!--    //     { regex: /\[!\]/m, label: '[!]' },  // [!]-->
+<!--    //     { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]-->
+<!--    //   ];-->
+<!--    //-->
+<!--    //   // 检查每个正则表达式是否匹配代码-->
+<!--    //   let allFieldsPresent = true;-->
+<!--    //   requiredFields.forEach(field => {-->
+<!--    //     const isMatch = field.regex.test(this.tempnewcode);-->
+<!--    //     console.log(`Checking field: ${field.label}, Match: ${isMatch}`);  // 调试输出-->
+<!--    //     if (!isMatch) {-->
+<!--    //       this.$message.error(`代码中缺少必要的字段：${field.label}`);-->
+<!--    //       allFieldsPresent = false;  // 如果任意字段未匹配，标记为 false-->
+<!--    //     }-->
+<!--    //   });-->
+<!--    //-->
+<!--    //   if (!allFieldsPresent) {-->
+<!--    //     return;  // 停止保存流程-->
+<!--    //   }-->
+<!--    //-->
+<!--    //   // 如果检查都通过，保存临时变量到实际变量中-->
+<!--    //   this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量-->
+<!--    //   this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量-->
+<!--    //   this.codeDialogVisible = false;         // 关闭对话框-->
+<!--    // },-->
 
 <!--    // 编辑poc的保存代码-->
 <!--    saveCode2() {-->
@@ -1864,14 +1887,19 @@ pre[class*="language-"] {
 <!--      // 正则表达式数组（多行模式，处理空格和换行）-->
 <!--      const requiredFields = [-->
 <!--        { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义-->
-<!--        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数-->
 <!--        { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法-->
 <!--        { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']-->
 <!--        { regex: /\[!\]/m, label: '[!]' },  // [!]-->
 <!--        { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]-->
 <!--      ];-->
 
-<!--      // 检查每个正则表达式是否匹配代码-->
+<!--      // 初始化方法的两种可能模式-->
+<!--      const initMethods = [-->
+<!--        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },-->
+<!--        { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port,\s*server_ip,\s*server_port\)/m, label: 'def __init__(self,url,ip,port,server_ip,server_port)' }-->
+<!--      ];-->
+
+<!--      // 检查每个必须字段是否匹配代码-->
 <!--      let allFieldsPresent = true;-->
 <!--      requiredFields.forEach(field => {-->
 <!--        const isMatch = field.regex.test(this.tempnewcode);-->
@@ -1882,15 +1910,63 @@ pre[class*="language-"] {
 <!--        }-->
 <!--      });-->
 
+<!--      // 检查初始化方法是否匹配其中一种模式-->
+<!--      const initMethodMatch = initMethods.some(method => method.regex.test(this.tempnewcode));-->
+<!--      console.log(`Checking init methods. Match: ${initMethodMatch}`);  // 调试输出-->
+<!--      if (!initMethodMatch) {-->
+<!--        this.$message.error(`代码中缺少必要的初始化方法，需要包含以下两种之一：-->
+<!--    - def __init__(self,url,ip,port)或-->
+<!--    - def __init__(self,url,ip,port,server_ip,server_port)`);-->
+<!--        allFieldsPresent = false;-->
+<!--      }-->
+
 <!--      if (!allFieldsPresent) {-->
 <!--        return;  // 停止保存流程-->
 <!--      }-->
 
 <!--      // 如果检查都通过，保存临时变量到实际变量中-->
 <!--      this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量-->
-<!--      this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量-->
-<!--      this.editPocCodeDialogVisible = false;         // 关闭对话框-->
+<!--      this.newcode = this.tempnewcode;        // 将临时代码赋值给实际代码变量-->
+<!--      this.editPocCodeDialogVisible = false;  // 关闭对话框-->
 <!--    },-->
+<!--    //以下只验证了一种初始化方法-->
+<!--    // saveCode2() {-->
+<!--    //   // 检查文件名是否以 .py 结尾-->
+<!--    //   if (!this.tempFilename.endsWith('.py')) {-->
+<!--    //     this.$message.error('文件名错误，必须以 .py 结尾');-->
+<!--    //     return;  // 停止保存流程-->
+<!--    //   }-->
+<!--    //-->
+<!--    //   // 正则表达式数组（多行模式，处理空格和换行）-->
+<!--    //   const requiredFields = [-->
+<!--    //     { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义-->
+<!--    //     { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数-->
+<!--    //     { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法-->
+<!--    //     { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']-->
+<!--    //     { regex: /\[!\]/m, label: '[!]' },  // [!]-->
+<!--    //     { regex: /\[SAFE\]/m, label: '[SAFE]' }  // [SAFE]-->
+<!--    //   ];-->
+<!--    //-->
+<!--    //   // 检查每个正则表达式是否匹配代码-->
+<!--    //   let allFieldsPresent = true;-->
+<!--    //   requiredFields.forEach(field => {-->
+<!--    //     const isMatch = field.regex.test(this.tempnewcode);-->
+<!--    //     console.log(`Checking field: ${field.label}, Match: ${isMatch}`);  // 调试输出-->
+<!--    //     if (!isMatch) {-->
+<!--    //       this.$message.error(`代码中缺少必要的字段：${field.label}`);-->
+<!--    //       allFieldsPresent = false;  // 如果任意字段未匹配，标记为 false-->
+<!--    //     }-->
+<!--    //   });-->
+<!--    //-->
+<!--    //   if (!allFieldsPresent) {-->
+<!--    //     return;  // 停止保存流程-->
+<!--    //   }-->
+<!--    //-->
+<!--    //   // 如果检查都通过，保存临时变量到实际变量中-->
+<!--    //   this.editFilename = this.tempFilename;  // 将临时文件名赋值给实际文件名变量-->
+<!--    //   this.newcode = this.tempnewcode;           // 将临时代码赋值给实际代码变量-->
+<!--    //   this.editPocCodeDialogVisible = false;         // 关闭对话框-->
+<!--    // },-->
 
 <!--    // 清空代码并关闭窗口-->
 <!--    clearCode() {-->
@@ -1902,6 +1978,14 @@ pre[class*="language-"] {
 <!--      this.editPocCodeDialogVisible = false; // 关闭窗口-->
 <!--    },-->
 <!--    async submitNewPoc() {-->
+<!--      this.submitAttempted = true;-->
+
+<!--      // 检查是否选择了有效的affected_infra-->
+<!--      if (!this.affectedInfraValid || !this.newPoc.affected_infra) {-->
+<!--        this.$message.error('请从列表中选择有效的基础设施');-->
+<!--        return;-->
+<!--      }-->
+
 <!--      const formData = new FormData();-->
 <!--      formData.append('cve_id', this.newPoc.cve_id);-->
 <!--      formData.append('vul_name', this.newPoc.vul_name);-->
@@ -1938,6 +2022,15 @@ pre[class*="language-"] {
 <!--      }-->
 <!--    },-->
 <!--    async submitEditPoc() {-->
+
+<!--      this.editSubmitAttempted = true;-->
+
+<!--      // 检查是否选择了有效的affected_infra-->
+<!--      if (!this.editAffectedInfraValid || !this.editPoc.affected_infra) {-->
+<!--        this.$message.error('请从列表中选择有效的基础设施');-->
+<!--        return;-->
+<!--      }-->
+
 <!--      const formData = new FormData();-->
 <!--      formData.append('id', this.editPoc.id);-->
 <!--      formData.append('cve_id', this.editPoc.cve_id);-->
@@ -2021,20 +2114,52 @@ pre[class*="language-"] {
 <!--        console.error("Failed to load file:", error);-->
 <!--      }-->
 <!--    },-->
+
 <!--    querySearch(queryString, callback) {-->
-<!--      console.log("querySearch triggered with:", queryString); // 调试信息-->
-<!--      // 仅当输入字符数达到或超过3个并且为连续匹配时才执行匹配-->
+<!--      console.log("querySearch triggered with:", queryString);-->
 <!--      if (queryString.length >= 3) {-->
 <!--        const results = this.suggestions.filter(item =>-->
 <!--            item.value.toLowerCase().includes(queryString.toLowerCase())-->
 <!--        );-->
-<!--        console.log("Filtered results:", results); // 调试信息-->
+<!--        console.log("Filtered results:", results);-->
 <!--        callback(results);-->
 <!--      } else {-->
-<!--        // 输入字符数不足时返回空数组-->
 <!--        callback([]);-->
 <!--      }-->
 <!--    },-->
+<!--    // 新增时选择建议的处理方法-->
+<!--    handleSelectNew(item) {-->
+<!--      console.log("Selected for new POC:", item);-->
+<!--      // 将选中的值设置到实际存储字段-->
+<!--      this.newPoc.affected_infra = item.value;-->
+<!--      // 标记为有效-->
+<!--      this.affectedInfraValid = true;-->
+<!--    },-->
+
+<!--    // 编辑时选择建议的处理方法-->
+<!--    handleSelectEdit(item) {-->
+<!--      console.log("Selected for edit POC:", item);-->
+<!--      // 将选中的值设置到实际存储字段-->
+<!--      this.editPoc.affected_infra = item.value;-->
+<!--      // 标记为有效-->
+<!--      this.editAffectedInfraValid = true;-->
+<!--    },-->
+
+
+<!--    // querySearch(queryString, callback) {-->
+<!--    //   console.log("querySearch triggered with:", queryString); // 调试信息-->
+<!--    //   // 仅当输入字符数达到或超过3个并且为连续匹配时才执行匹配-->
+<!--    //   if (queryString.length >= 3) {-->
+<!--    //     const results = this.suggestions.filter(item =>-->
+<!--    //         item.value.toLowerCase().includes(queryString.toLowerCase())-->
+<!--    //     );-->
+<!--    //     console.log("Filtered results:", results); // 调试信息-->
+<!--    //     callback(results);-->
+<!--    //   } else {-->
+<!--    //     // 输入字符数不足时返回空数组-->
+<!--    //     callback([]);-->
+<!--    //   }-->
+<!--    // },-->
 <!--    handleSelect(item) {-->
 <!--      console.log("Selected:", item);-->
 <!--    },-->
@@ -2045,6 +2170,11 @@ pre[class*="language-"] {
 <!--      this.tempnewcode = '';-->
 <!--      this.tempFilename = '';-->
 <!--      this.editDialogVisible = false;-->
+
+<!--      // 重置验证状态-->
+<!--      this.editAffectedInfraValid = false;-->
+<!--      this.editSearchAffectedInfra = '';-->
+<!--      this.editSubmitAttempted = false;-->
 <!--    }-->
 
 <!--  },-->
@@ -2092,3 +2222,5 @@ pre[class*="language-"] {
 
 
 <!--</style>-->
+
+

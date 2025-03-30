@@ -206,12 +206,16 @@
               <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_username }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="weak_password" label="弱密码" width="120">
-            <template slot-scope="scope">
-              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_password }}</span>
-            </template>
+          <el-table-column prop="weak_password" label="结果" width="120">
+              <span style="color: #F56C6C; font-weight: bold;">存在弱密码</span>
           </el-table-column>
-          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>
+<!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
+<!--          <el-table-column prop="weak_password" label="弱密码" width="120">-->
+<!--            <template slot-scope="scope">-->
+<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_password }}</span>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+<!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
         </el-table>
       </div>
 

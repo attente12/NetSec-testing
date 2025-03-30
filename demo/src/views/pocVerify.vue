@@ -11,7 +11,7 @@
         <el-card class="box-card">
           <div slot="header">POC任务</div>
           <el-button type="primary" @click="batchExecutePOC" style="margin-top: 5px;">批量执行POC</el-button>
-          <el-button @click="printResult" style="margin-top: 5px;">打印报告</el-button>
+<!--          <el-button @click="printResult" style="margin-top: 5px;">打印报告</el-button>-->
           <el-table
               ref="table"
               :data="paginatedTasks"
@@ -309,7 +309,7 @@ export default {
     executePOC(row) {
       axios.post('/api/pocVerify', { cve_ids: [row.CVE] })
           .then(() => {
-            this.$message.success(`POC 执行成功: ${row.CVE}`);
+            this.$message.info(`已执行POC: ${row.CVE}`);
             this.fetchCpeData(); // 刷新数据
           })
           .catch(error => {

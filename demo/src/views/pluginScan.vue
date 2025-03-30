@@ -28,16 +28,6 @@
                 :value="ip">
             </el-option>
           </el-select>
-          <!--          <el-input-->
-          <!--              type="textarea"-->
-          <!--              rows="2"-->
-          <!--              placeholder="扫描的目标，例如：192.168.1.0"-->
-          <!--              v-model="scanTarget"-->
-          <!--              @input="validateInput">-->
-          <!--          </el-input>-->
-          <!--          <div style="margin-bottom: 10px; color: #E6A23C; font-size: 13px;">-->
-          <!--            <i class="el-icon-warning-outline" style="margin-right: 5px;"></i>如果该资产未进行过端口扫描，需要进行预扫描。-->
-          <!--          </div>-->
           <div style="margin-bottom: 10px; color: #409EFF; font-size: 13px;">
             <i class="el-icon-warning-outline" style="margin-right: 5px;"></i>如果该资产未进行过端口扫描，需要进行预扫描。
           </div>
@@ -105,8 +95,6 @@
             <span>扫描结果</span>
             <div style="float: right" v-if="result.scan_time">检测时间: {{ result.scan_time }}</div>
           </div>
-
-<!--          <el-button size="small" @click="printReport" style="margin-bottom: 15px;">打印检测报告</el-button>-->
           <el-button
               @click="printReport"
               :loading="printLoading"
@@ -117,10 +105,47 @@
             打印检测报告
           </el-button>
 
+<!--          <el-table-->
+<!--              :data="sortedVulnResults"-->
+<!--              style="width: 100%"-->
+<!--              :default-sort = "{prop: 'vulExist', order: 'descending'}"-->
+<!--              v-if="result.ports"-->
+<!--          >-->
+<!--            <el-table-column prop="Vuln_id" label="漏洞ID" width="150"></el-table-column>-->
+<!--            <el-table-column prop="vul_name" label="漏洞名称" width="200"></el-table-column>-->
+<!--            <el-table-column prop="CVSS" label="CVSS" width="100"></el-table-column>-->
+<!--            <el-table-column prop="pocExist" label="POC存在" width="100">-->
+<!--              <template slot-scope="scope">-->
+<!--                {{ scope.row.pocExist ? '是' : '否' }}-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--            <el-table-column prop="ifCheck" label="是否检查" width="100">-->
+<!--              <template slot-scope="scope">-->
+<!--                {{ scope.row.ifCheck ? '是' : '否' }}-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--            <el-table-column-->
+<!--                prop="vulExist"-->
+<!--                label="漏洞状态"-->
+<!--                width="100"-->
+<!--                :filters="[-->
+<!--                { text: '存在', value: '存在' },-->
+<!--                { text: '不存在', value: '不存在' },-->
+<!--                { text: '未验证', value: '未验证' }-->
+<!--              ]"-->
+<!--                :filter-method="filterVulExist"-->
+<!--            >-->
+<!--              <template slot-scope="scope">-->
+<!--                <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'info'">-->
+<!--                  {{ scope.row.vulExist }}-->
+<!--                </el-tag>-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--            <el-table-column prop="summary" label="描述"></el-table-column>-->
+<!--          </el-table>-->
           <el-table
               :data="sortedVulnResults"
               style="width: 100%"
-              :default-sort = "{prop: 'vulExist', order: 'descending'}"
               v-if="result.ports"
           >
             <el-table-column prop="Vuln_id" label="漏洞ID" width="150"></el-table-column>
@@ -141,10 +166,10 @@
                 label="漏洞状态"
                 width="100"
                 :filters="[
-                { text: '存在', value: '存在' },
-                { text: '不存在', value: '不存在' },
-                { text: '未验证', value: '未验证' }
-              ]"
+        { text: '存在', value: '存在' },
+        { text: '不存在', value: '不存在' },
+        { text: '未验证', value: '未验证' }
+      ]"
                 :filter-method="filterVulExist"
             >
               <template slot-scope="scope">
@@ -231,6 +256,8 @@ export default {
 
   computed: {
     // 对漏洞结果进行排序，将"存在"的漏洞排在前面
+
+// 修改 sortedVulnResults 计算属性
     sortedVulnResults() {
       if (!this.result || !this.result.ports) return [];
 
@@ -249,14 +276,46 @@ export default {
 
       // 去重（基于Vuln_id）
       allVulns = _.uniqBy(allVulns, 'Vuln_id');
-      console.log(allVulns);
 
-      // 排序：存在的漏洞排在前面
-      return _.orderBy(allVulns, [
-        vuln => vuln.vulExist === '存在' ? 0 : 1,
+      // 明确定义排序顺序: 存在 > 不存在 > 未验证
+      return _.sortBy(allVulns, [
+        // 首要排序条件：按漏洞状态
+        item => {
+          if (item.vulExist === '存在') return 0;
+          if (item.vulExist === '不存在') return 1;
+          if (item.vulExist === '未验证') return 2;
+          return 3; // 其他未知状态
+        },
+        // 次要排序条件：按漏洞ID
         'Vuln_id'
       ]);
     }
+    // sortedVulnResults() {
+    //   if (!this.result || !this.result.ports) return [];
+    //
+    //   // 收集所有端口的漏洞结果
+    //   let allVulns = [];
+    //   this.result.ports.forEach(port => {
+    //     if (port.vuln_result && port.vuln_result.length > 0) {
+    //       allVulns = allVulns.concat(port.vuln_result);
+    //     }
+    //   });
+    //
+    //   // 如果有操作系统相关的漏洞，也加入
+    //   if (this.result.os_vuln_result && this.result.os_vuln_result.length > 0) {
+    //     allVulns = allVulns.concat(this.result.os_vuln_result);
+    //   }
+    //
+    //   // 去重（基于Vuln_id）
+    //   allVulns = _.uniqBy(allVulns, 'Vuln_id');
+    //   console.log(allVulns);
+    //
+    //   // 排序：存在的漏洞排在前面
+    //   return _.orderBy(allVulns, [
+    //     vuln => vuln.vulExist === '存在' ? 0 : 1,
+    //     'Vuln_id'
+    //   ]);
+    // }
   },
 
   methods: {
@@ -516,103 +575,6 @@ export default {
       }
       this.printLoading=false;
     }
-    // 打印报告
-
-    // async printReport() {
-    //   try {
-    //     const pdf = new jsPDF({
-    //       orientation: 'p',
-    //       unit: 'mm',
-    //       format: 'a4'
-    //     });
-    //
-    //     // 显示打印区域（临时）
-    //     const printableElement = document.getElementById('printable');
-    //     printableElement.style.display = 'block';
-    //
-    //     // 首先处理第一页（封面）
-    //     const firstPage = printableElement.getElementsByClassName('print-page')[0];
-    //     const firstPageCanvas = await html2canvas(firstPage, {
-    //       scale: 2,
-    //       useCORS: true,
-    //       logging: false,
-    //       backgroundColor: '#ffffff'
-    //     });
-    //
-    //     // 添加封面
-    //     const firstPageImgData = firstPageCanvas.toDataURL('image/jpeg', 0.8);
-    //     const imgWidth = 190; // A4纸宽度减去边距
-    //     let imgHeight = firstPageCanvas.height * imgWidth / firstPageCanvas.width;
-    //     pdf.addImage(firstPageImgData, 'JPEG', 10, 10, imgWidth, imgHeight);
-    //
-    //     // 添加新页面用于表格
-    //     pdf.addPage();
-    //
-    //     // 获取表格元素
-    //     const tableElement = printableElement.querySelector('.print-table');
-    //
-    //     // 先渲染表头
-    //     const tableHeader = tableElement.querySelector('thead');
-    //     const headerCanvas = await html2canvas(tableHeader, {
-    //       scale: 2,
-    //       useCORS: true
-    //     });
-    //
-    //     const headerImgData = headerCanvas.toDataURL('image/jpeg', 0.8);
-    //     const headerImgWidth = 190;
-    //     const headerImgHeight = headerCanvas.height * headerImgWidth / headerCanvas.width;
-    //
-    //     // 添加表头到新页面
-    //     pdf.addImage(headerImgData, 'JPEG', 10, 10, headerImgWidth, headerImgHeight);
-    //
-    //     // 处理表格行
-    //     const rows = tableElement.querySelectorAll('tbody tr');
-    //     let currentY = 10 + headerImgHeight + 2; // 当前垂直位置，从表头下方开始
-    //
-    //     const pageHeight = pdf.internal.pageSize.getHeight() - 20; // 页面可用高度（减去边距）
-    //
-    //     for (let i = 0; i < rows.length; i++) {
-    //       const row = rows[i];
-    //       const rowCanvas = await html2canvas(row, {
-    //         scale: 2,
-    //         useCORS: true
-    //       });
-    //
-    //       const rowImgData = rowCanvas.toDataURL('image/jpeg', 0.8);
-    //       const rowImgWidth = 190;
-    //       const rowImgHeight = rowCanvas.height * rowImgWidth / rowCanvas.width;
-    //
-    //       // 检查是否需要新页面
-    //       if (currentY + rowImgHeight > pageHeight) {
-    //         pdf.addPage();
-    //         // 在新页面重新添加表头
-    //         pdf.addImage(headerImgData, 'JPEG', 10, 10, headerImgWidth, headerImgHeight);
-    //         currentY = 10 + headerImgHeight + 2; // 重置当前位置到表头下方
-    //       }
-    //
-    //       // 添加行内容
-    //       pdf.addImage(rowImgData, 'JPEG', 10, currentY, rowImgWidth, rowImgHeight);
-    //       currentY += rowImgHeight + 2; // 更新垂直位置，添加小间距
-    //     }
-    //
-    //     // 隐藏打印区域
-    //     printableElement.style.display = 'none';
-    //
-    //     // 保存PDF
-    //     pdf.save(`漏洞扫描报告_${this.result.ip}_${new Date().toISOString().split('T')[0]}.pdf`);
-    //
-    //     this.$message.success('报告已生成');
-    //   } catch (error) {
-    //     console.error('Error generating PDF:', error);
-    //     this.$message.error('生成报告时发生错误');
-    //     // 确保错误情况下也隐藏打印区域
-    //     const printableElement = document.getElementById('printable');
-    //     if (printableElement) {
-    //       printableElement.style.display = 'none';
-    //     }
-    //   }
-    // }
-
   },
 
   mounted() {
@@ -668,22 +630,6 @@ export default {
 }
 
 
-/* 打印区域样式
-
-
-#printable {
-  background: white;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: -1;
-  margin: 0;
-  padding: 0;
-}
-*/
-
-
 #printable .print-page {
   padding: 40px;
   font-size: 30px;
@@ -694,19 +640,6 @@ export default {
   font-weight: bold;
   margin-bottom: 30px;
 }
-
-/*
-#printable .print-info {
-  font-size: 120px;
-  line-height: 2;
-  margin: 30px 0;
-}
-
-#printable .print-info p {
-  margin: 10px 0;
-}
-
- */
 
 #printable .print-info {
   font-size: 18px;   /* 原来是120px但显示效果不如预期 */
