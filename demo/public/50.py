@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#Login Bypass模板
 
 import requests
 import random
@@ -14,7 +15,7 @@ class DemoPOC:
     install_requires = []     # 你可以在这里添加其他需要的库
     CVE_ID = ""               #CVE编号
     Vul_name = ""             #漏洞名称
-    Type = ""                 #漏洞类型
+    Type = "Login Bypass"                 #漏洞类型
     Description = ""          #漏洞描述
     Script_type = "python"    #POC类型（暂时只支持python）
     Script = "xxx.py"         #POC文件名（包含后缀）
