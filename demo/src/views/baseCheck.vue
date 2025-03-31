@@ -134,7 +134,6 @@
 // import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';//用于在客户端生成 PDF 文件
 import html2canvas from 'html2canvas';//将 HTML 元素转换为画布 (canvas) 图像
-import { EventBus } from '../main';
 
 export default {
     name: "baseCheck",
@@ -148,6 +147,9 @@ export default {
         }
     },
     computed: {
+        message() {
+            return this.$store.state.message; // 读取共享状态
+        },
         filteredCheckresults() {
             return this.checkresults.filter(result => {
                 const matchesStatus = this.selectedStatus === 'all' ||
@@ -161,6 +163,7 @@ export default {
 
     },
     methods: {
+
         fetchAndDisplayChenckResults() {
             fetch('/api/userinfo')
                 .then(response => response.json())
@@ -256,24 +259,20 @@ export default {
                     };
                 });
             }, 1000);
+        },
+        getData(){
+            if(!this.message){
+                this.fetchAndDisplayChenckResults()
+            }else{
+                this.serverInfo = this.message.ServerInfo
+                this.checkresults = this.message.Event_result
+            }
         }
     },
     beforeMount() {
-
+        this.getData()
     },
     mounted() {
-
-        EventBus.$on('userData', (data) => {
-            console.log(data)
-            if (!data) {
-                this.fetchAndDisplayChenckResults();
-            } else {
-                this.checkresults = data.Event_result
-                console.log(this.checkresults)
-                this.ServerInfo = data.ServerInfo
-            }
-
-        })
     }
 }
 </script>

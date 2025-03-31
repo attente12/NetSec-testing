@@ -41,7 +41,7 @@
                 <el-form-item>
                     <el-button v-show="!flag" type="primary" @click="submitForm">开始检测</el-button>
                     <el-button v-show="flag" type="primary" :disabled="versionFlag ? null : true"
-                        @click="submitForm">检测全部</el-button>
+                        @click="checkAll">检测全部</el-button>
                     <el-button type="primary" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
                 </el-form-item>
             </el-form>
@@ -89,7 +89,6 @@
 
 <script>
 import { Message } from "element-ui"
-import { EventBus } from "../main";
 
 export default {
     name: "home",
@@ -266,7 +265,9 @@ export default {
                 { value: 10, label: 'Window server 2012' },
             ],
             value: '',
-            valueTemp: ''
+            valueTemp: '',
+            checkResult: {},
+            isChecked: false
         };
     },
     watch: {
@@ -287,10 +288,7 @@ export default {
             this.pd = ''
             this.ip = ''
             this.adminName = ''
-        },
-
-        sendData(data){
-            EventBus.$emit('userData',data)
+            this.isChecked = false
         },
 
         WindowsSubmitForm() {
@@ -323,15 +321,12 @@ export default {
                 .then(data => {
                     // 检查data是否为null来避免执行不需要的代码
                     if (data === null) return;
-
-                    console.log("Response received:", data);
+                    this.checkResult = data
+                    this.sendData()
                     if (!this.value) this.value = data.ServerInfo.version
                     // 仅在成功响应时执行UI操作
-                    this.sendData(data)
                     this.versionFlag = true
-                    this.progressBarWidth = 0; // 初始化进度为0
-                    // this.showModal = true;
-                    this.runProgress();
+                    this.isChecked = true
                 })
                 .catch((error) => {
                     console.error('Error:', error);
@@ -340,6 +335,9 @@ export default {
                 });
         },
 
+        sendData() {
+            this.$store.commit('updateMessage', this.checkResult); // 更新共享状态
+        },
 
         LinuxSubmitForm() {
             const payload = {
@@ -394,6 +392,8 @@ export default {
         },
 
         runProgress() {
+            this.progressBarWidth = 0; // 初始化进度为0
+            this.showModal = true;
             let duration = 4000;
             let elapsed = 0;
             let intervalTime = 100;
@@ -454,6 +454,16 @@ export default {
                         Message.error(error.message);
                     });
             });
+        },
+
+        checkAll(){
+            if (this.isChecked) {
+                this.runProgress();
+                return 0
+            }else{
+                this.submitForm()
+                this.runProgress()
+            }
         },
 
         closeModal() {

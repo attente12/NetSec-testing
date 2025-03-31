@@ -1,4 +1,5 @@
 import Vue from 'vue'
+
 import Router from 'vue-router';
 import router from '@/router/index.js'
 import App from './App.vue'
@@ -15,6 +16,7 @@ import 'codemirror/mode/python/python.js';   // Python 语言模式
 import 'codemirror/theme/material.css';   // Codemirror 主题
 
 
+import { store } from './store.js'; // 引入你创建的 Vuex store 文件
 // 注册 Codemirror 作为 Vue 插件
 // Vue.use(Codemirror);
 
@@ -25,9 +27,8 @@ Vue.use(VueCodemirror); // 注册插件
 
 Vue.config.productionTip = false
 
-export const EventBus = new Vue()
-
 new Vue({
   router,
+  store,
   render: h => h(App),
 }).$mount('#app')
