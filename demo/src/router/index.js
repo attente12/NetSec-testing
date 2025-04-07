@@ -19,6 +19,10 @@ import pluginScan from "@/views/pluginScan.vue";
 import assetManage from "@/views/assetManage.vue";
 import hostDiscovery from "@/views/hostDiscovery.vue";
 import test from "@/views/test.vue";
+import tempBaseCheck from "@/views/tempBaseCheck.vue";
+import classifyProtectHome from "@/views/classifyProtectHome.vue";
+import tempClassifyProtect from "@/views/tempClassifyProtect.vue";
+
 
 export default new Router({
     routes: [
@@ -83,7 +87,7 @@ export default new Router({
             path: '/classifyProtect',
             name: 'classifyProtect',
             component: classifyProtect,
-            meta:{title:'等级保护测评'}
+            meta:{title:'测评历史'}
         },
         {
             path: '/CVELibrary',
@@ -114,6 +118,24 @@ export default new Router({
             name: 'test',
             component: test,
             meta:{title:'测试'}
+        },
+        {
+            path: '/tempBaseCheck',
+            name: 'tempBaseCheck',
+            component: tempBaseCheck,
+            meta:{title:'检测结果'}
+        },
+        {
+            path: '/classifyProtectHome',
+            name: 'classifyProtectHome',
+            component: classifyProtectHome,
+            meta:{title:'等级保护测评'}
+        },
+        {
+            path: '/tempClassifyProtect',
+            name: 'tempClassifyProtect',
+            component: tempClassifyProtect,
+            meta:{title:'等保测评结果'}
         },
 
     ]

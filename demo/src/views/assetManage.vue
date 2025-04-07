@@ -202,9 +202,17 @@
             border
             stripe
             :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+<!--          <el-table-column prop="product" label="产品" width="150">-->
+<!--            <template slot-scope="scope">-->
+<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
           <el-table-column prop="product" label="产品" width="150">
             <template slot-scope="scope">
-              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>
+              <span v-if="scope.row.product" style="color: #F56C6C; font-weight: bold;">
+                {{ scope.row.product }}
+              </span>
+              <span v-else>未识别</span>
             </template>
           </el-table-column>
           <el-table-column prop="port" label="端口" width="80"></el-table-column>

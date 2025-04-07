@@ -35,7 +35,7 @@
                             <span>安全基线检测</span>
                         </template>
                         <el-menu-item-group>
-                            <el-menu-item index="/baseCheckHome">基线检测启动</el-menu-item>
+                            <el-menu-item index="/baseCheckHome">基线检测</el-menu-item>
                             <el-menu-item index="/baseCheck">基线检测报告</el-menu-item>
                         </el-menu-item-group>
                     </el-submenu>
@@ -57,11 +57,21 @@
                     <i class="el-icon-attract"></i>
                     <span slot="title">弱口令检测</span>
                   </el-menu-item>
+                  <el-submenu index="4">
+                    <template slot="title">
+                      <i class="el-icon-share"></i>
+                      <span>等级保护测评</span>
+                    </template>
+                    <el-menu-item-group>
+                      <el-menu-item index="/classifyProtectHome">等级保护测评</el-menu-item>
+                      <el-menu-item index="/classifyProtect">测评历史</el-menu-item>
+                    </el-menu-item-group>
+                  </el-submenu>
 
-                  <el-menu-item index="/classifyProtect">
-                    <i class="el-icon-share"></i>
-                    <span slot="title">等级保护测评</span>
-                  </el-menu-item>
+<!--                  <el-menu-item index="/classifyProtect">-->
+<!--                    <i class="el-icon-share"></i>-->
+<!--                    <span slot="title">等级保护测评</span>-->
+<!--                  </el-menu-item>-->
 
                   <el-menu-item index="/assetManage">
                     <i class="el-icon-s-help"></i>

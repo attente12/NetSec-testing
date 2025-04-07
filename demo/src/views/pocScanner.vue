@@ -193,7 +193,8 @@
                 <span>已扫描主机: {{ scanResults.length }} 台</span>
                 <span>发现开放端口: {{ getTotalOpenPorts() }} 个</span>
                 <span>潜在漏洞: {{ getTotalCves() }} 个</span>
-                <span>是否全端口扫描: {{ resultAllPorts }} </span>
+                <span>是否全端口扫描: {{ { true: '是', false: '否' }[resultAllPorts] || '未知' }}</span>
+<!--                <span>是否全端口扫描: {{ resultAllPorts }} </span>-->
               </div>
             </template>
           </el-alert>

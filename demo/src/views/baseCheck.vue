@@ -34,12 +34,12 @@
             type="primary">
           导出为 PDF
         </el-button>
-        <el-button
-            @click="goToClassifyProtect"
-            type="success"
-            icon="el-icon-s-check">
-          去进行等保测评
-        </el-button>
+<!--        <el-button-->
+<!--            @click="goToClassifyProtect"-->
+<!--            type="success"-->
+<!--            icon="el-icon-s-check">-->
+<!--          去进行等保测评-->
+<!--        </el-button>-->
       </div>
 
       <div class="filter-group">
