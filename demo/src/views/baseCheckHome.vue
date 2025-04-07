@@ -51,21 +51,30 @@
         <el-card class="box-card check-items">
             <div slot="header" class="card-header">
                 <span>检测项目选择</span>
-                <el-button type="primary" @click="batchExecute" icon="el-icon-video-play" :loading="batchLoading">
-                    批量执行
-                </el-button>
+                <span>
+                        <el-checkbox label="全选" @change="handleSelectAll" v-model="isSelectAll"/>
+
+                    <el-button type="primary" @click="batchExecute" icon="el-icon-video-play" :loading="batchLoading">
+                        批量执行
+                    </el-button>
+                </span>
+
             </div>
 
-            <el-checkbox-group v-model="selectedItems">
+            <el-checkbox-group v-model="selectedItemsW" v-if="versionFlag">
                 <el-row :gutter="20">
-                    <el-col v-show="versionFlag" :span="8" v-for="item in checkItemsW" :key="item.id">
+                    <el-col :span="8" v-for="item in checkItemsW" :key="item.id">
                         <el-checkbox :label="item.id">
                             <el-tooltip :content="item.name" placement="top">
                                 <span class="checkbox-label">{{ item.name }}</span>
                             </el-tooltip>
                         </el-checkbox>
                     </el-col>
-                    <el-col v-show="!flag" :span="8" v-for="item in checkItems" :key="item.id">
+                </el-row>
+            </el-checkbox-group>
+            <el-checkbox-group v-model="selectedItems" v-if="!flag">
+                <el-row :gutter="20">
+                    <el-col :span="8" v-for="item in checkItems" :key="item.id">
                         <el-checkbox :label="item.id">
                             <el-tooltip :content="item.name" placement="top">
                                 <span class="checkbox-label">{{ item.name }}</span>
@@ -100,6 +109,7 @@ export default {
             adminName: '',
             pd: '',
             selectedItems: [],
+            selectedItemsW: [],
             showModal: false,
             progressBarWidth: 0,
             showButton: false,
@@ -267,7 +277,8 @@ export default {
             value: '',
             valueTemp: '',
             checkResult: {},
-            isChecked: false
+            isChecked: false,
+            isSelectAll: false
         };
     },
     watch: {
@@ -456,13 +467,21 @@ export default {
             });
         },
 
-        checkAll(){
+        checkAll() {
             if (this.isChecked) {
                 this.runProgress();
                 return 0
-            }else{
+            } else {
                 this.submitForm()
                 this.runProgress()
+            }
+        },
+
+        handleSelectAll(){
+            if(!this.isSelectAll){
+                this.selectedItemsW = [...this.checkItemsW]
+            }else{
+                this.selectedItemsW = []
             }
         },
 
