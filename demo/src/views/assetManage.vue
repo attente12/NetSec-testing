@@ -69,11 +69,14 @@
         </div>
       </div>
 
-      <!-- 新增：基线检测信息 -->
-      <!-- 基线检测信息 -->
       <!-- 基线检测信息 -->
       <div class="baseline-section" v-if="currentAsset.baseline_summary">
-        <h2>基线检测</h2>
+        <h2>
+          基线检测
+          <el-tooltip content="查看详细信息" placement="top">
+            <i class="el-icon-view baseline-info-icon" @click="showBaselineDetails"></i>
+          </el-tooltip>
+        </h2>
         <div class="baseline-info">
           <div class="baseline-summary">
             <div class="compliance-dashboard">
@@ -102,57 +105,27 @@
               </div>
             </div>
           </div>
-
-          <el-divider></el-divider>
-
-          <div class="compliance-details">
-            <div class="detail-row">
-              <div class="detail-label">
-                <el-tag type="info">高危</el-tag>
-              </div>
-              <div class="detail-progress">
-                <el-progress
-                    :percentage="(currentAsset.baseline_summary.critical_compliant / currentAsset.baseline_summary.critical_items) * 100"
-                    :format="format"
-                    :stroke-width="15"
-                    :color="'#e5445d'">
-                </el-progress>
-              </div>
-              <div class="detail-numbers" style="color: #303133;">
-                {{ currentAsset.baseline_summary.critical_compliant }}/{{ currentAsset.baseline_summary.critical_items }}
-              </div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">
-                <el-tag type="info">中危</el-tag>
-              </div>
-              <div class="detail-progress">
-                <el-progress
-                    :percentage="(currentAsset.baseline_summary.high_compliant / currentAsset.baseline_summary.high_items) * 100"
-                    :format="format"
-                    :stroke-width="15"
-                    :color="'#ea8e04'">
-                </el-progress>
-              </div>
-              <div class="detail-numbers" style="color: #303133;">
-                {{ currentAsset.baseline_summary.high_compliant }}/{{ currentAsset.baseline_summary.high_items }}
-              </div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">
-                <el-tag type="info">低危</el-tag>
-              </div>
-              <div class="detail-progress">
-                <el-progress
-                    :percentage="(currentAsset.baseline_summary.medium_compliant / currentAsset.baseline_summary.medium_items) * 100"
-                    :format="format"
-                    :stroke-width="15"
-                    :color="'#fcdb55'">
-                </el-progress>
-              </div>
-              <div class="detail-numbers" style="color: #303133;">
-                {{ currentAsset.baseline_summary.medium_compliant }}/{{ currentAsset.baseline_summary.medium_items }}
-              </div>
+        </div>
+      </div>
+      <!-- 等保测评信息 -->
+      <div class="baseline-section" v-if="currentAsset.baseline_summary">
+        <h2>
+          等级保护测评
+          <el-tooltip content="查看详细信息" placement="top">
+            <i class="el-icon-view baseline-info-icon" @click="showClassifyProtectDetails"></i>
+          </el-tooltip>
+        </h2>
+        <div class="baseline-info">
+          <div class="baseline-summary">
+            <div class="compliance-dashboard">
+<!--              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">合规率</div>-->
+<!--              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.compliance_rate" :color="'#67C23A'" :stroke-width="10">-->
+<!--                <template v-slot:default>-->
+<!--                  <div class="progress-content">-->
+<!--                    <span class="rate">{{ currentAsset.baseline_summary.compliance_rate }}%</span>-->
+<!--                  </div>-->
+<!--                </template>-->
+<!--              </el-progress>-->
             </div>
           </div>
         </div>
@@ -181,8 +154,8 @@
                 {{ scope.row.version || '未识别' }}
               </template>
             </el-table-column>
-<!--            <el-table-column prop="product" label="产品" width="150"></el-table-column>-->
-<!--            <el-table-column prop="version" label="版本" width="150"></el-table-column>-->
+            <!--            <el-table-column prop="product" label="产品" width="150"></el-table-column>-->
+            <!--            <el-table-column prop="version" label="版本" width="150"></el-table-column>-->
             <el-table-column prop="status" label="状态" width="100">
               <template slot-scope="scope">
                 <el-tag :type="scope.row.status === 'open' ? 'success' : 'danger'">
@@ -202,11 +175,11 @@
             border
             stripe
             :header-cell-style="{ backgroundColor: '#f5f7fa' }">
-<!--          <el-table-column prop="product" label="产品" width="150">-->
-<!--            <template slot-scope="scope">-->
-<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>-->
-<!--            </template>-->
-<!--          </el-table-column>-->
+          <!--          <el-table-column prop="product" label="产品" width="150">-->
+          <!--            <template slot-scope="scope">-->
+          <!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
           <el-table-column prop="product" label="产品" width="150">
             <template slot-scope="scope">
               <span v-if="scope.row.product" style="color: #F56C6C; font-weight: bold;">
@@ -225,15 +198,15 @@
             </template>
           </el-table-column>
           <el-table-column prop="weak_password" label="结果" width="120">
-              <span style="color: #F56C6C; font-weight: bold;">存在弱密码</span>
+            <span style="color: #F56C6C; font-weight: bold;">存在弱密码</span>
           </el-table-column>
-<!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
-<!--          <el-table-column prop="weak_password" label="弱密码" width="120">-->
-<!--            <template slot-scope="scope">-->
-<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_password }}</span>-->
-<!--            </template>-->
-<!--          </el-table-column>-->
-<!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
+          <!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
+          <!--          <el-table-column prop="weak_password" label="弱密码" width="120">-->
+          <!--            <template slot-scope="scope">-->
+          <!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_password }}</span>-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
+          <!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
         </el-table>
       </div>
 
@@ -399,6 +372,93 @@
         </div>
       </template>
     </div>
+    <el-dialog
+        title="基线检测详细信息"
+        :visible.sync="baselineDialogVisible"
+        width="70%"
+        :before-close="handleBaselineDialogClose">
+      <div v-if="baselineDetails.length" class="baseline-details-content">
+        <el-table
+            :data="baselineDetails"
+            border
+            stripe
+            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+          <el-table-column label="合规状态" width="100">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>
+              <el-tag v-else-if="scope.row.IsComply === 'pending'" type="warning">待检查</el-tag>
+              <el-tag v-else type="danger">不通过</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="检查项" width="200"></el-table-column>
+<!--          <el-table-column prop="importantLevel" label="重要级别" width="100">-->
+<!--            <template slot-scope="scope">-->
+<!--              <el-tag :type="getImportanceLevelType(scope.row.importantLevel)">-->
+<!--                {{ getImportanceLevel(scope.row.importantLevel) }}-->
+<!--              </el-tag>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+          <el-table-column prop="basis" label="检查依据" width="200"></el-table-column>
+          <el-table-column prop="result" label="检查结果"></el-table-column>
+          <el-table-column label="建议" width="350">
+            <template slot-scope="scope">
+              <span v-if="scope.row.IsComply === 'true'">-</span>
+              <span v-else>{{ scope.row.recommend }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div v-else class="baseline-details-loading">
+        <el-empty description="暂无数据" v-if="!baselineDetailsLoading"></el-empty>
+        <div v-else class="loading-container">
+          <el-loading type="primary" v-loading="baselineDetailsLoading"></el-loading>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+        title="等保测评详细信息"
+        :visible.sync="classifyDialogVisible"
+        width="70%"
+        :before-close="handleClassifyDialogClose">
+      <div v-if="classifyDetails.length" class="baseline-details-content">
+        <el-table
+            :data="classifyDetails"
+            border
+            stripe
+            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+          <el-table-column label="合规状态" width="100">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>
+              <el-tag v-else-if="scope.row.IsComply === 'pending'" type="warning">待检查</el-tag>
+              <el-tag v-else type="danger">不通过</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="检查项" width="200"></el-table-column>
+          <!--          <el-table-column prop="importantLevel" label="重要级别" width="100">-->
+          <!--            <template slot-scope="scope">-->
+          <!--              <el-tag :type="getImportanceLevelType(scope.row.importantLevel)">-->
+          <!--                {{ getImportanceLevel(scope.row.importantLevel) }}-->
+          <!--              </el-tag>-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
+          <el-table-column prop="basis" label="检查依据" width="200"></el-table-column>
+          <el-table-column prop="result" label="检查结果"></el-table-column>
+          <el-table-column label="建议" width="350">
+            <template slot-scope="scope">
+              <span v-if="scope.row.IsComply === 'true'">-</span>
+              <span v-else>{{ scope.row.recommend }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div v-else class="baseline-details-loading">
+        <el-empty description="暂无数据" v-if="!classifyDetailsLoading"></el-empty>
+        <div v-else class="loading-container">
+          <el-loading type="primary" v-loading="classifyDetailsLoading"></el-loading>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -444,7 +504,13 @@ export default {
       // 新增端口信息的软件类型分类
       softwareTypes: [
         "系统工具", "Web应用", "中间件", "数据库", "操作系统", "未知类型"
-      ]
+      ],
+      baselineDialogVisible: false,
+      baselineDetails: [],
+      baselineDetailsLoading: false,
+      classifyDialogVisible: false,
+      classifyDetails: [],
+      classifyDetailsLoading: false,
     }
   },
   computed: {
@@ -1003,7 +1069,80 @@ export default {
       };
 
       this.vulTypePieChart.setOption(option);
-    }
+    },
+    // 显示基线检测详细信息对话框
+    showBaselineDetails() {
+      if (!this.currentAsset) return;
+
+      this.baselineDialogVisible = true;
+      this.baselineDetailsLoading = true;
+      this.baselineDetails = [];
+
+      // 调用API获取详细信息
+      fetch(`/api/userinfo?ip=${this.currentAsset.ip}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.checkResults) {
+              this.baselineDetails = data.checkResults;
+            }
+            this.baselineDetailsLoading = false;
+          })
+          .catch(error => {
+            console.error('获取基线检测详细信息失败:', error);
+            this.baselineDetailsLoading = false;
+          });
+    },
+
+    // 关闭基线检测详细信息对话框
+    handleBaselineDialogClose() {
+      this.baselineDialogVisible = false;
+    },
+
+    showClassifyProtectDetails() {
+      if (!this.currentAsset) return;
+
+      this.classifyDialogVisible = true;
+      this.classifyDetailsLoading = true;
+      this.classifyDetails = [];
+
+      // 调用API获取详细信息
+      fetch(`/api/level3Userinfo?ip=${this.currentAsset.ip}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.checkResults) {
+              this.classifyDetails = data.checkResults;
+            }
+            this.classifyDetailsLoading = false;
+          })
+          .catch(error => {
+            console.error('获取基线检测详细信息失败:', error);
+            this.classifyDetailsLoading = false;
+          });
+    },
+    // 关闭基线检测详细信息对话框
+    handleClassifyDialogClose() {
+      this.classifyDialogVisible = false;
+    },
+
+    // 获取重要级别对应的类型
+    getImportanceLevelType(level) {
+      level = parseInt(level, 10);
+      switch (level) {
+        case 1: return 'warning';
+        case 2: return 'danger';
+        default: return 'info';
+      }
+    },
+
+    // 获取重要级别对应的文本
+    getImportanceLevel(level) {
+      level = parseInt(level, 10);
+      switch (level) {
+        case 1: return '一般';
+        case 2: return '重要';
+        default: return '未知';
+      }
+    },
     // 原有的资产类型饼图更新方法
     // updateAssetPieChart() {
     //   if (!this.pieChart) return;
@@ -1142,7 +1281,8 @@ export default {
       this.vulTypePieChart.dispose();
       this.vulTypePieChart = null;
     }
-  }
+  },
+
 }
 </script>
 
@@ -1415,6 +1555,46 @@ export default {
   color: #333;
   font-weight: bold;
   margin-bottom: 10px;
+}
+
+/* 基线信息图标样式 */
+.baseline-info-icon {
+  cursor: pointer;
+  margin-left: 10px;
+  color: #409EFF;
+  font-size: 16px;
+}
+
+.baseline-info-icon:hover {
+  color: #66b1ff;
+}
+
+/* 基线详细信息弹窗内容样式 */
+.baseline-details-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.baseline-details-loading {
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 确保弹窗中的表格单元格内容垂直居中 */
+.el-table .cell {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 23px;
 }
 
 </style>

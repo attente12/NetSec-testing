@@ -86,6 +86,7 @@
                     <el-menu-item-group>
                       <el-menu-item index="/CVELibrary">CVE库</el-menu-item>
                       <el-menu-item index="/pocManage">POC管理</el-menu-item>
+                      <el-menu-item index="/vulTypeManage">漏洞类型管理</el-menu-item>
 <!--                      <el-menu-item index="">漏洞类型管理</el-menu-item>-->
                     </el-menu-item-group>
                   </el-submenu>

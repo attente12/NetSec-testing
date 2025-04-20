@@ -42,7 +42,7 @@
 
             <el-table-column prop="searchResult" label="扫描结果" width="140">
               <template slot-scope="scope">
-                <span :class="{ 'failed-result': scope.row.searchResult === '未发现漏洞' }">{{ scope.row.searchResult }}</span>
+                <span :class="{ 'failed-result': scope.row.searchResult === '存在' }">{{ scope.row.searchResult }}</span>
               </template>
             </el-table-column>
 

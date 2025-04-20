@@ -17,7 +17,7 @@
           <el-select
               v-model="scanTarget"
               placeholder="请输入或选择要扫描的目标，例如：192.168.1.0"
-              filterable
+              @change="changeServer"
               allow-create
               default-first-option
               style="width: 100%; margin-bottom: 10px;">
@@ -319,6 +319,11 @@ export default {
   },
 
   methods: {
+    changeServer() {
+      if (this.scanTarget) {
+        this.loadTableData();
+      }
+    },
     chooseDetect(){
       if(this.all_ports===true){
         this.detectAll();
@@ -328,7 +333,7 @@ export default {
     },
     detect() {
       this.detectState=true;
-      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      // localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       const target = { ip: this.scanTarget };
       axios.post('/api/getNmapIp', target)
           .then(response => {
@@ -348,7 +353,7 @@ export default {
     },
     detectAll() {
       this.detectState=true;//检测中状态
-      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      // localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       //const target = { ip: this.scanTarget };
       // 生成请求体，默认包含 all_ports: true
       const target = {
@@ -376,6 +381,10 @@ export default {
       axios.get('/api/getAliveHosts')
           .then(response => {
             this.aliveHosts = response.data.alive_hosts;
+            if (!this.scanTarget) {
+              this.scanTarget = this.aliveHosts[0];
+              this.loadTableData();
+            }
           })
           .catch(error => {
             console.error('获取活跃IP列表失败:', error);
@@ -383,10 +392,10 @@ export default {
           });
     },
     loadTableData(){
-      const dataStorage=localStorage.getItem('scanTarget');
-      if (dataStorage) {
-        this.scanTarget = JSON.parse(dataStorage);
-      }
+      // const dataStorage=localStorage.getItem('scanTarget');
+      // if (dataStorage) {
+      //   this.scanTarget = JSON.parse(dataStorage);
+      // }
       axios.get('/api/getAllData').then(response => {
         this.pocList=response.data;
       })
@@ -411,7 +420,7 @@ export default {
         return;
       }
       this.runPocState=true;
-      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      // localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       this.selectedPoc = this.checkedPocs.map(poc => poc.id);
 
       const postData = {

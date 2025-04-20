@@ -22,6 +22,7 @@ import test from "@/views/test.vue";
 import tempBaseCheck from "@/views/tempBaseCheck.vue";
 import classifyProtectHome from "@/views/classifyProtectHome.vue";
 import tempClassifyProtect from "@/views/tempClassifyProtect.vue";
+import vulTypeManage from "@/views/vulTypeManage.vue";
 
 
 export default new Router({
@@ -136,6 +137,12 @@ export default new Router({
             name: 'tempClassifyProtect',
             component: tempClassifyProtect,
             meta:{title:'等保测评结果'}
+        },
+        {
+            path: '/vulTypeManage',
+            name: 'vulTypeManage',
+            component: vulTypeManage,
+            meta:{title:'漏洞类型管理'}
         },
 
     ]

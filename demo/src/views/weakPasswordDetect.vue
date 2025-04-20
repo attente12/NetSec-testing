@@ -17,8 +17,7 @@
             <el-select
                 v-model="scanTarget"
                 placeholder="选择扫描目标IP"
-                filterable
-                allow-create
+                @change="changeServer"
                 default-first-option
                 size="medium">
               <el-option
@@ -28,6 +27,20 @@
                   :value="ip">
               </el-option>
             </el-select>
+<!--            <el-select-->
+<!--                v-model="scanTarget"-->
+<!--                placeholder="选择扫描目标IP"-->
+<!--                filterable-->
+<!--                allow-create-->
+<!--                default-first-option-->
+<!--                size="medium">-->
+<!--              <el-option-->
+<!--                  v-for="ip in aliveHosts"-->
+<!--                  :key="ip"-->
+<!--                  :label="ip"-->
+<!--                  :value="ip">-->
+<!--              </el-option>-->
+<!--            </el-select>-->
           </div>
 
           <div class="info-alert">
@@ -148,15 +161,22 @@
                 type="success"
                 icon="el-icon-printer"
                 @click="printReport">
-              打印检测报告
+              打印当前主机弱口令
             </el-button>
             <el-button
                 size="medium"
-                type="danger"
-                icon="el-icon-delete"
-                @click="clearLocalStorage">
-              清除数据
+                type="warning"
+                icon="el-icon-printer"
+                @click="printAllHostsReport">
+              打印所有主机弱口令
             </el-button>
+<!--            <el-button-->
+<!--                size="medium"-->
+<!--                type="danger"-->
+<!--                icon="el-icon-delete"-->
+<!--                @click="clearLocalStorage">-->
+<!--              清除数据-->
+<!--            </el-button>-->
           </div>
         </div>
 
@@ -167,9 +187,9 @@
             stripe
             :header-cell-style="{background:'#f5f7fa',color:'#606266'}">
           <el-table-column prop="port" label="端口" width="180"></el-table-column>
-          <el-table-column prop="service" label="服务" width="180"></el-table-column>
-          <el-table-column prop="account" label="账号" width="180"></el-table-column>
-          <el-table-column prop="password" label="密码" width="180"></el-table-column>
+          <el-table-column prop="service_name" label="服务" width="180"></el-table-column>
+          <el-table-column prop="weak_username" label="账号" width="180"></el-table-column>
+          <el-table-column label="结果" width="180">存在弱密码</el-table-column>
         </el-table>
       </el-card>
     </div>
@@ -252,10 +272,43 @@
         <tbody>
         <tr v-for="item in tableData" :key="item.port + item.service">
           <td>{{ item.port }}</td>
-          <td>{{ item.service }}</td>
-          <td>{{ item.account }}</td>
-          <td>{{ item.password }}</td>
+          <td>{{ item.service_name }}</td>
+          <td>{{ item.weak_username }}</td>
+          <td>存在弱密码</td>
         </tr>
+        </tbody>
+      </table>
+      <div class="signature-area">
+        <span>检测人员签名：</span>
+        <div class="signature-line"></div>
+      </div>
+    </div>
+    <!-- 隐藏的所有主机打印区域 -->
+    <div id="printableAllHosts" class="printable">
+      <h1 class="print-title">全部主机弱口令检测报告</h1>
+      <div class="print-info">
+        <p>检测时间：{{ new Date().toLocaleString() }}</p>
+      </div>
+      <table class="print-table">
+        <thead>
+        <tr>
+          <th>主机IP</th>
+          <th>端口</th>
+          <th>服务</th>
+          <th>账号</th>
+          <th>结果</th>
+        </tr>
+        </thead>
+        <tbody>
+        <template v-for="(host) in allHostsWeakPasswords">
+          <tr v-for="(item, itemIndex) in host.weak_passwords" :key="host.ip + '-' + item.port + '-' + item.service_name + '-' + item.weak_username">
+            <td v-if="itemIndex === 0" :rowspan="host.weak_passwords.length">{{ host.ip }}</td>
+            <td>{{ item.port }}</td>
+            <td>{{ item.service_name }}</td>
+            <td>{{ item.weak_username }}</td>
+            <td>存在弱密码</td>
+          </tr>
+        </template>
         </tbody>
       </table>
       <div class="signature-area">
@@ -320,6 +373,7 @@ export default {
       PasswordStrengthLoading: false,
       checkAllServices: false,
       isIndeterminate: false,
+      allHostsWeakPasswords: [], // 新增：存储所有主机的弱口令数据
     };
   },
 
@@ -331,6 +385,11 @@ export default {
   },
 
   methods: {
+    changeServer() {
+      if (this.scanTarget) {
+        this.fetchAndDisplayPasswordResults();
+      }
+    },
     handleCheckAllServices(val) {
       this.selectedServices = val ? this.services.map(s => s.name) : [];
       this.isIndeterminate = false;
@@ -340,11 +399,64 @@ export default {
       axios.get('/api/getAliveHosts')
           .then(response => {
             this.aliveHosts = response.data.alive_hosts;
+            if (!this.scanTarget) {
+              this.scanTarget = this.aliveHosts[0];
+            }
+            this.fetchAndDisplayPasswordResults();
           })
           .catch(error => {
             console.error('获取活跃IP列表失败:', error);
             this.$message.error('获取活跃IP列表失败');
           });
+    },
+    fetchAndDisplayPasswordResults() {
+      if (!this.scanTarget) {
+        this.$message.warning('请先选择服务器IP');
+        return;
+      }
+
+      axios.get(`/api/getWeakPasswordByIp?ip=${this.scanTarget}`)
+          .then(response => {
+            // this.checkresults = response.data.Event_result;
+            this.tableData = response.data;
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            this.$message.error('获取检测结果失败，请重试');
+          });
+    },
+    // 获取所有主机的弱口令数据
+    fetchAllHostsWeakPasswords() {
+      return axios.get('/api/getAllWeakPassword')
+          .then(response => {
+            this.allHostsWeakPasswords = response.data;
+            return response.data;
+          })
+          .catch(error => {
+            console.error('获取所有主机弱口令数据失败:', error);
+            this.$message.error('获取所有主机弱口令数据失败，请重试');
+            throw error;
+          });
+    },
+    // 打印所有主机弱口令报告
+    async printAllHostsReport() {
+      try {
+        await this.fetchAllHostsWeakPasswords();
+        if (this.allHostsWeakPasswords.length === 0) {
+          this.$message.warning('没有发现弱口令数据');
+          return;
+        }
+
+        // 执行打印操作
+        const printContents = document.getElementById('printableAllHosts').innerHTML;
+        const originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+        window.location.reload();
+      } catch (error) {
+        console.error('打印所有主机报告失败:', error);
+      }
     },
 
     getServiceDetails(serviceName) {
@@ -496,20 +608,22 @@ export default {
         responses.forEach(response => {
           if (response.data && response.data.length > 0) {
             foundWeakPasswords = true;
-            response.data.forEach(result => {
-              this.tableData.push({
-                port: result.port,
-                service: result.service,
-                account: result.login,
-                password: result.password
-              });
-            });
+            // response.data.forEach(result => {
+            //   this.tableData.push({
+            //     port: result.port,
+            //     service: result.service,
+            //     account: result.login,
+            //     password: result.password
+            //   });
+            // });
           }
         });
 
         if (foundWeakPasswords) {
+          // window.location.reload();
+          this.fetchAndDisplayPasswordResults();
           this.$message.success('检测完成，结果已更新');
-          this.saveTableData();
+          // this.saveTableData();
         } else {
           this.$message.warning('检测完成，但未发现弱口令');
         }
@@ -604,8 +718,11 @@ export default {
     }
   },
   mounted() {
-    this.loadTableData();
+    // this.loadTableData();
+
     this.fetchAliveHosts(); // 组件挂载时获取活跃IP列表
+
+    // this.fetchAndDisplayPasswordResults();
   },
 
   // 组件销毁前取消防抖函数

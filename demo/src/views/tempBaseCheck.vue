@@ -27,6 +27,7 @@
           <el-option label="全部" value="all"></el-option>
           <el-option label="通过" value="passed"></el-option>
           <el-option label="未通过" value="failed"></el-option>
+          <el-option label="待检查" value="pending"></el-option>
         </el-select>
 
         <el-input
@@ -67,6 +68,7 @@
         <div class="summary">
           <el-tag type="success">通过: {{ passedCount }}</el-tag>
           <el-tag type="danger">未通过: {{ failedCount }}</el-tag>
+          <el-tag type="warning">待检查: {{ pendingCount }}</el-tag>
           <el-tag type="info">总计: {{ totalCount }}</el-tag>
         </div>
       </div>
@@ -84,14 +86,18 @@
         <el-table-column prop="result" label="检测结果" min-width="150"></el-table-column>
         <el-table-column label="是否通过检查" width="120">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.IsComply === 'true' ? 'success' : 'danger'">
-              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}
+<!--            <el-tag :type="scope.row.IsComply === 'true' ? 'success' : 'danger'">-->
+<!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
+<!--            </el-tag>-->
+            <el-tag :type="getStatusType(scope.row.IsComply)">
+                  {{ getStatusText(scope.row.IsComply) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="修改建议" min-width="250">
           <template slot-scope="scope">
-            <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>
+<!--            <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>-->
+            <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{ scope.row.recommend }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -123,7 +129,9 @@ export default {
       return this.checkresults.filter(result => {
         const matchesStatus = this.selectedStatus === 'all' ||
             (this.selectedStatus === 'passed' && result.IsComply === 'true') ||
-            (this.selectedStatus === 'failed' && result.IsComply === 'false');
+            (this.selectedStatus === 'failed' && result.IsComply === 'false') ||
+            (this.selectedStatus === 'pending' && result.IsComply === 'pending');
+            // (this.selectedStatus === 'failed' && result.IsComply === 'false');
         const matchesSearch = !this.searchTerm ||
             result.description.toLowerCase().includes(this.searchTerm.toLowerCase());
         return matchesStatus && matchesSearch;
@@ -134,6 +142,9 @@ export default {
     },
     failedCount() {
       return this.checkresults.filter(item => item.IsComply === 'false').length;
+    },
+    pendingCount() {
+      return this.checkresults.filter(item => item.IsComply === 'pending').length;
     },
     totalCount() {
       return this.checkresults.length;
@@ -165,7 +176,29 @@ export default {
     },
     goBack() {
       this.$router.push('/baseCheckHome');
-    }
+    },
+    // 获取状态对应的类型（用于el-tag的type属性）
+    getStatusType(status) {
+      switch(status) {
+        case 'true': return 'success';
+        case 'false': return 'danger';
+        case 'pending': return 'warning';
+        default: return 'info';
+      }
+    },
+
+    // 获取状态对应的文本
+    getStatusText(status) {
+      switch(status) {
+        case 'true': return '通过';
+        case 'false': return '未通过';
+        case 'pending': return '待检查';
+        default: return '未知';
+      }
+    },
+
+
+
   },
   mounted() {
     this.fetchAndDisplayChenckResults();
@@ -240,6 +273,10 @@ export default {
 .server-info-card {
   margin-bottom: 20px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.pending-result {
+  color: #e6a23c;
 }
 
 .card-header {

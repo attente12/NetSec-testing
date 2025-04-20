@@ -325,25 +325,26 @@ export default {
     return{
       addDialogVisible: false,
       codeDialogVisible: false,
-      // 添加漏洞类型列表
-      vulTypes: [
-        "缓冲区溢出",
-        "文件上传漏洞",
-        "代码注入",
-        "SQL 注入",
-        "跨站脚本攻击 (XSS)",
-        "权限提升",
-        "拒绝服务攻击 (DoS)",
-        "身份验证绕过",
-        "路径遍历",
-        "信息泄露",
-        "跨站请求伪造 (CSRF)",
-        "XML 外部实体注入 (XXE)",
-        "远程代码执行 (RCE)",
-        "会话劫持",
-        "未经授权的访问",
-        "其他类型"
-      ],
+      // 漏洞类型列表
+      vulTypes: [],
+      // vulTypes: [
+      //   "缓冲区溢出",
+      //   "文件上传漏洞",
+      //   "代码注入",
+      //   "SQL 注入",
+      //   "跨站脚本攻击 (XSS)",
+      //   "权限提升",
+      //   "拒绝服务攻击 (DoS)",
+      //   "身份验证绕过",
+      //   "路径遍历",
+      //   "信息泄露",
+      //   "跨站请求伪造 (CSRF)",
+      //   "XML 外部实体注入 (XXE)",
+      //   "远程代码执行 (RCE)",
+      //   "会话劫持",
+      //   "未经授权的访问",
+      //   "其他类型"
+      // ],
       newPoc: {
         type: '',
         cve_id: '',
@@ -441,6 +442,40 @@ export default {
     }
   },
   methods:{
+    loadVulTypes() {
+      fetch('/api/poc/getAllVulnTypes')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            this.vulTypes = data.types; // 将API返回的类型列表赋值给 vulTypes
+          })
+          .catch(error => {
+            console.error('Error fetching vulnerability types:', error);
+            // 设置一个默认的漏洞类型列表作为备用
+            this.vulTypes = [
+                "缓冲区溢出",
+                "文件上传漏洞",
+                "代码注入",
+                "SQL 注入",
+                "跨站脚本攻击 (XSS)",
+                "权限提升",
+                "拒绝服务攻击 (DoS)",
+                "身份验证绕过",
+                "路径遍历",
+                "信息泄露",
+                "跨站请求伪造 (CSRF)",
+                "XML 外部实体注入 (XXE)",
+                "远程代码执行 (RCE)",
+                "会话劫持",
+                "未经授权的访问",
+                "其他类型"
+            ];
+          });
+    },
     //搜索的实现
     load() {
       let query = new URLSearchParams({ keyword: this.searchKeyword.trim() }).toString();
@@ -1002,6 +1037,7 @@ export default {
   created() {
     this.loadData();
     this.loadFile();
+    this.loadVulTypes();
   }
 }
 </script>
