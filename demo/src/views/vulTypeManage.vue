@@ -5,6 +5,8 @@
       <el-button type="primary" size="small" @click="showAddDialog">新增漏洞类型</el-button>
     </div>
 
+    <div class="tip-text">以下为POC管理中可设置的漏洞类型</div>
+
     <el-card class="list-card" shadow="hover">
       <div v-if="loading" class="loading-container">
         <el-skeleton :rows="6" animated />
@@ -207,6 +209,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+}
+
+
+.tip-text {
+  color: #606266;
+  font-size: 14px;
+  margin-bottom: 15px;
 }
 
 .list-card {
