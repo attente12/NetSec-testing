@@ -93,6 +93,20 @@
                 </el-button>
               </div>
             </div>
+
+            <!-- 新增的CVE库使用手册下载模块 -->
+            <div class="manual-item">
+              <div class="manual-item-icon">
+                <i class="el-icon-document"></i>
+              </div>
+              <div class="manual-item-content">
+                <h4>CVE库使用手册</h4>
+                <p>详细介绍CVE库的使用方法、CVE漏洞库界面各个字段的含义</p>
+                <el-button type="primary" size="small" icon="el-icon-download" @click="downloadFile('/CVE-Search_helper.pdf')">
+                  下载手册
+                </el-button>
+              </div>
+            </div>
           </div>
         </div>
       </el-card>
