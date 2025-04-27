@@ -24,13 +24,18 @@
                         <span slot="title">首页</span>
                     </el-menu-item>
 
+                  <el-menu-item index="/hostDiscovery">
+                    <i class="el-icon-search"></i>
+                    <span slot="title">主机发现</span>
+                  </el-menu-item>
+
                     <el-submenu index="1">
                         <template slot="title">
                             <i class="el-icon-location"></i>
                             <span>安全基线检测</span>
                         </template>
                         <el-menu-item-group>
-                            <el-menu-item index="/baseCheckHome">基线检测启动</el-menu-item>
+                            <el-menu-item index="/baseCheckHome">基线检测</el-menu-item>
                             <el-menu-item index="/baseCheck">基线检测报告</el-menu-item>
                         </el-menu-item-group>
                     </el-submenu>
@@ -41,8 +46,8 @@
                             <span>安全风险评估</span>
                         </template>
                         <el-menu-item-group>
-                            <el-menu-item index="/CVELibrary">CVE库</el-menu-item>
-                            <el-menu-item index="/pocManage">POC管理</el-menu-item>
+<!--                            <el-menu-item index="/CVELibrary">CVE库</el-menu-item>-->
+<!--                            <el-menu-item index="/pocManage">POC管理</el-menu-item>-->
                             <el-menu-item index="/pocScanner">漏洞扫描</el-menu-item>
                             <el-menu-item index="/pluginScan">插件化扫描</el-menu-item>
                         </el-menu-item-group>
@@ -52,16 +57,39 @@
                     <i class="el-icon-attract"></i>
                     <span slot="title">弱口令检测</span>
                   </el-menu-item>
+                  <el-submenu index="4">
+                    <template slot="title">
+                      <i class="el-icon-share"></i>
+                      <span>等级保护测评</span>
+                    </template>
+                    <el-menu-item-group>
+                      <el-menu-item index="/classifyProtectHome">等级保护测评</el-menu-item>
+                      <el-menu-item index="/classifyProtect">测评历史</el-menu-item>
+                    </el-menu-item-group>
+                  </el-submenu>
 
-                  <el-menu-item index="/classifyProtect">
-                    <i class="el-icon-share"></i>
-                    <span slot="title">等级保护测评</span>
-                  </el-menu-item>
+<!--                  <el-menu-item index="/classifyProtect">-->
+<!--                    <i class="el-icon-share"></i>-->
+<!--                    <span slot="title">等级保护测评</span>-->
+<!--                  </el-menu-item>-->
 
                   <el-menu-item index="/assetManage">
                     <i class="el-icon-s-help"></i>
                     <span slot="title">资产管理</span>
                   </el-menu-item>
+
+                  <el-submenu index="3">
+                    <template slot="title">
+                      <i class="el-icon-collection"></i>
+                      <span>知识库</span>
+                    </template>
+                    <el-menu-item-group>
+                      <el-menu-item index="/CVELibrary">CVE库</el-menu-item>
+                      <el-menu-item index="/pocManage">POC管理</el-menu-item>
+                      <el-menu-item index="/vulTypeManage">漏洞类型管理</el-menu-item>
+<!--                      <el-menu-item index="">漏洞类型管理</el-menu-item>-->
+                    </el-menu-item-group>
+                  </el-submenu>
 
                 </el-menu>
             </el-col>
@@ -104,9 +132,10 @@
             // 根据当前路径决定要展开哪些子菜单
             if (path.startsWith('/baseCheckHome') || path.startsWith('/baseCheck')) {
               this.openeds = ['1'];
-            } else if (['/CVELibrary', '/pocManage', '/pocScanner', '/pluginScan'].some(p => path.startsWith(p))) {
+            } else if ([ '/pocScanner', '/pluginScan'].some(p => path.startsWith(p))) {
               this.openeds = ['2'];
-            }
+            }else if (['/CVELibrary', '/pocManage'].some(p => path.startsWith(p))) {
+              this.openeds = ['3'];}
           },
             handleOpen(key, keyPath) {
                 console.log(key, keyPath);

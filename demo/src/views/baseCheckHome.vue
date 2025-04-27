@@ -307,6 +307,11 @@ export default {
     align-items: center;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
 .check-items {
     margin-top: 30px;
 }
@@ -327,4 +332,37 @@ export default {
 .el-row {
     margin-bottom: 20px;
 }
+
+.control-bar {
+  display: flex;
+  align-items: center;
+}
+
+.selected-info {
+  margin-top: 10px;
+  color: #606266;
+  font-size: 14px;
+}
+
+.temp-check-link {
+  margin-top: -8px;
+  margin-bottom: -13px;
+  font-size: 12px;
+  text-align: right;
+
+  .el-link {
+    display: inline-flex;
+    align-items: center;
+
+    i {
+      margin-right: 3px;
+      font-size: 14px;
+    }
+  }
+}
+
+.login-form >>> .el-form-item {
+  margin-bottom: 18px;
+}
 </style>
+

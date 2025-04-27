@@ -32,20 +32,186 @@
             <span class="label">IP地址：</span>
             <span class="value">{{ currentAsset.ip }}</span>
           </div>
-          <div class="info-item">
-            <span class="label">操作系统：</span>
-            <span class="value">{{ currentAsset.os }}</span>
+          <div class="info-item" v-if="currentAsset.serverinfo">
+            <span class="label">主机名：</span>
+            <span class="value">{{ currentAsset.serverinfo.hostname }}</span>
           </div>
+          <div class="info-item" v-if="currentAsset.serverinfo">
+            <span class="label">操作系统：</span>
+            <span class="value">{{ currentAsset.serverinfo.osName }}</span>
+            <!--            <span class="value">{{ currentAsset.serverinfo.osName }} {{ // currentAsset.serverinfo.version }}</span>-->
+          </div>
+          <div class="info-item" v-if="currentAsset.serverinfo">
+            <span class="label">主机架构：</span>
+            <span class="value">{{ currentAsset.serverinfo.arch }}</span>
+          </div>
+          <div class="info-item" v-if="currentAsset.serverinfo">
+            <span class="label">CPU：</span>
+            <span class="value">{{ currentAsset.serverinfo.cpu }}</span>
+            <!--            <span class="value">{{ currentAsset.serverinfo.cpu }} ({{ currentAsset.serverinfo.cpuPhysical }}物理核, {{ currentAsset.serverinfo.cpuCore }}逻辑核)</span>-->
+          </div>
+          <div class="info-item" v-if="currentAsset.serverinfo">
+            <span class="label">硬件型号：</span>
+            <span class="value">{{ currentAsset.serverinfo.ProductName }}</span>
+          </div>
+          <div class="info-item" v-if="currentAsset.serverinfo">
+            <span class="label">空闲内存：</span>
+            <span class="value">{{ currentAsset.serverinfo.free }}</span>
+          </div>
+          <!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
+          <!--            <span class="label">互联网连接：</span>-->
+          <!--            <span class="value">{{ currentAsset.serverinfo.isInternet === 'true' ? '已连接' : '未连接' }}</span>-->
+          <!--          </div>-->
           <div class="info-item">
             <span class="label">开放端口：</span>
-            <span class="value">{{ currentAsset.ports }}</span>
+            <span class="value">{{ formatOpenPorts }}</span>
           </div>
         </div>
       </div>
-      <!-- 前面的代码保持不变，直到漏洞信息标题 -->
+
+      <!-- 基线检测信息 -->
+      <div class="baseline-section" v-if="currentAsset.baseline_summary">
+        <h2>
+          基线检测
+          <el-tooltip content="查看详细信息" placement="top">
+            <i class="el-icon-view baseline-info-icon" @click="showBaselineDetails"></i>
+          </el-tooltip>
+        </h2>
+        <div class="baseline-info">
+          <div class="baseline-summary">
+            <div class="compliance-dashboard">
+              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">合规率</div>
+              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.compliance_rate" :color="'#67C23A'" :stroke-width="10">
+                <template v-slot:default>
+                  <div class="progress-content">
+                    <span class="rate">{{ currentAsset.baseline_summary.compliance_rate }}%</span>
+                  </div>
+                </template>
+              </el-progress>
+            </div>
+
+            <div class="baseline-stats">
+              <div class="stat-item">
+                <div class="item-header">总检测项</div>
+                <div class="item-value" style="color: #303133;">{{ currentAsset.baseline_summary.total_checks }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="item-header">合规项</div>
+                <div class="item-value" style="color: #67C23A;">{{ currentAsset.baseline_summary.compliant_items }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="item-header">不合规项</div>
+                <div class="item-value" style="color: #F56C6C;">{{ currentAsset.baseline_summary.non_compliant_items }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 等保测评信息 -->
+      <div class="baseline-section" v-if="currentAsset.baseline_summary">
+        <h2>
+          等级保护测评
+          <el-tooltip content="查看详细信息" placement="top">
+            <i class="el-icon-view baseline-info-icon" @click="showClassifyProtectDetails"></i>
+          </el-tooltip>
+        </h2>
+        <div class="baseline-info">
+          <div class="baseline-summary">
+            <div class="compliance-dashboard">
+<!--              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">合规率</div>-->
+<!--              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.compliance_rate" :color="'#67C23A'" :stroke-width="10">-->
+<!--                <template v-slot:default>-->
+<!--                  <div class="progress-content">-->
+<!--                    <span class="rate">{{ currentAsset.baseline_summary.compliance_rate }}%</span>-->
+<!--                  </div>-->
+<!--                </template>-->
+<!--              </el-progress>-->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 软件资产部分 -->
+      <div class="ports-section">
+        <h2>软件资产</h2>
+        <div v-for="(ports, type) in groupedPorts" :key="type" class="port-group">
+          <h3 class="group-title">{{ type }}</h3>
+          <el-table
+              :data="ports"
+              border
+              stripe
+              :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+            <el-table-column prop="port" label="端口" width="80"></el-table-column>
+            <el-table-column prop="protocol" label="协议" width="80"></el-table-column>
+            <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>
+            <el-table-column prop="product" label="产品" width="150">
+              <template slot-scope="scope">
+                {{ scope.row.product || '未识别' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="version" label="版本" width="150">
+              <template slot-scope="scope">
+                {{ scope.row.version || '未识别' }}
+              </template>
+            </el-table-column>
+            <!--            <el-table-column prop="product" label="产品" width="150"></el-table-column>-->
+            <!--            <el-table-column prop="version" label="版本" width="150"></el-table-column>-->
+            <el-table-column prop="status" label="状态" width="100">
+              <template slot-scope="scope">
+                <el-tag :type="scope.row.status === 'open' ? 'success' : 'danger'">
+                  {{ scope.row.status }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+
+      <!-- 风险部分 -->
+      <div class="weak-password-section" v-if="weakPasswordPorts.length > 0">
+        <h2>风险</h2>
+        <el-table
+            :data="weakPasswordPorts"
+            border
+            stripe
+            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+          <!--          <el-table-column prop="product" label="产品" width="150">-->
+          <!--            <template slot-scope="scope">-->
+          <!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
+          <el-table-column prop="product" label="产品" width="150">
+            <template slot-scope="scope">
+              <span v-if="scope.row.product" style="color: #F56C6C; font-weight: bold;">
+                {{ scope.row.product }}
+              </span>
+              <span v-else>未识别</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="port" label="端口" width="80"></el-table-column>
+          <el-table-column prop="protocol" label="协议" width="80"></el-table-column>
+          <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>
+          <el-table-column prop="software_type" label="软件类型" width="120"></el-table-column>
+          <el-table-column prop="weak_username" label="账号" width="120">
+            <template slot-scope="scope">
+              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_username }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="weak_password" label="结果" width="120">
+            <span style="color: #F56C6C; font-weight: bold;">存在弱密码</span>
+          </el-table-column>
+          <!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
+          <!--          <el-table-column prop="weak_password" label="弱密码" width="120">-->
+          <!--            <template slot-scope="scope">-->
+          <!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_password }}</span>-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
+          <!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
+        </el-table>
+      </div>
 
       <h2 class="flex justify-between items-center">
-        <span style="font-size: 18px;">所含漏洞信息</span>
+        <span style="font-size: 18px;">资产漏洞信息</span>
         <div class="chart-toggle">
           <el-radio-group v-model="displayType" size="small">
             <el-radio-button label="assetType">按资产类型分布</el-radio-button>
@@ -65,7 +231,7 @@
         </el-card>
 
         <!-- 主机漏洞表格 -->
-        <div class="table-section">
+        <div class="table-section" v-if="currentAsset.host_vulnerabilities && currentAsset.host_vulnerabilities.length > 0">
           <h3><strong>系统漏洞</strong></h3>
           <el-table
               :data="currentAsset.host_vulnerabilities"
@@ -92,8 +258,8 @@
           </el-table>
         </div>
 
-        <!-- 原有的端口漏洞分组表格 -->
-        <div class="table-section">
+        <!-- 端口漏洞分组表格 -->
+        <div class="table-section" v-if="Object.keys(groupedPortVulnerabilities).length > 0">
           <h3><strong>软件资产漏洞</strong></h3>
           <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities"
                :key="type"
@@ -139,7 +305,39 @@
         </el-card>
 
         <!-- 按漏洞类型分组的表格 -->
-        <div class="table-section">
+        <!--        <div class="table-section" v-if="Object.keys(groupedVulTypeVulnerabilities).length > 0">-->
+        <!--          <h3><strong>漏洞详情</strong></h3>-->
+        <!--          <div v-for="(vulnerabilities, type) in groupedVulTypeVulnerabilities"-->
+        <!--               :key="type"-->
+        <!--               class="vulnerability-group">-->
+        <!--            <h4 class="group-title">{{ type }}</h4>-->
+        <!--            <el-table-->
+        <!--                :data="vulnerabilities"-->
+        <!--                border-->
+        <!--                stripe-->
+        <!--                :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
+        <!--            >-->
+        <!--              <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
+        <!--              <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
+        <!--              <el-table-column prop="softwareType" label="资产类型" width="150"></el-table-column>-->
+        <!--              <el-table-column prop="service_name" label="服务名称" width="100"></el-table-column>-->
+        <!--              <el-table-column prop="cvss" label="风险等级" width="120">-->
+        <!--                <template slot-scope="scope">-->
+        <!--                  <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+        <!--                </template>-->
+        <!--              </el-table-column>-->
+        <!--              <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
+        <!--              <el-table-column prop="vulExist" label="是否存在" width="100">-->
+        <!--                <template slot-scope="scope">-->
+        <!--                  <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
+        <!--                    {{ scope.row.vulExist }}-->
+        <!--                  </el-tag>-->
+        <!--                </template>-->
+        <!--              </el-table-column>-->
+        <!--            </el-table>-->
+        <!--          </div>-->
+        <!--        </div>-->
+        <div class="table-section" v-if="Object.keys(groupedVulTypeVulnerabilities).length > 0">
           <h3><strong>漏洞详情</strong></h3>
           <div v-for="(vulnerabilities, type) in groupedVulTypeVulnerabilities"
                :key="type"
@@ -153,7 +351,8 @@
             >
               <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>
               <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>
-              <el-table-column prop="softwareType" label="资产类型" width="150"></el-table-column>
+              <el-table-column prop="vulType" label="漏洞类型" width="150"></el-table-column>
+              <el-table-column prop="softwareType" label="资产类型" width="120"></el-table-column>
               <el-table-column prop="service_name" label="服务名称" width="100"></el-table-column>
               <el-table-column prop="cvss" label="风险等级" width="120">
                 <template slot-scope="scope">
@@ -173,6 +372,93 @@
         </div>
       </template>
     </div>
+    <el-dialog
+        title="基线检测详细信息"
+        :visible.sync="baselineDialogVisible"
+        width="70%"
+        :before-close="handleBaselineDialogClose">
+      <div v-if="baselineDetails.length" class="baseline-details-content">
+        <el-table
+            :data="baselineDetails"
+            border
+            stripe
+            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+          <el-table-column label="合规状态" width="100">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>
+              <el-tag v-else-if="scope.row.IsComply === 'pending'" type="warning">待检查</el-tag>
+              <el-tag v-else type="danger">不通过</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="检查项" width="200"></el-table-column>
+<!--          <el-table-column prop="importantLevel" label="重要级别" width="100">-->
+<!--            <template slot-scope="scope">-->
+<!--              <el-tag :type="getImportanceLevelType(scope.row.importantLevel)">-->
+<!--                {{ getImportanceLevel(scope.row.importantLevel) }}-->
+<!--              </el-tag>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+          <el-table-column prop="basis" label="检查依据" width="200"></el-table-column>
+          <el-table-column prop="result" label="检查结果"></el-table-column>
+          <el-table-column label="建议" width="350">
+            <template slot-scope="scope">
+              <span v-if="scope.row.IsComply === 'true'">-</span>
+              <span v-else>{{ scope.row.recommend }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div v-else class="baseline-details-loading">
+        <el-empty description="暂无数据" v-if="!baselineDetailsLoading"></el-empty>
+        <div v-else class="loading-container">
+          <el-loading type="primary" v-loading="baselineDetailsLoading"></el-loading>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+        title="等保测评详细信息"
+        :visible.sync="classifyDialogVisible"
+        width="70%"
+        :before-close="handleClassifyDialogClose">
+      <div v-if="classifyDetails.length" class="baseline-details-content">
+        <el-table
+            :data="classifyDetails"
+            border
+            stripe
+            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+          <el-table-column label="合规状态" width="100">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>
+              <el-tag v-else-if="scope.row.IsComply === 'pending'" type="warning">待检查</el-tag>
+              <el-tag v-else type="danger">不通过</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="检查项" width="200"></el-table-column>
+          <!--          <el-table-column prop="importantLevel" label="重要级别" width="100">-->
+          <!--            <template slot-scope="scope">-->
+          <!--              <el-tag :type="getImportanceLevelType(scope.row.importantLevel)">-->
+          <!--                {{ getImportanceLevel(scope.row.importantLevel) }}-->
+          <!--              </el-tag>-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
+          <el-table-column prop="basis" label="检查依据" width="200"></el-table-column>
+          <el-table-column prop="result" label="检查结果"></el-table-column>
+          <el-table-column label="建议" width="350">
+            <template slot-scope="scope">
+              <span v-if="scope.row.IsComply === 'true'">-</span>
+              <span v-else>{{ scope.row.recommend }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <div v-else class="baseline-details-loading">
+        <el-empty description="暂无数据" v-if="!classifyDetailsLoading"></el-empty>
+        <div v-else class="loading-container">
+          <el-loading type="primary" v-loading="classifyDetailsLoading"></el-loading>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -188,473 +474,43 @@ export default {
       vulTypePieChart: null,
       displayType: 'assetType',
       assets: [
-        // {
-        //   "host_vulnerabilities": [
-        //     {
-        //       "cvss": "10.000000",
-        //       "softwareType": "操作系统",
-        //       "summary": "drivers/media/usb/dvb-usb/technisat-usb2.c in the Linux kernel through 5.2.9 has an out-of-bounds read via crafted USB device traffic (which may be remote via usbip or usbredir).",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2019-15505",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "softwareType": "操作系统",
-        //       "summary": "The NFSv2 and NFSv3 server implementations in the Linux kernel through 4.10.13 lack certain checks for the end of a buffer, which allows remote attackers to trigger pointer-arithmetic errors or possibly have unspecified other impact via crafted requests, related to fs/nfsd/nfs3xdr.c and fs/nfsd/nfsxdr.c.",
-        //       "vulExist": "存在",
-        //       "vulType": "未知类型",
-        //       "vuln_id": "CVE-2017-7895",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "softwareType": "操作系统",
-        //       "summary": "A heap-based buffer overflow vulnerability was found in the Linux kernel, version kernel-2.6.32, in Marvell WiFi chip driver. A remote attacker could cause a denial of service (system crash) or, possibly execute arbitrary code, when the lbs_ibss_join_existing function is called after a STA connects to an AP.",
-        //       "vulExist": "存在",
-        //       "vulType": "Denial of Service (DoS)",
-        //       "vuln_id": "CVE-2019-14896",
-        //       "vuln_name": ""
-        //     }
-        //   ],
-        //   "ip": "10.9.130.193",
-        //   "port_vulnerabilities": [
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "A heap overflow flaw was found in the Linux kernel, all versions 3.x.x and 4.x.x before 4.18.0, in Marvell WiFi chip driver. The vulnerability allows a remote attacker to cause a system crash, resulting in a denial of service, or execute arbitrary code. The highest threat with this vulnerability is with the availability of the system. If code execution occurs, the code will run with the permissions of root. This will affect both confidentiality and integrity of files on the system.",
-        //       "vulExist": "不存在",
-        //       "vulType": "Denial of Service (DoS)",
-        //       "vuln_id": "CVE-2019-14901",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "A heap-based buffer overflow vulnerability was found in the Linux kernel, version kernel-2.6.32, in Marvell WiFi chip driver. A remote attacker could cause a denial of service (system crash) or, possibly execute arbitrary code, when the lbs_ibss_join_existing function is called after a STA connects to an AP.",
-        //       "vulExist": "存在",
-        //       "vulType": "Denial of Service (DoS)",
-        //       "vuln_id": "CVE-2019-14896",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "Brackets versions 1.14 and earlier have a command injection vulnerability. Successful exploitation could lead to arbitrary code execution.",
-        //       "vulExist": "不存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2019-8255",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM Spectrum Protect Plus 10.1.0 and 10.1.5 could allow a remote attacker to execute arbitrary code on the system. By using a specially crafted HTTP command, an attacker could exploit this vulnerability to execute arbitrary command on the system. IBM X-Force ID: 175020.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-4210",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM Spectrum Protect Plus 10.1.0 and 10.1.5 could allow a remote attacker to execute arbitrary code on the system. By using a specially crafted HTTP command, an attacker could exploit this vulnerability to execute arbitrary command on the system. IBM X-Force ID: 175022.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-4211",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM Spectrum Protect Plus 10.1.0 and 10.1.5 could allow a remote attacker to execute arbitrary code on the system. By using a specially crafted HTTP command, an attacker could exploit this vulnerability to execute arbitrary command on the system. IBM X-Force ID: 175023.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-4212",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "SecureCRT before 8.7.2 allows remote attackers to execute arbitrary code via an Integer Overflow and a Buffer Overflow because a banner can trigger a line number to CSI functions that exceeds INT_MAX.",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2020-12651",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "Adobe Flash Player Desktop Runtime 32.0.0.371 and earlier, Adobe Flash Player for Google Chrome 32.0.0.371 and earlier, and Adobe Flash Player for Microsoft Edge and Internet Explorer 32.0.0.330 and earlier have an use after free vulnerability. Successful exploitation could lead to arbitrary code execution.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-9633",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM Spectrum Copy Data Management 2.2.13 and earlier could allow a remote attacker to execute arbitrary commands on the system, caused by improper validation of user-supplied input by the Spectrum Copy Data Management Admin Console login and uploadcertificate function . A remote attacker could inject arbitrary shell commands which would be executed on the affected system. IBM X-Force ID: 214958.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2021-39065",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM CICS TX Standard and Advanced 11.1 could allow a remote attacker to execute arbitrary commands on the system by sending a specially crafted request. IBM X-Force ID: 227980.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2022-31767",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "A carefully crafted request body can cause a buffer overflow in the mod_lua multipart parser (r:parsebody() called from Lua scripts). The Apache httpd team is not aware of an exploit for the vulnerabilty though it might be possible to craft one. This issue affects Apache HTTP Server 2.4.51 and earlier.",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2021-44790",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP Server 2.4.52 and earlier fails to close inbound connection when errors are encountered discarding the request body, exposing the server to HTTP Request Smuggling",
-        //       "vulExist": "存在",
-        //       "vulType": "未知类型",
-        //       "vuln_id": "CVE-2022-22720",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP Server 2.4.53 and earlier may not send the X-Forwarded-* headers to the origin server based on client side Connection header hop-by-hop mechanism. This may be used to bypass IP based authentication on the origin server/application.",
-        //       "vulExist": "存在",
-        //       "vulType": "未知类型",
-        //       "vuln_id": "CVE-2022-31813",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Out-of-bounds Write vulnerability in mod_sed of Apache HTTP Server allows an attacker to overwrite heap memory with possibly attacker provided data. This issue affects Apache HTTP Server 2.4 version 2.4.52 and prior versions.",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2022-23943",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "In Apache HTTP Server versions 2.4.0 to 2.4.46 a specially crafted SessionHeader sent by an origin server could cause a heap overflow",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2021-26691",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "ap_escape_quotes() may write beyond the end of a buffer when given malicious input. No included modules pass untrusted data to these functions, but third-party / external modules may. This issue affects Apache HTTP Server 2.4.48 and earlier.",
-        //       "vulExist": "存在",
-        //       "vulType": "Cross-Site Scripting (XSS)",
-        //       "vuln_id": "CVE-2021-39275",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP server 2.4.32 to 2.4.44 mod_proxy_uwsgi info disclosure and possible RCE",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-11984",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "6.800000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "A crafted request uri-path can cause mod_proxy to forward the request to an origin server choosen by the remote user. This issue affects Apache HTTP Server 2.4.48 and earlier.",
-        //       "vulExist": "存在",
-        //       "vulType": "未知类型",
-        //       "vuln_id": "CVE-2021-40438",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "6.800000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP Server versions 2.4.0 to 2.4.46 A specially crafted Digest nonce can cause a stack overflow in mod_auth_digest. There is no report of this overflow being exploitable, nor the Apache HTTP Server team could create one, though some particular compiler and/or compilation option might make it possible, with limited consequences anyway due to the size (a single byte) and the value (zero byte) of the overflow",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2020-35452",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "6.400000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP Server 2.4.53 and earlier may crash or disclose information due to a read beyond bounds in ap_strcmp_match() when provided with an extremely large input buffer. While no code distributed with the server can be coerced into such a call, third-party modules or lua scripts that use ap_strcmp_match() may hypothetically be affected.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2022-28615",
-        //       "vuln_name": ""
-        //     }
-        //   ]
-        // },
-        // {
-        //   "host_vulnerabilities": [
-        //     {
-        //       "cvss": "10.000000",
-        //       "softwareType": "操作系统",
-        //       "summary": "drivers/media/usb/dvb-usb/technisat-usb2.c in the Linux kernel through 5.2.9 has an out-of-bounds read via crafted USB device traffic (which may be remote via usbip or usbredir).",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2019-15505",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "softwareType": "操作系统",
-        //       "summary": "The NFSv2 and NFSv3 server implementations in the Linux kernel through 4.10.13 lack certain checks for the end of a buffer, which allows remote attackers to trigger pointer-arithmetic errors or possibly have unspecified other impact via crafted requests, related to fs/nfsd/nfs3xdr.c and fs/nfsd/nfsxdr.c.",
-        //       "vulExist": "存在",
-        //       "vulType": "未知类型",
-        //       "vuln_id": "CVE-2017-7895",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "softwareType": "操作系统",
-        //       "summary": "A heap-based buffer overflow vulnerability was found in the Linux kernel, version kernel-2.6.32, in Marvell WiFi chip driver. A remote attacker could cause a denial of service (system crash) or, possibly execute arbitrary code, when the lbs_ibss_join_existing function is called after a STA connects to an AP.",
-        //       "vulExist": "存在",
-        //       "vulType": "Denial of Service (DoS)",
-        //       "vuln_id": "CVE-2019-14896",
-        //       "vuln_name": ""
-        //     }
-        //   ],
-        //   "ip": "10.9.130.192",
-        //   "port_vulnerabilities": [
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 21,
-        //       "softwareType": "系统工具",
-        //       "summary": "A heap overflow flaw was found in the Linux kernel, all versions 3.x.x and 4.x.x before 4.18.0, in Marvell WiFi chip driver. The vulnerability allows a remote attacker to cause a system crash, resulting in a denial of service, or execute arbitrary code. The highest threat with this vulnerability is with the availability of the system. If code execution occurs, the code will run with the permissions of root. This will affect both confidentiality and integrity of files on the system.",
-        //       "vulExist": "不存在",
-        //       "vulType": "Denial of Service (DoS)",
-        //       "vuln_id": "CVE-2019-14901",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "A heap-based buffer overflow vulnerability was found in the Linux kernel, version kernel-2.6.32, in Marvell WiFi chip driver. A remote attacker could cause a denial of service (system crash) or, possibly execute arbitrary code, when the lbs_ibss_join_existing function is called after a STA connects to an AP.",
-        //       "vulExist": "存在",
-        //       "vulType": "Denial of Service (DoS)",
-        //       "vuln_id": "CVE-2019-14896",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM Spectrum Protect Plus 10.1.0 and 10.1.5 could allow a remote attacker to execute arbitrary code on the system. By using a specially crafted HTTP command, an attacker could exploit this vulnerability to execute arbitrary command on the system. IBM X-Force ID: 175020.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-4210",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM Spectrum Protect Plus 10.1.0 and 10.1.5 could allow a remote attacker to execute arbitrary code on the system. By using a specially crafted HTTP command, an attacker could exploit this vulnerability to execute arbitrary command on the system. IBM X-Force ID: 175022.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-4211",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM Spectrum Protect Plus 10.1.0 and 10.1.5 could allow a remote attacker to execute arbitrary code on the system. By using a specially crafted HTTP command, an attacker could exploit this vulnerability to execute arbitrary command on the system. IBM X-Force ID: 175023.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-4212",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "SecureCRT before 8.7.2 allows remote attackers to execute arbitrary code via an Integer Overflow and a Buffer Overflow because a banner can trigger a line number to CSI functions that exceeds INT_MAX.",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2020-12651",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "Adobe Flash Player Desktop Runtime 32.0.0.371 and earlier, Adobe Flash Player for Google Chrome 32.0.0.371 and earlier, and Adobe Flash Player for Microsoft Edge and Internet Explorer 32.0.0.330 and earlier have an use after free vulnerability. Successful exploitation could lead to arbitrary code execution.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-9633",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM Spectrum Copy Data Management 2.2.13 and earlier could allow a remote attacker to execute arbitrary commands on the system, caused by improper validation of user-supplied input by the Spectrum Copy Data Management Admin Console login and uploadcertificate function . A remote attacker could inject arbitrary shell commands which would be executed on the affected system. IBM X-Force ID: 214958.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2021-39065",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "10.000000",
-        //       "port_id": 22,
-        //       "softwareType": "系统工具",
-        //       "summary": "IBM CICS TX Standard and Advanced 11.1 could allow a remote attacker to execute arbitrary commands on the system by sending a specially crafted request. IBM X-Force ID: 227980.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2022-31767",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "A carefully crafted request body can cause a buffer overflow in the mod_lua multipart parser (r:parsebody() called from Lua scripts). The Apache httpd team is not aware of an exploit for the vulnerabilty though it might be possible to craft one. This issue affects Apache HTTP Server 2.4.51 and earlier.",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2021-44790",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP Server 2.4.52 and earlier fails to close inbound connection when errors are encountered discarding the request body, exposing the server to HTTP Request Smuggling",
-        //       "vulExist": "存在",
-        //       "vulType": "未知类型",
-        //       "vuln_id": "CVE-2022-22720",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP Server 2.4.53 and earlier may not send the X-Forwarded-* headers to the origin server based on client side Connection header hop-by-hop mechanism. This may be used to bypass IP based authentication on the origin server/application.",
-        //       "vulExist": "存在",
-        //       "vulType": "未知类型",
-        //       "vuln_id": "CVE-2022-31813",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Out-of-bounds Write vulnerability in mod_sed of Apache HTTP Server allows an attacker to overwrite heap memory with possibly attacker provided data. This issue affects Apache HTTP Server 2.4 version 2.4.52 and prior versions.",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2022-23943",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "In Apache HTTP Server versions 2.4.0 to 2.4.46 a specially crafted SessionHeader sent by an origin server could cause a heap overflow",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2021-26691",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "ap_escape_quotes() may write beyond the end of a buffer when given malicious input. No included modules pass untrusted data to these functions, but third-party / external modules may. This issue affects Apache HTTP Server 2.4.48 and earlier.",
-        //       "vulExist": "存在",
-        //       "vulType": "Cross-Site Scripting (XSS)",
-        //       "vuln_id": "CVE-2021-39275",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "7.500000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP server 2.4.32 to 2.4.44 mod_proxy_uwsgi info disclosure and possible RCE",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2020-11984",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "6.800000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "A crafted request uri-path can cause mod_proxy to forward the request to an origin server choosen by the remote user. This issue affects Apache HTTP Server 2.4.48 and earlier.",
-        //       "vulExist": "存在",
-        //       "vulType": "未知类型",
-        //       "vuln_id": "CVE-2021-40438",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "6.800000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP Server versions 2.4.0 to 2.4.46 A specially crafted Digest nonce can cause a stack overflow in mod_auth_digest. There is no report of this overflow being exploitable, nor the Apache HTTP Server team could create one, though some particular compiler and/or compilation option might make it possible, with limited consequences anyway due to the size (a single byte) and the value (zero byte) of the overflow",
-        //       "vulExist": "存在",
-        //       "vulType": "Buffer Overflow",
-        //       "vuln_id": "CVE-2020-35452",
-        //       "vuln_name": ""
-        //     },
-        //     {
-        //       "cvss": "6.400000",
-        //       "port_id": 80,
-        //       "softwareType": "Web应用",
-        //       "summary": "Apache HTTP Server 2.4.53 and earlier may crash or disclose information due to a read beyond bounds in ap_strcmp_match() when provided with an extremely large input buffer. While no code distributed with the server can be coerced into such a call, third-party modules or lua scripts that use ap_strcmp_match() may hypothetically be affected.",
-        //       "vulExist": "存在",
-        //       "vulType": "Remote Code Execution (RCE)",
-        //       "vuln_id": "CVE-2022-28615",
-        //       "vuln_name": ""
-        //     }
-        //   ]
-        // }
+
       ],
+      // vulTypes: [
+      //   "Buffer Overflow", "File Upload Vulnerability", "Code Injection",
+      //   "SQL Injection", "Cross-Site Scripting (XSS)", "Privilege Escalation",
+      //   "Denial of Service (DoS)", "Authentication Bypass", "Path Traversal",
+      //   "Information Disclosure", "Cross-Site Request Forgery (CSRF)",
+      //   "XML External Entity (XXE)", "Remote Code Execution (RCE)",
+      //   "Session Hijacking", "Unauthorized Access"
+      // ],
       vulTypes: [
-        "Buffer Overflow", "File Upload Vulnerability", "Code Injection",
-        "SQL Injection", "Cross-Site Scripting (XSS)", "Privilege Escalation",
-        "Denial of Service (DoS)", "Authentication Bypass", "Path Traversal",
-        "Information Disclosure", "Cross-Site Request Forgery (CSRF)",
-        "XML External Entity (XXE)", "Remote Code Execution (RCE)",
-        "Session Hijacking", "Unauthorized Access"
-      ]
+        "缓冲区溢出",
+        "文件上传漏洞",
+        "代码注入",
+        "SQL 注入",
+        "跨站脚本攻击 (XSS)",
+        "权限提升",
+        "拒绝服务攻击 (DoS)",
+        "身份验证绕过",
+        "路径遍历",
+        "信息泄露",
+        "跨站请求伪造 (CSRF)",
+        "XML 外部实体注入 (XXE)",
+        "远程代码执行 (RCE)",
+        "会话劫持",
+        "未经授权的访问"
+      ],
+      // 新增端口信息的软件类型分类
+      softwareTypes: [
+        "系统工具", "Web应用", "中间件", "数据库", "操作系统", "未知类型"
+      ],
+      baselineDialogVisible: false,
+      baselineDetails: [],
+      baselineDetailsLoading: false,
+      classifyDialogVisible: false,
+      classifyDetails: [],
+      classifyDetailsLoading: false,
     }
   },
   computed: {
@@ -662,18 +518,45 @@ export default {
     currentAsset() {
       return this.assets.find(asset => asset.ip === this.currentIp);
     },
+    // groupedPortVulnerabilities() {
+    //   if (!this.currentAsset || !this.currentAsset.port_vulnerabilities) {
+    //     return {};
+    //   }
+    //   return this.currentAsset.port_vulnerabilities.reduce((groups, vuln) => {
+    //     const type = vuln.softwareType || '未分类';
+    //     if (!groups[type]) {
+    //       groups[type] = [];
+    //     }
+    //     groups[type].push(vuln);
+    //     return groups;
+    //   }, {});
+    // },
     groupedPortVulnerabilities() {
       if (!this.currentAsset || !this.currentAsset.port_vulnerabilities) {
         return {};
       }
-      return this.currentAsset.port_vulnerabilities.reduce((groups, vuln) => {
-        const type = vuln.softwareType || '未分类';
-        if (!groups[type]) {
-          groups[type] = [];
+
+      // 创建一个按指定顺序的空对象
+      const orderedGroups = {};
+      this.softwareTypes.forEach(type => {
+        orderedGroups[type] = [];
+      });
+
+      // 填充数据
+      this.currentAsset.port_vulnerabilities.forEach(vuln => {
+        const type = vuln.softwareType || '未知类型';
+        if (this.softwareTypes.includes(type)) {
+          orderedGroups[type].push(vuln);
+        } else {
+          // 对于不在预定义列表中的类型，归为未知类型
+          orderedGroups['未知类型'].push(vuln);
         }
-        groups[type].push(vuln);
-        return groups;
-      }, {});
+      });
+
+      // 过滤掉空数组，只返回有数据的分组
+      return Object.fromEntries(
+          Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
+      );
     },
     vulnerabilityTypeStats() {
       const stats = {
@@ -686,29 +569,105 @@ export default {
 
       if (this.currentAsset?.host_vulnerabilities) {
         this.currentAsset.host_vulnerabilities.forEach(vuln => {
-          const type = vuln.softwareType || '未知类型';
-          if (Object.hasOwn(stats, type)) {
-            stats[type]++;
-          } else {
-            stats['未知类型']++;
+          // 只统计"是否存在"为"存在"的漏洞
+          if (vuln.vulExist === '存在') {
+            const type = vuln.softwareType || '未知类型';
+            if (Object.hasOwn(stats, type)) {
+              stats[type]++;
+            } else {
+              stats['未知类型']++;
+            }
           }
         });
       }
 
       if (this.currentAsset?.port_vulnerabilities) {
         this.currentAsset.port_vulnerabilities.forEach(vuln => {
-          const type = vuln.softwareType || '未知类型';
-          if (Object.hasOwn(stats, type)) {
-            stats[type]++;
-          } else {
-            stats['未知类型']++;
+          // 只统计"是否存在"为"存在"的漏洞
+          if (vuln.vulExist === '存在') {
+            const type = vuln.softwareType || '未知类型';
+            if (Object.hasOwn(stats, type)) {
+              stats[type]++;
+            } else {
+              stats['未知类型']++;
+            }
           }
         });
       }
 
       return stats;
     },
-    // 新增：按漏洞类型统计
+
+    // // 修改漏洞类型统计
+    // vulTypeStats() {
+    //   const stats = {};
+    //
+    //   // 初始化所有漏洞类型的计数为0
+    //   this.vulTypes.forEach(type => {
+    //     stats[type] = 0;
+    //   });
+    //
+    //   // 统计主机漏洞
+    //   if (this.currentAsset?.host_vulnerabilities) {
+    //     this.currentAsset.host_vulnerabilities.forEach(vuln => {
+    //       // 只统计"是否存在"为"存在"的漏洞
+    //       if (vuln.vulExist === '存在' && vuln.vulType) {
+    //         stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;
+    //       }
+    //     });
+    //   }
+    //
+    //   // 统计端口漏洞
+    //   if (this.currentAsset?.port_vulnerabilities) {
+    //     this.currentAsset.port_vulnerabilities.forEach(vuln => {
+    //       // 只统计"是否存在"为"存在"的漏洞
+    //       if (vuln.vulExist === '存在' && vuln.vulType) {
+    //         stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;
+    //       }
+    //     });
+    //   }
+    //
+    //   // 只返回数量大于0的类型
+    //   return Object.fromEntries(
+    //       Object.entries(stats).filter(([, count]) => count > 0)
+    //   );
+    // },
+    //
+    // // 修改按漏洞类型分组的漏洞
+    // groupedVulTypeVulnerabilities() {
+    //   // 创建一个按指定顺序的空对象
+    //   const orderedGroups = {};
+    //   this.vulTypes.forEach(type => {
+    //     orderedGroups[type] = [];
+    //   });
+    //
+    //   // 合并主机漏洞和端口漏洞
+    //   const allVulnerabilities = [
+    //     ...(this.currentAsset?.host_vulnerabilities || []),
+    //     ...(this.currentAsset?.port_vulnerabilities || [])
+    //   ].filter(vuln => vuln.vulExist === '存在'); // 只包括"是否存在"为"存在"的漏洞
+    //
+    //   // 按漏洞类型分组
+    //   allVulnerabilities.forEach(vuln => {
+    //     const type = vuln.vulType || '未分类';
+    //     if (this.vulTypes.includes(type)) {
+    //       orderedGroups[type].push(vuln);
+    //     } else {
+    //       // 如果不在列表中，添加到"未分类"
+    //       if (!orderedGroups['未分类']) {
+    //         orderedGroups['未分类'] = [];
+    //       }
+    //       orderedGroups['未分类'].push(vuln);
+    //     }
+    //   });
+    //
+    //   // 过滤掉空数组，只返回有数据的分组
+    //   return Object.fromEntries(
+    //       Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
+    //   );
+    // },
+
+    // 修改按漏洞类型统计的计算属性
     vulTypeStats() {
       const stats = {};
 
@@ -720,7 +679,8 @@ export default {
       // 统计主机漏洞
       if (this.currentAsset?.host_vulnerabilities) {
         this.currentAsset.host_vulnerabilities.forEach(vuln => {
-          if (vuln.vulType) {
+          // 只统计"是否存在"为"存在"的漏洞
+          if (vuln.vulExist === '存在' && vuln.vulType) {
             stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;
           }
         });
@@ -729,7 +689,8 @@ export default {
       // 统计端口漏洞
       if (this.currentAsset?.port_vulnerabilities) {
         this.currentAsset.port_vulnerabilities.forEach(vuln => {
-          if (vuln.vulType) {
+          // 只统计"是否存在"为"存在"的漏洞
+          if (vuln.vulExist === '存在' && vuln.vulType) {
             stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;
           }
         });
@@ -740,31 +701,201 @@ export default {
           Object.entries(stats).filter(([, count]) => count > 0)
       );
     },
-    // 新增：按漏洞类型分组的所有漏洞
+
+// 更新 groupedVulTypeVulnerabilities 计算属性
     groupedVulTypeVulnerabilities() {
-      const groups = {};
+      // 创建一个按指定顺序的空对象
+      const orderedGroups = {};
+      this.vulTypes.forEach(type => {
+        orderedGroups[type] = [];
+      });
+
+      // 添加未分类类别
+      orderedGroups['未分类'] = [];
 
       // 合并主机漏洞和端口漏洞
       const allVulnerabilities = [
         ...(this.currentAsset?.host_vulnerabilities || []),
         ...(this.currentAsset?.port_vulnerabilities || [])
-      ];
+      ]; // 显示所有漏洞，包括"存在"和"不存在"的
 
       // 按漏洞类型分组
       allVulnerabilities.forEach(vuln => {
         const type = vuln.vulType || '未分类';
-        if (!groups[type]) {
-          groups[type] = [];
+        if (this.vulTypes.includes(type)) {
+          orderedGroups[type].push(vuln);
+        } else {
+          // 如果不在列表中，添加到"未分类"
+          orderedGroups['未分类'].push(vuln);
         }
-        groups[type].push(vuln);
       });
 
-      return groups;
+      // 过滤掉空数组，只返回有数据的分组
+      return Object.fromEntries(
+          Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
+      );
+    },
+
+
+
+    // vulnerabilityTypeStats() {
+    //   const stats = {
+    //     '操作系统': 0,
+    //     'Web应用': 0,
+    //     '系统工具': 0,
+    //     '中间件': 0,
+    //     '未知类型': 0
+    //   };
+    //
+    //   if (this.currentAsset?.host_vulnerabilities) {
+    //     this.currentAsset.host_vulnerabilities.forEach(vuln => {
+    //       const type = vuln.softwareType || '未知类型';
+    //       if (Object.hasOwn(stats, type)) {
+    //         stats[type]++;
+    //       } else {
+    //         stats['未知类型']++;
+    //       }
+    //     });
+    //   }
+    //
+    //   if (this.currentAsset?.port_vulnerabilities) {
+    //     this.currentAsset.port_vulnerabilities.forEach(vuln => {
+    //       const type = vuln.softwareType || '未知类型';
+    //       if (Object.hasOwn(stats, type)) {
+    //         stats[type]++;
+    //       } else {
+    //         stats['未知类型']++;
+    //       }
+    //     });
+    //   }
+    //
+    //   return stats;
+    // },
+    // // 新增：按漏洞类型统计
+    // vulTypeStats() {
+    //   const stats = {};
+    //
+    //   // 初始化所有漏洞类型的计数为0
+    //   this.vulTypes.forEach(type => {
+    //     stats[type] = 0;
+    //   });
+    //
+    //   // 统计主机漏洞
+    //   if (this.currentAsset?.host_vulnerabilities) {
+    //     this.currentAsset.host_vulnerabilities.forEach(vuln => {
+    //       if (vuln.vulType) {
+    //         stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;
+    //       }
+    //     });
+    //   }
+    //
+    //   // 统计端口漏洞
+    //   if (this.currentAsset?.port_vulnerabilities) {
+    //     this.currentAsset.port_vulnerabilities.forEach(vuln => {
+    //       if (vuln.vulType) {
+    //         stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;
+    //       }
+    //     });
+    //   }
+    //
+    //   // 只返回数量大于0的类型
+    //   return Object.fromEntries(
+    //       Object.entries(stats).filter(([, count]) => count > 0)
+    //   );
+    // },
+    //
+    // groupedVulTypeVulnerabilities() {
+    //   // 创建一个按指定顺序的空对象
+    //   const orderedGroups = {};
+    //   this.vulTypes.forEach(type => {
+    //     orderedGroups[type] = [];
+    //   });
+    //
+    //   // 合并主机漏洞和端口漏洞
+    //   const allVulnerabilities = [
+    //     ...(this.currentAsset?.host_vulnerabilities || []),
+    //     ...(this.currentAsset?.port_vulnerabilities || [])
+    //   ];
+    //
+    //   // 按漏洞类型分组
+    //   allVulnerabilities.forEach(vuln => {
+    //     const type = vuln.vulType || '未分类';
+    //     if (this.vulTypes.includes(type)) {
+    //       orderedGroups[type].push(vuln);
+    //     } else {
+    //       // 如果不在列表中，添加到"未分类"
+    //       if (!orderedGroups['未分类']) {
+    //         orderedGroups['未分类'] = [];
+    //       }
+    //       orderedGroups['未分类'].push(vuln);
+    //     }
+    //   });
+    //
+    //   // 过滤掉空数组，只返回有数据的分组
+    //   return Object.fromEntries(
+    //       Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
+    //   );
+    // },
+    // 新增：提取开放端口展示在资产信息中
+    formatOpenPorts() {
+      if (!this.currentAsset || !this.currentAsset.ports) {
+        return '无';
+      }
+      return this.currentAsset.ports
+          .filter(port => port.status === 'open')
+          .map(port => `${port.port}`)
+          .join(', ');
+    },
+    // 新增：按软件类型分组端口信息
+    groupedPorts() {
+      if (!this.currentAsset || !this.currentAsset.ports) {
+        return {};
+      }
+
+      // 创建一个按指定顺序的空对象
+      const orderedGroups = {};
+      this.softwareTypes.forEach(type => {
+        orderedGroups[type] = [];
+      });
+
+      // 填充数据
+      this.currentAsset.ports.forEach(port => {
+        const type = port.software_type || '未知类型';
+        if (this.softwareTypes.includes(type)) {
+          orderedGroups[type].push(port);
+        } else {
+          // 对于不在预定义列表中的类型，归为未知类型
+          orderedGroups['未知类型'].push(port);
+        }
+      });
+
+      // 过滤掉空数组，只返回有数据的分组
+      return Object.fromEntries(
+          Object.entries(orderedGroups).filter(([, ports]) => ports.length > 0)
+      );
+    },
+    weakPasswordPorts() {
+      if (!this.currentAsset || !this.currentAsset.ports) {
+        return [];
+      }
+      return this.currentAsset.ports.filter(port =>
+          port.weak_username && port.weak_password && port.verify_time
+      );
+    },
+    // 新增：获取合规率颜色
+    getComplianceColor() {
+      if (!this.currentAsset || !this.currentAsset.baseline_summary) {
+        return '#F56C6C';
+      }
+      const rate = this.currentAsset.baseline_summary.compliance_rate;
+      if (rate < 30) return '#F56C6C';
+      if (rate < 60) return '#E6A23C';
+      return '#67C23A';
     }
   },
   methods: {
     getResults() {
-      fetch('/api/getAllAssetsVulnData')
+      fetch('/api/getAllAssetInfo')
           .then(response => response.json())
           .then(data => {
             this.assets = data;
@@ -780,18 +911,7 @@ export default {
       } else {
         this.updateCharts(); // 否则直接更新数据
       }
-      // this.updateCharts();
-      // this.initCharts();
-      // 使用 nextTick 确保 DOM 更新后再初始化图表
-      // this.$nextTick(() => {
-      //   this.initCharts();  // 改用 initCharts 而不是 updateCharts
-      // });
     },
-    // handleSelect(ip) {
-    //   this.currentIp = ip;
-    //   this.displayType ='assetType';
-    //   this.updateCharts();
-    // },
     getCvssType(score) {
       score = parseFloat(score);
       if (score >= 7.0) return 'danger';
@@ -804,7 +924,11 @@ export default {
       if (score >= 7.0) return '高风险';
       if (score >= 4.0) return '中风险';
       if (score >= 0.0) return '低风险';
-      return '信息';
+      return '未知';
+    },
+    // 新增：格式化进度条
+    format() {
+      return '';
     },
     async initCharts() {
       await this.$nextTick();
@@ -839,7 +963,6 @@ export default {
         this.updateVulTypePieChart();
       }
     },
-    // 原有的资产类型饼图更新方法
     updateAssetPieChart() {
       if (!this.pieChart) return;
 
@@ -863,7 +986,7 @@ export default {
           data: data.map(item => item.name)
         },
         series: [{
-          name: '资产类型分布',
+          name: '存在漏洞的资产类型分布', // 更新名称以反映只显示存在的漏洞
           type: 'pie',
           radius: ['40%', '70%'],
           center: ['40%', '50%'],
@@ -893,7 +1016,8 @@ export default {
 
       this.pieChart.setOption(option);
     },
-    // 新增：漏洞类型饼图更新方法
+
+    // 更新漏洞类型饼图
     updateVulTypePieChart() {
       if (!this.vulTypePieChart) return;
 
@@ -916,7 +1040,7 @@ export default {
           data: data.map(item => item.name)
         },
         series: [{
-          name: '漏洞类型分布',
+          name: '存在漏洞的类型分布', // 更新名称以反映只显示存在的漏洞
           type: 'pie',
           radius: ['40%', '70%'],
           center: ['40%', '50%'],
@@ -945,7 +1069,187 @@ export default {
       };
 
       this.vulTypePieChart.setOption(option);
-    }
+    },
+    // 显示基线检测详细信息对话框
+    showBaselineDetails() {
+      if (!this.currentAsset) return;
+
+      this.baselineDialogVisible = true;
+      this.baselineDetailsLoading = true;
+      this.baselineDetails = [];
+
+      // 调用API获取详细信息
+      fetch(`/api/userinfo?ip=${this.currentAsset.ip}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.checkResults) {
+              this.baselineDetails = data.checkResults;
+            }
+            this.baselineDetailsLoading = false;
+          })
+          .catch(error => {
+            console.error('获取基线检测详细信息失败:', error);
+            this.baselineDetailsLoading = false;
+          });
+    },
+
+    // 关闭基线检测详细信息对话框
+    handleBaselineDialogClose() {
+      this.baselineDialogVisible = false;
+    },
+
+    showClassifyProtectDetails() {
+      if (!this.currentAsset) return;
+
+      this.classifyDialogVisible = true;
+      this.classifyDetailsLoading = true;
+      this.classifyDetails = [];
+
+      // 调用API获取详细信息
+      fetch(`/api/level3Userinfo?ip=${this.currentAsset.ip}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.checkResults) {
+              this.classifyDetails = data.checkResults;
+            }
+            this.classifyDetailsLoading = false;
+          })
+          .catch(error => {
+            console.error('获取基线检测详细信息失败:', error);
+            this.classifyDetailsLoading = false;
+          });
+    },
+    // 关闭基线检测详细信息对话框
+    handleClassifyDialogClose() {
+      this.classifyDialogVisible = false;
+    },
+
+    // 获取重要级别对应的类型
+    getImportanceLevelType(level) {
+      level = parseInt(level, 10);
+      switch (level) {
+        case 1: return 'warning';
+        case 2: return 'danger';
+        default: return 'info';
+      }
+    },
+
+    // 获取重要级别对应的文本
+    getImportanceLevel(level) {
+      level = parseInt(level, 10);
+      switch (level) {
+        case 1: return '一般';
+        case 2: return '重要';
+        default: return '未知';
+      }
+    },
+    // 原有的资产类型饼图更新方法
+    // updateAssetPieChart() {
+    //   if (!this.pieChart) return;
+    //
+    //   const stats = this.vulnerabilityTypeStats;
+    //   const data = Object.entries(stats)
+    //       .filter(([, value]) => value > 0)
+    //       .map(([name, value]) => ({
+    //         name,
+    //         value
+    //       }));
+    //
+    //   const option = {
+    //     tooltip: {
+    //       trigger: 'item',
+    //       formatter: '{a} <br/>{b}: {c} ({d}%)'
+    //     },
+    //     legend: {
+    //       orient: 'vertical',
+    //       right: 'right',
+    //       top: 'middle',
+    //       data: data.map(item => item.name)
+    //     },
+    //     series: [{
+    //       name: '资产类型分布',
+    //       type: 'pie',
+    //       radius: ['40%', '70%'],
+    //       center: ['40%', '50%'],
+    //       avoidLabelOverlap: false,
+    //       itemStyle: {
+    //         borderRadius: 10,
+    //         borderColor: '#fff',
+    //         borderWidth: 2
+    //       },
+    //       label: {
+    //         show: true,
+    //         formatter: '{b}: {c}个'
+    //       },
+    //       emphasis: {
+    //         label: {
+    //           show: true,
+    //           fontSize: '18',
+    //           fontWeight: 'bold'
+    //         }
+    //       },
+    //       labelLine: {
+    //         show: true
+    //       },
+    //       data: data
+    //     }]
+    //   };
+    //
+    //   this.pieChart.setOption(option);
+    // },
+    // // 新增：漏洞类型饼图更新方法
+    // updateVulTypePieChart() {
+    //   if (!this.vulTypePieChart) return;
+    //
+    //   const stats = this.vulTypeStats;
+    //   const data = Object.entries(stats)
+    //       .map(([name, value]) => ({
+    //         name,
+    //         value
+    //       }));
+    //
+    //   const option = {
+    //     tooltip: {
+    //       trigger: 'item',
+    //       formatter: '{a} <br/>{b}: {c} ({d}%)'
+    //     },
+    //     legend: {
+    //       orient: 'vertical',
+    //       right: 'right',
+    //       top: 'middle',
+    //       data: data.map(item => item.name)
+    //     },
+    //     series: [{
+    //       name: '漏洞类型分布',
+    //       type: 'pie',
+    //       radius: ['40%', '70%'],
+    //       center: ['40%', '50%'],
+    //       avoidLabelOverlap: false,
+    //       itemStyle: {
+    //         borderRadius: 10,
+    //         borderColor: '#fff',
+    //         borderWidth: 2
+    //       },
+    //       label: {
+    //         show: true,
+    //         formatter: '{b}: {c}个'
+    //       },
+    //       emphasis: {
+    //         label: {
+    //           show: true,
+    //           fontSize: '18',
+    //           fontWeight: 'bold'
+    //         }
+    //       },
+    //       labelLine: {
+    //         show: true
+    //       },
+    //       data: data
+    //     }]
+    //   };
+    //
+    //   this.vulTypePieChart.setOption(option);
+    // }
   },
   watch: {
     currentAsset() {
@@ -959,17 +1263,6 @@ export default {
       });
     }
   },
-  // created() {
-  //   this.getResults().then(() => {
-  //     if (this.assets.length > 0) {
-  //       this.currentIp = this.assets[0].ip;
-  //       this.displayType = 'assetType';
-  //       this.$nextTick(() => {
-  //         this.initCharts();
-  //       });
-  //     }
-  //   });
-  // },
   created() {
     this.getResults();
   },
@@ -988,7 +1281,8 @@ export default {
       this.vulTypePieChart.dispose();
       this.vulTypePieChart = null;
     }
-  }
+  },
+
 }
 </script>
 
@@ -1131,12 +1425,182 @@ export default {
   padding-left: 10px;
   border-left: 3px solid #409EFF;
 }
+
+.port-group {
+  margin-bottom: 20px;
+}
+
+.ports-section {
+  margin-bottom: 30px;
+}
+
+.ports-section h2, .baseline-section h2 {
+  color: #303133;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.weak-password-section {
+  margin-bottom: 30px;
+}
+
+.weak-password-section h2 {
+  color: #303133;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+
+/* 新增基线检测相关样式*/
+.baseline-section {
+  margin-bottom: 30px;
+}
+
+.baseline-info {
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.baseline-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.progress-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-content .rate {
+  font-size: 24px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.progress-content .label {
+  font-size: 14px;
+  color: #606266;
+  margin-top: 5px;
+}
+
+.baseline-stats {
+  display: flex;
+  flex: 1;
+  justify-content: space-around;
+  margin-left: 30px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 0 15px;
+}
+
+.item-header {
+  font-size: 14px;
+  color: #606266;
+  margin-bottom: 10px;
+}
+
+.item-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.compliance-details {
+  margin-top: 20px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.detail-label {
+  width: 70px;
+  margin-right: 15px;
+}
+
+.detail-progress {
+  flex: 1;
+}
+
+.detail-numbers {
+  width: 80px;
+  text-align: right;
+  color: #606266;
+  font-size: 14px;
+  margin-left: 15px;
+}
+.compliance-dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.compliance-label {
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* 基线信息图标样式 */
+.baseline-info-icon {
+  cursor: pointer;
+  margin-left: 10px;
+  color: #409EFF;
+  font-size: 16px;
+}
+
+.baseline-info-icon:hover {
+  color: #66b1ff;
+}
+
+/* 基线详细信息弹窗内容样式 */
+.baseline-details-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.baseline-details-loading {
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 确保弹窗中的表格单元格内容垂直居中 */
+.el-table .cell {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 23px;
+}
+
 </style>
 
-<!--没有分两类的方法-->
 <!--<template>-->
 <!--  <div class="vulnerability-container">-->
-<!--    &lt;!&ndash; 左侧IP列表 &ndash;&gt;-->
 <!--    <div class="ip-list">-->
 <!--      <div class="menu-header">-->
 <!--        <span class="title">资产</span>-->
@@ -1169,68 +1633,214 @@ export default {
 <!--            <span class="label">IP地址：</span>-->
 <!--            <span class="value">{{ currentAsset.ip }}</span>-->
 <!--          </div>-->
-<!--          <div class="info-item">-->
-<!--            <span class="label">操作系统：</span>-->
-<!--            <span class="value">{{ currentAsset.os }}</span>-->
+<!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
+<!--            <span class="label">主机名：</span>-->
+<!--            <span class="value">{{ currentAsset.serverinfo.hostname }}</span>-->
 <!--          </div>-->
+<!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
+<!--            <span class="label">操作系统：</span>-->
+<!--            <span class="value">{{ currentAsset.serverinfo.osName }}</span>-->
+<!--            &lt;!&ndash;            <span class="value">{{ currentAsset.serverinfo.osName }} {{ // currentAsset.serverinfo.version }}</span>&ndash;&gt;-->
+<!--          </div>-->
+<!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
+<!--            <span class="label">主机架构：</span>-->
+<!--            <span class="value">{{ currentAsset.serverinfo.arch }}</span>-->
+<!--          </div>-->
+<!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
+<!--            <span class="label">CPU：</span>-->
+<!--            <span class="value">{{ currentAsset.serverinfo.cpu }}</span>-->
+<!--            &lt;!&ndash;            <span class="value">{{ currentAsset.serverinfo.cpu }} ({{ currentAsset.serverinfo.cpuPhysical }}物理核, {{ currentAsset.serverinfo.cpuCore }}逻辑核)</span>&ndash;&gt;-->
+<!--          </div>-->
+<!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
+<!--            <span class="label">硬件型号：</span>-->
+<!--            <span class="value">{{ currentAsset.serverinfo.ProductName }}</span>-->
+<!--          </div>-->
+<!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
+<!--            <span class="label">空闲内存：</span>-->
+<!--            <span class="value">{{ currentAsset.serverinfo.free }}</span>-->
+<!--          </div>-->
+<!--          &lt;!&ndash;          <div class="info-item" v-if="currentAsset.serverinfo">&ndash;&gt;-->
+<!--          &lt;!&ndash;            <span class="label">互联网连接：</span>&ndash;&gt;-->
+<!--          &lt;!&ndash;            <span class="value">{{ currentAsset.serverinfo.isInternet === 'true' ? '已连接' : '未连接' }}</span>&ndash;&gt;-->
+<!--          &lt;!&ndash;          </div>&ndash;&gt;-->
 <!--          <div class="info-item">-->
 <!--            <span class="label">开放端口：</span>-->
-<!--            <span class="value">{{ currentAsset.ports }}</span>-->
+<!--            <span class="value">{{ formatOpenPorts }}</span>-->
 <!--          </div>-->
 <!--        </div>-->
 <!--      </div>-->
 
-<!--      <h2>漏洞信息</h2>-->
-<!--      &lt;!&ndash; 漏洞类型统计饼图 &ndash;&gt;-->
-<!--      <el-card class="chart-section">-->
-<!--        <div slot="header" class="clearfix">-->
-<!--          <span>漏洞类型分布</span>-->
-<!--        </div>-->
-<!--        <div class="pie-chart" ref="pieChart" style="width: 100%; height: 300px;"></div>-->
-<!--      </el-card>-->
+<!--      &lt;!&ndash; 新增：基线检测信息 &ndash;&gt;-->
+<!--      <div class="baseline-section" v-if="currentAsset.baseline_summary">-->
+<!--        <h2>基线检测</h2>-->
+<!--        <div class="baseline-info">-->
+<!--          <div class="baseline-summary">-->
+<!--            <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.compliance_rate" :color="getComplianceColor" :stroke-width="10">-->
+<!--              <template v-slot:default>-->
+<!--                <div class="progress-content">-->
+<!--                  <span class="rate">{{ currentAsset.baseline_summary.compliance_rate }}%</span>-->
+<!--                  <span class="label">合规率</span>-->
+<!--                </div>-->
+<!--              </template>-->
+<!--            </el-progress>-->
 
-<!--      &lt;!&ndash; 主机漏洞表格 &ndash;&gt;-->
-<!--      <div class="table-section">-->
-<!--        <h3><strong>系统漏洞</strong></h3>-->
+<!--            <div class="baseline-stats">-->
+<!--              <div class="stat-item">-->
+<!--                <div class="item-header">总检测项</div>-->
+<!--                <div class="item-value">{{ currentAsset.baseline_summary.total_checks }}</div>-->
+<!--              </div>-->
+<!--              <div class="stat-item">-->
+<!--                <div class="item-header">合规项</div>-->
+<!--                <div class="item-value">{{ currentAsset.baseline_summary.compliant_items }}</div>-->
+<!--              </div>-->
+<!--              <div class="stat-item">-->
+<!--                <div class="item-header">不合规项</div>-->
+<!--                <div class="item-value">{{ currentAsset.baseline_summary.non_compliant_items }}</div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+
+<!--          <el-divider></el-divider>-->
+
+<!--          <div class="compliance-details">-->
+<!--            <div class="detail-row">-->
+<!--              <div class="detail-label">-->
+<!--                <el-tag type="danger">严重</el-tag>-->
+<!--              </div>-->
+<!--              <div class="detail-progress">-->
+<!--                <el-progress-->
+<!--                    :percentage="(currentAsset.baseline_summary.critical_compliant / currentAsset.baseline_summary.critical_items) * 100"-->
+<!--                    :format="format"-->
+<!--                    :stroke-width="15"-->
+<!--                    :color="'#F56C6C'">-->
+<!--                </el-progress>-->
+<!--              </div>-->
+<!--              <div class="detail-numbers">-->
+<!--                {{ currentAsset.baseline_summary.critical_compliant }}/{{ currentAsset.baseline_summary.critical_items }}-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            <div class="detail-row">-->
+<!--              <div class="detail-label">-->
+<!--                <el-tag type="warning">高危</el-tag>-->
+<!--              </div>-->
+<!--              <div class="detail-progress">-->
+<!--                <el-progress-->
+<!--                    :percentage="(currentAsset.baseline_summary.high_compliant / currentAsset.baseline_summary.high_items) * 100"-->
+<!--                    :format="format"-->
+<!--                    :stroke-width="15"-->
+<!--                    :color="'#E6A23C'">-->
+<!--                </el-progress>-->
+<!--              </div>-->
+<!--              <div class="detail-numbers">-->
+<!--                {{ currentAsset.baseline_summary.high_compliant }}/{{ currentAsset.baseline_summary.high_items }}-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            <div class="detail-row">-->
+<!--              <div class="detail-label">-->
+<!--                <el-tag type="success">中危</el-tag>-->
+<!--              </div>-->
+<!--              <div class="detail-progress">-->
+<!--                <el-progress-->
+<!--                    :percentage="(currentAsset.baseline_summary.medium_compliant / currentAsset.baseline_summary.medium_items) * 100"-->
+<!--                    :format="format"-->
+<!--                    :stroke-width="15"-->
+<!--                    :color="'#67C23A'">-->
+<!--                </el-progress>-->
+<!--              </div>-->
+<!--              <div class="detail-numbers">-->
+<!--                {{ currentAsset.baseline_summary.medium_compliant }}/{{ currentAsset.baseline_summary.medium_items }}-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; 软件资产部分 &ndash;&gt;-->
+<!--      <div class="ports-section">-->
+<!--        <h2>软件资产</h2>-->
+<!--        <div v-for="(ports, type) in groupedPorts" :key="type" class="port-group">-->
+<!--          <h3 class="group-title">{{ type }}</h3>-->
+<!--          <el-table-->
+<!--              :data="ports"-->
+<!--              border-->
+<!--              stripe-->
+<!--              :header-cell-style="{ backgroundColor: '#f5f7fa' }">-->
+<!--            <el-table-column prop="port" label="端口" width="80"></el-table-column>-->
+<!--            <el-table-column prop="protocol" label="协议" width="80"></el-table-column>-->
+<!--            <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>-->
+<!--            <el-table-column prop="product" label="产品" width="150"></el-table-column>-->
+<!--            <el-table-column prop="version" label="版本" width="150"></el-table-column>-->
+<!--            <el-table-column prop="status" label="状态" width="100">-->
+<!--              <template slot-scope="scope">-->
+<!--                <el-tag :type="scope.row.status === 'open' ? 'success' : 'danger'">-->
+<!--                  {{ scope.row.status }}-->
+<!--                </el-tag>-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--          </el-table>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; 风险部分 &ndash;&gt;-->
+<!--      <div class="weak-password-section" v-if="weakPasswordPorts.length > 0">-->
+<!--        <h2>风险</h2>-->
 <!--        <el-table-->
-<!--            :data="currentAsset.host_vulnerabilities"-->
+<!--            :data="weakPasswordPorts"-->
 <!--            border-->
 <!--            stripe-->
-<!--            :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
-<!--        >-->
-<!--          <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
-<!--          <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
-<!--          <el-table-column prop="vulType" label="漏洞类型" width="150"></el-table-column>-->
-<!--          <el-table-column prop="cvss" label="风险等级" width="120">-->
+<!--            :header-cell-style="{ backgroundColor: '#f5f7fa' }">-->
+<!--          <el-table-column prop="product" label="产品" width="150">-->
 <!--            <template slot-scope="scope">-->
-<!--              <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>-->
 <!--            </template>-->
 <!--          </el-table-column>-->
-<!--          <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
-<!--          <el-table-column prop="vulExist" label="是否存在" width="100">-->
+<!--          <el-table-column prop="port" label="端口" width="80"></el-table-column>-->
+<!--          <el-table-column prop="protocol" label="协议" width="80"></el-table-column>-->
+<!--          <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>-->
+<!--          <el-table-column prop="software_type" label="软件类型" width="120"></el-table-column>-->
+<!--          <el-table-column prop="weak_username" label="账号" width="120">-->
 <!--            <template slot-scope="scope">-->
-<!--              <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
-<!--                {{ scope.row.vulExist }}-->
-<!--              </el-tag>-->
+<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_username }}</span>-->
 <!--            </template>-->
 <!--          </el-table-column>-->
+<!--          <el-table-column prop="weak_password" label="弱密码" width="120">-->
+<!--            <template slot-scope="scope">-->
+<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_password }}</span>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+<!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
 <!--        </el-table>-->
 <!--      </div>-->
 
-<!--      &lt;!&ndash; 端口漏洞表格 &ndash;&gt;-->
-<!--      <div class="table-section">-->
-<!--        <h3><strong>软件资产漏洞</strong></h3>-->
-<!--        <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities"-->
-<!--             :key="type"-->
-<!--             class="vulnerability-group">-->
-<!--          <h4 class="group-title">{{ type }}</h4>-->
+<!--      <h2 class="flex justify-between items-center">-->
+<!--        <span style="font-size: 18px;">资产漏洞信息</span>-->
+<!--        <div class="chart-toggle">-->
+<!--          <el-radio-group v-model="displayType" size="small">-->
+<!--            <el-radio-button label="assetType">按资产类型分布</el-radio-button>-->
+<!--            <el-radio-button label="vulType">按漏洞类型分布</el-radio-button>-->
+<!--          </el-radio-group>-->
+<!--        </div>-->
+<!--      </h2>-->
+
+<!--      &lt;!&ndash; 资产类型视图 &ndash;&gt;-->
+<!--      <template v-if="displayType === 'assetType'">-->
+<!--        &lt;!&ndash; 饼图 &ndash;&gt;-->
+<!--        <el-card class="chart-section">-->
+<!--          <div slot="header" class="clearfix">-->
+<!--            <span>漏洞资产类型分布</span>-->
+<!--          </div>-->
+<!--          <div class="pie-chart" ref="pieChart" style="width: 100%; height: 300px;"></div>-->
+<!--        </el-card>-->
+
+<!--        &lt;!&ndash; 主机漏洞表格 &ndash;&gt;-->
+<!--        <div class="table-section" v-if="currentAsset.host_vulnerabilities && currentAsset.host_vulnerabilities.length > 0">-->
+<!--          <h3><strong>系统漏洞</strong></h3>-->
 <!--          <el-table-->
-<!--              :data="vulnerabilities"-->
+<!--              :data="currentAsset.host_vulnerabilities"-->
 <!--              border-->
 <!--              stripe-->
 <!--              :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
 <!--          >-->
-<!--            <el-table-column prop="port_id" label="端口" width="70"></el-table-column>-->
 <!--            <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
 <!--            <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
 <!--            <el-table-column prop="vulType" label="漏洞类型" width="150"></el-table-column>-->
@@ -1249,12 +1859,87 @@ export default {
 <!--            </el-table-column>-->
 <!--          </el-table>-->
 <!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
 
-<!--    &lt;!&ndash; 未选择IP时的提示 &ndash;&gt;-->
-<!--    <div class="empty-content" v-else>-->
-<!--      <el-empty description="请选择左侧IP地址查看详情"></el-empty>-->
+<!--        &lt;!&ndash; 端口漏洞分组表格 &ndash;&gt;-->
+<!--        <div class="table-section" v-if="Object.keys(groupedPortVulnerabilities).length > 0">-->
+<!--          <h3><strong>软件资产漏洞</strong></h3>-->
+<!--          <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities"-->
+<!--               :key="type"-->
+<!--               class="vulnerability-group">-->
+<!--            <h4 class="group-title">{{ type }}</h4>-->
+<!--            <el-table-->
+<!--                :data="vulnerabilities"-->
+<!--                border-->
+<!--                stripe-->
+<!--                :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
+<!--            >-->
+<!--              <el-table-column prop="port_id" label="端口" width="70"></el-table-column>-->
+<!--              <el-table-column prop="service_name" label="服务名称" width="100"></el-table-column>-->
+<!--              <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
+<!--              <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
+<!--              <el-table-column prop="vulType" label="漏洞类型" width="150"></el-table-column>-->
+<!--              <el-table-column prop="cvss" label="风险等级" width="120">-->
+<!--                <template slot-scope="scope">-->
+<!--                  <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+<!--                </template>-->
+<!--              </el-table-column>-->
+<!--              <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
+<!--              <el-table-column prop="vulExist" label="是否存在" width="100">-->
+<!--                <template slot-scope="scope">-->
+<!--                  <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
+<!--                    {{ scope.row.vulExist }}-->
+<!--                  </el-tag>-->
+<!--                </template>-->
+<!--              </el-table-column>-->
+<!--            </el-table>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </template>-->
+
+<!--      &lt;!&ndash; 漏洞类型视图 &ndash;&gt;-->
+<!--      <template v-else>-->
+<!--        &lt;!&ndash; 漏洞类型饼图 &ndash;&gt;-->
+<!--        <el-card class="chart-section">-->
+<!--          <div slot="header" class="clearfix">-->
+<!--            <span>漏洞类型分布</span>-->
+<!--          </div>-->
+<!--          <div class="pie-chart" ref="vulTypePieChart" style="width: 100%; height: 300px;"></div>-->
+<!--        </el-card>-->
+
+<!--        &lt;!&ndash; 按漏洞类型分组的表格 &ndash;&gt;-->
+<!--        <div class="table-section" v-if="Object.keys(groupedVulTypeVulnerabilities).length > 0">-->
+<!--          <h3><strong>漏洞详情</strong></h3>-->
+<!--          <div v-for="(vulnerabilities, type) in groupedVulTypeVulnerabilities"-->
+<!--               :key="type"-->
+<!--               class="vulnerability-group">-->
+<!--            <h4 class="group-title">{{ type }}</h4>-->
+<!--            <el-table-->
+<!--                :data="vulnerabilities"-->
+<!--                border-->
+<!--                stripe-->
+<!--                :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
+<!--            >-->
+<!--              <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
+<!--              <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
+<!--              <el-table-column prop="softwareType" label="资产类型" width="150"></el-table-column>-->
+<!--              <el-table-column prop="service_name" label="服务名称" width="100"></el-table-column>-->
+<!--              <el-table-column prop="cvss" label="风险等级" width="120">-->
+<!--                <template slot-scope="scope">-->
+<!--                  <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+<!--                </template>-->
+<!--              </el-table-column>-->
+<!--              <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
+<!--              <el-table-column prop="vulExist" label="是否存在" width="100">-->
+<!--                <template slot-scope="scope">-->
+<!--                  <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
+<!--                    {{ scope.row.vulExist }}-->
+<!--                  </el-tag>-->
+<!--                </template>-->
+<!--              </el-table-column>-->
+<!--            </el-table>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </template>-->
 <!--    </div>-->
 <!--  </div>-->
 <!--</template>-->
@@ -1268,10 +1953,27 @@ export default {
 <!--    return {-->
 <!--      currentIp: '',-->
 <!--      pieChart: null,-->
-<!--      assets: []-->
+<!--      vulTypePieChart: null,-->
+<!--      displayType: 'assetType',-->
+<!--      assets: [-->
+
+<!--      ],-->
+<!--      vulTypes: [-->
+<!--        "Buffer Overflow", "File Upload Vulnerability", "Code Injection",-->
+<!--        "SQL Injection", "Cross-Site Scripting (XSS)", "Privilege Escalation",-->
+<!--        "Denial of Service (DoS)", "Authentication Bypass", "Path Traversal",-->
+<!--        "Information Disclosure", "Cross-Site Request Forgery (CSRF)",-->
+<!--        "XML External Entity (XXE)", "Remote Code Execution (RCE)",-->
+<!--        "Session Hijacking", "Unauthorized Access"-->
+<!--      ],-->
+<!--      // 新增端口信息的软件类型分类-->
+<!--      softwareTypes: [-->
+<!--        "系统工具", "Web应用", "中间件", "数据库", "操作系统", "未知类型"-->
+<!--      ]-->
 <!--    }-->
 <!--  },-->
 <!--  computed: {-->
+<!--    // 原有的计算属性保持不变-->
 <!--    currentAsset() {-->
 <!--      return this.assets.find(asset => asset.ip === this.currentIp);-->
 <!--    },-->
@@ -1291,13 +1993,12 @@ export default {
 <!--    vulnerabilityTypeStats() {-->
 <!--      const stats = {-->
 <!--        '操作系统': 0,-->
-<!--        'Web应用程序': 0,-->
+<!--        'Web应用': 0,-->
 <!--        '系统工具': 0,-->
 <!--        '中间件': 0,-->
 <!--        '未知类型': 0-->
 <!--      };-->
 
-<!--      // 统计主机漏洞-->
 <!--      if (this.currentAsset?.host_vulnerabilities) {-->
 <!--        this.currentAsset.host_vulnerabilities.forEach(vuln => {-->
 <!--          const type = vuln.softwareType || '未知类型';-->
@@ -1309,7 +2010,6 @@ export default {
 <!--        });-->
 <!--      }-->
 
-<!--      // 统计端口漏洞-->
 <!--      if (this.currentAsset?.port_vulnerabilities) {-->
 <!--        this.currentAsset.port_vulnerabilities.forEach(vuln => {-->
 <!--          const type = vuln.softwareType || '未知类型';-->
@@ -1322,11 +2022,106 @@ export default {
 <!--      }-->
 
 <!--      return stats;-->
+<!--    },-->
+<!--    // 新增：按漏洞类型统计-->
+<!--    vulTypeStats() {-->
+<!--      const stats = {};-->
+
+<!--      // 初始化所有漏洞类型的计数为0-->
+<!--      this.vulTypes.forEach(type => {-->
+<!--        stats[type] = 0;-->
+<!--      });-->
+
+<!--      // 统计主机漏洞-->
+<!--      if (this.currentAsset?.host_vulnerabilities) {-->
+<!--        this.currentAsset.host_vulnerabilities.forEach(vuln => {-->
+<!--          if (vuln.vulType) {-->
+<!--            stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;-->
+<!--          }-->
+<!--        });-->
+<!--      }-->
+
+<!--      // 统计端口漏洞-->
+<!--      if (this.currentAsset?.port_vulnerabilities) {-->
+<!--        this.currentAsset.port_vulnerabilities.forEach(vuln => {-->
+<!--          if (vuln.vulType) {-->
+<!--            stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;-->
+<!--          }-->
+<!--        });-->
+<!--      }-->
+
+<!--      // 只返回数量大于0的类型-->
+<!--      return Object.fromEntries(-->
+<!--          Object.entries(stats).filter(([, count]) => count > 0)-->
+<!--      );-->
+<!--    },-->
+<!--    // 新增：按漏洞类型分组的所有漏洞-->
+<!--    groupedVulTypeVulnerabilities() {-->
+<!--      const groups = {};-->
+
+<!--      // 合并主机漏洞和端口漏洞-->
+<!--      const allVulnerabilities = [-->
+<!--        ...(this.currentAsset?.host_vulnerabilities || []),-->
+<!--        ...(this.currentAsset?.port_vulnerabilities || [])-->
+<!--      ];-->
+
+<!--      // 按漏洞类型分组-->
+<!--      allVulnerabilities.forEach(vuln => {-->
+<!--        const type = vuln.vulType || '未分类';-->
+<!--        if (!groups[type]) {-->
+<!--          groups[type] = [];-->
+<!--        }-->
+<!--        groups[type].push(vuln);-->
+<!--      });-->
+
+<!--      return groups;-->
+<!--    },-->
+<!--    // 新增：提取开放端口展示在资产信息中-->
+<!--    formatOpenPorts() {-->
+<!--      if (!this.currentAsset || !this.currentAsset.ports) {-->
+<!--        return '无';-->
+<!--      }-->
+<!--      return this.currentAsset.ports-->
+<!--          .filter(port => port.status === 'open')-->
+<!--          .map(port => `${port.port}`)-->
+<!--          .join(', ');-->
+<!--    },-->
+<!--    // 新增：按软件类型分组端口信息-->
+<!--    groupedPorts() {-->
+<!--      if (!this.currentAsset || !this.currentAsset.ports) {-->
+<!--        return {};-->
+<!--      }-->
+<!--      return this.currentAsset.ports.reduce((groups, port) => {-->
+<!--        const type = port.software_type || '未知类型';-->
+<!--        if (!groups[type]) {-->
+<!--          groups[type] = [];-->
+<!--        }-->
+<!--        groups[type].push(port);-->
+<!--        return groups;-->
+<!--      }, {});-->
+<!--    },-->
+<!--    weakPasswordPorts() {-->
+<!--      if (!this.currentAsset || !this.currentAsset.ports) {-->
+<!--        return [];-->
+<!--      }-->
+<!--      return this.currentAsset.ports.filter(port =>-->
+<!--          port.weak_username && port.weak_password && port.verify_time-->
+<!--      );-->
+<!--    },-->
+<!--    // 新增：获取合规率颜色-->
+<!--    getComplianceColor() {-->
+<!--      if (!this.currentAsset || !this.currentAsset.baseline_summary) {-->
+<!--        return '#F56C6C';-->
+<!--      }-->
+<!--      const rate = this.currentAsset.baseline_summary.compliance_rate;-->
+<!--      if (rate < 30) return '#F56C6C';-->
+<!--      if (rate < 60) return '#E6A23C';-->
+<!--      return '#67C23A';-->
 <!--    }-->
 <!--  },-->
 <!--  methods: {-->
 <!--    getResults() {-->
-<!--      fetch('/api/getAllAssetsVulnData')-->
+<!--      fetch('/api/getAllAssetInfo')-->
 <!--          .then(response => response.json())-->
 <!--          .then(data => {-->
 <!--            this.assets = data;-->
@@ -1335,7 +2130,13 @@ export default {
 <!--    },-->
 <!--    handleSelect(ip) {-->
 <!--      this.currentIp = ip;-->
-<!--      this.updatePieChart();-->
+<!--      this.displayType = 'assetType';-->
+<!--      // 检查图表实例是否存在-->
+<!--      if (!this.pieChart || !this.pieChart.isDisposed()) {-->
+<!--        this.initCharts();  // 不存在或已销毁:初始化-->
+<!--      } else {-->
+<!--        this.updateCharts(); // 否则直接更新数据-->
+<!--      }-->
 <!--    },-->
 <!--    getCvssType(score) {-->
 <!--      score = parseFloat(score);-->
@@ -1349,30 +2150,52 @@ export default {
 <!--      if (score >= 7.0) return '高风险';-->
 <!--      if (score >= 4.0) return '中风险';-->
 <!--      if (score >= 0.0) return '低风险';-->
-<!--      return '信息';-->
+<!--      return '未知';-->
 <!--    },-->
-<!--    async initPieChart() {-->
+<!--    // 新增：格式化进度条-->
+<!--    format() {-->
+<!--      return '';-->
+<!--    },-->
+<!--    async initCharts() {-->
 <!--      await this.$nextTick();-->
+
+<!--      // 初始化资产类型饼图-->
 <!--      if (this.$refs.pieChart) {-->
 <!--        if (this.pieChart) {-->
 <!--          this.pieChart.dispose();-->
 <!--        }-->
 <!--        this.pieChart = echarts.init(this.$refs.pieChart);-->
-<!--        window.addEventListener('resize', () => {-->
-<!--          this.pieChart && this.pieChart.resize();-->
-<!--        });-->
-<!--        this.updatePieChart();-->
+<!--      }-->
+
+<!--      // 初始化漏洞类型饼图-->
+<!--      if (this.$refs.vulTypePieChart) {-->
+<!--        if (this.vulTypePieChart) {-->
+<!--          this.vulTypePieChart.dispose();-->
+<!--        }-->
+<!--        this.vulTypePieChart = echarts.init(this.$refs.vulTypePieChart);-->
+<!--      }-->
+
+<!--      window.addEventListener('resize', () => {-->
+<!--        this.pieChart && this.pieChart.resize();-->
+<!--        this.vulTypePieChart && this.vulTypePieChart.resize();-->
+<!--      });-->
+
+<!--      this.updateCharts();-->
+<!--    },-->
+<!--    updateCharts() {-->
+<!--      if (this.displayType === 'assetType') {-->
+<!--        this.updateAssetPieChart();-->
+<!--      } else {-->
+<!--        this.updateVulTypePieChart();-->
 <!--      }-->
 <!--    },-->
-<!--    updatePieChart() {-->
-<!--      if (!this.pieChart) {-->
-<!--        this.initPieChart();-->
-<!--        return;-->
-<!--      }-->
+<!--    // 原有的资产类型饼图更新方法-->
+<!--    updateAssetPieChart() {-->
+<!--      if (!this.pieChart) return;-->
 
 <!--      const stats = this.vulnerabilityTypeStats;-->
 <!--      const data = Object.entries(stats)-->
-<!--          .filter(([, value]) => value > 0) // 只显示数量大于0的类型-->
+<!--          .filter(([, value]) => value > 0)-->
 <!--          .map(([name, value]) => ({-->
 <!--            name,-->
 <!--            value-->
@@ -1389,69 +2212,126 @@ export default {
 <!--          top: 'middle',-->
 <!--          data: data.map(item => item.name)-->
 <!--        },-->
-<!--        series: [-->
-<!--          {-->
-<!--            name: '漏洞类型分布',-->
-<!--            type: 'pie',-->
-<!--            radius: ['40%', '70%'],-->
-<!--            center: ['40%', '50%'],-->
-<!--            avoidLabelOverlap: false,-->
-<!--            itemStyle: {-->
-<!--              borderRadius: 10,-->
-<!--              borderColor: '#fff',-->
-<!--              borderWidth: 2-->
-<!--            },-->
+<!--        series: [{-->
+<!--          name: '资产类型分布',-->
+<!--          type: 'pie',-->
+<!--          radius: ['40%', '70%'],-->
+<!--          center: ['40%', '50%'],-->
+<!--          avoidLabelOverlap: false,-->
+<!--          itemStyle: {-->
+<!--            borderRadius: 10,-->
+<!--            borderColor: '#fff',-->
+<!--            borderWidth: 2-->
+<!--          },-->
+<!--          label: {-->
+<!--            show: true,-->
+<!--            formatter: '{b}: {c}个'-->
+<!--          },-->
+<!--          emphasis: {-->
 <!--            label: {-->
 <!--              show: true,-->
-<!--              formatter: '{b}: {c}个'-->
-<!--            },-->
-<!--            emphasis: {-->
-<!--              label: {-->
-<!--                show: true,-->
-<!--                fontSize: '18',-->
-<!--                fontWeight: 'bold'-->
-<!--              }-->
-<!--            },-->
-<!--            labelLine: {-->
-<!--              show: true-->
-<!--            },-->
-<!--            data: data-->
-<!--          }-->
-<!--        ]-->
+<!--              fontSize: '18',-->
+<!--              fontWeight: 'bold'-->
+<!--            }-->
+<!--          },-->
+<!--          labelLine: {-->
+<!--            show: true-->
+<!--          },-->
+<!--          data: data-->
+<!--        }]-->
 <!--      };-->
 
 <!--      this.pieChart.setOption(option);-->
+<!--    },-->
+<!--    // 新增：漏洞类型饼图更新方法-->
+<!--    updateVulTypePieChart() {-->
+<!--      if (!this.vulTypePieChart) return;-->
+
+<!--      const stats = this.vulTypeStats;-->
+<!--      const data = Object.entries(stats)-->
+<!--          .map(([name, value]) => ({-->
+<!--            name,-->
+<!--            value-->
+<!--          }));-->
+
+<!--      const option = {-->
+<!--        tooltip: {-->
+<!--          trigger: 'item',-->
+<!--          formatter: '{a} <br/>{b}: {c} ({d}%)'-->
+<!--        },-->
+<!--        legend: {-->
+<!--          orient: 'vertical',-->
+<!--          right: 'right',-->
+<!--          top: 'middle',-->
+<!--          data: data.map(item => item.name)-->
+<!--        },-->
+<!--        series: [{-->
+<!--          name: '漏洞类型分布',-->
+<!--          type: 'pie',-->
+<!--          radius: ['40%', '70%'],-->
+<!--          center: ['40%', '50%'],-->
+<!--          avoidLabelOverlap: false,-->
+<!--          itemStyle: {-->
+<!--            borderRadius: 10,-->
+<!--            borderColor: '#fff',-->
+<!--            borderWidth: 2-->
+<!--          },-->
+<!--          label: {-->
+<!--            show: true,-->
+<!--            formatter: '{b}: {c}个'-->
+<!--          },-->
+<!--          emphasis: {-->
+<!--            label: {-->
+<!--              show: true,-->
+<!--              fontSize: '18',-->
+<!--              fontWeight: 'bold'-->
+<!--            }-->
+<!--          },-->
+<!--          labelLine: {-->
+<!--            show: true-->
+<!--          },-->
+<!--          data: data-->
+<!--        }]-->
+<!--      };-->
+
+<!--      this.vulTypePieChart.setOption(option);-->
+<!--    }-->
+<!--  },-->
+<!--  watch: {-->
+<!--    currentAsset() {-->
+<!--      this.$nextTick(() => {-->
+<!--        this.updateCharts();-->
+<!--      });-->
+<!--    },-->
+<!--    displayType() {-->
+<!--      this.$nextTick(() => {-->
+<!--        this.initCharts();-->
+<!--      });-->
 <!--    }-->
 <!--  },-->
 <!--  created() {-->
 <!--    this.getResults();-->
 <!--  },-->
 <!--  mounted() {-->
-<!--    // 默认选中第一个IP-->
 <!--    if (this.assets.length > 0) {-->
 <!--      this.currentIp = this.assets[0].ip;-->
 <!--    }-->
-<!--    this.$nextTick(() => {-->
-<!--      this.initPieChart();-->
-<!--    });-->
+<!--    this.initCharts();-->
 <!--  },-->
 <!--  beforeDestroy() {-->
 <!--    if (this.pieChart) {-->
 <!--      this.pieChart.dispose();-->
 <!--      this.pieChart = null;-->
 <!--    }-->
-<!--  },-->
-<!--  watch: {-->
-<!--    currentAsset() {-->
-<!--      this.$nextTick(() => {-->
-<!--        this.updatePieChart();-->
-<!--      });-->
+<!--    if (this.vulTypePieChart) {-->
+<!--      this.vulTypePieChart.dispose();-->
+<!--      this.vulTypePieChart = null;-->
 <!--    }-->
 <!--  }-->
 <!--}-->
 <!--</script>-->
 
-<!--<style scoped>-->
+<!--<style scopt>-->
 <!--.vulnerability-container {-->
 <!--  display: flex;-->
 <!--  height: 100%;-->
@@ -1460,7 +2340,7 @@ export default {
 <!--}-->
 
 <!--.ip-list {-->
-<!--  width: 250px;-->
+<!--  width: 180px;-->
 <!--  border-right: 1px solid #e6e6e6;-->
 <!--  background-color: #f5f7fa;-->
 <!--}-->
@@ -1513,6 +2393,24 @@ export default {
 <!--  margin: 0 0 15px 0;-->
 <!--}-->
 
+<!--.chart-toggle {-->
+<!--  margin-right: 20px;-->
+<!--  margin-top: 15px;-->
+<!--}-->
+
+<!--.chart-section {-->
+<!--  margin: 20px 0;-->
+<!--  padding: 0;-->
+<!--  background-color: #fff;-->
+<!--  border-radius: 4px;-->
+<!--  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);-->
+<!--}-->
+
+<!--.pie-chart {-->
+<!--  width: 100%;-->
+<!--  height: 400px;-->
+<!--}-->
+
 <!--.asset-info {-->
 <!--  padding: 15px;-->
 <!--  background-color: #f5f7fa;-->
@@ -1552,12 +2450,10 @@ export default {
 <!--  text-align: center;-->
 <!--}-->
 
-<!--/* 表格内的标签居中显示 */-->
 <!--.el-table .cell {-->
 <!--  text-align: center;-->
 <!--}-->
 
-<!--/* 确保描述列左对齐 */-->
 <!--.el-table .el-table__row td:nth-child(4) .cell {-->
 <!--  text-align: left;-->
 <!--}-->
@@ -1575,31 +2471,130 @@ export default {
 <!--  border-left: 3px solid #409EFF;-->
 <!--}-->
 
-<!--/* 新增的饼图相关样式 */-->
-<!--.chart-section {-->
-<!--  margin: 20px 0;-->
-<!--  padding: 0px;-->
-<!--  background-color: #fff;-->
-<!--  border-radius: 4px;-->
-<!--  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);-->
+<!--.port-group {-->
+<!--  margin-bottom: 20px;-->
 <!--}-->
 
-<!--.chart-section h3 {-->
+<!--.ports-section {-->
+<!--  margin-bottom: 30px;-->
+<!--}-->
+
+<!--.ports-section h2, .baseline-section h2 {-->
+<!--  color: #303133;-->
+<!--  font-size: 18px;-->
+<!--  font-weight: 600;-->
+<!--  margin: 0 0 15px 0;-->
+<!--  padding-bottom: 10px;-->
+<!--  border-bottom: 1px solid #ebeef5;-->
+<!--}-->
+
+<!--.weak-password-section {-->
+<!--  margin-bottom: 30px;-->
+<!--}-->
+
+<!--.weak-password-section h2 {-->
+<!--  color: #303133;-->
+<!--  font-size: 18px;-->
+<!--  font-weight: 600;-->
+<!--  margin: 0 0 15px 0;-->
+<!--  padding-bottom: 10px;-->
+<!--  border-bottom: 1px solid #ebeef5;-->
+<!--}-->
+
+<!--/* 新增基线检测相关样式 */-->
+<!--.baseline-section {-->
+<!--  margin-bottom: 30px;-->
+<!--}-->
+
+<!--.baseline-info {-->
+<!--  background-color: #f5f7fa;-->
+<!--  border-radius: 4px;-->
+<!--  padding: 20px;-->
+<!--}-->
+
+<!--.baseline-summary {-->
+<!--  display: flex;-->
+<!--  align-items: center;-->
+<!--  justify-content: space-between;-->
 <!--  margin-bottom: 20px;-->
+<!--}-->
+
+<!--.progress-content {-->
+<!--  display: flex;-->
+<!--  flex-direction: column;-->
+<!--  align-items: center;-->
+<!--  justify-content: center;-->
+<!--}-->
+
+<!--.progress-content .rate {-->
+<!--  font-size: 24px;-->
+<!--  font-weight: bold;-->
 <!--  color: #303133;-->
 <!--}-->
 
-<!--.pie-chart {-->
-<!--  width: 100%;-->
-<!--  height: 400px;-->
+<!--.progress-content .label {-->
+<!--  font-size: 14px;-->
+<!--  color: #606266;-->
+<!--  margin-top: 5px;-->
+<!--}-->
+
+<!--.baseline-stats {-->
+<!--  display: flex;-->
+<!--  flex: 1;-->
+<!--  justify-content: space-around;-->
+<!--  margin-left: 30px;-->
+<!--}-->
+
+<!--.stat-item {-->
+<!--  text-align: center;-->
+<!--  padding: 0 15px;-->
+<!--}-->
+
+<!--.item-header {-->
+<!--  font-size: 14px;-->
+<!--  color: #606266;-->
+<!--  margin-bottom: 10px;-->
+<!--}-->
+
+<!--.item-value {-->
+<!--  font-size: 24px;-->
+<!--  font-weight: bold;-->
+<!--  color: #303133;-->
+<!--}-->
+
+<!--.compliance-details {-->
+<!--  margin-top: 20px;-->
+<!--}-->
+
+<!--.detail-row {-->
+<!--  display: flex;-->
+<!--  align-items: center;-->
+<!--  margin-bottom: 15px;-->
+<!--}-->
+
+<!--.detail-label {-->
+<!--  width: 70px;-->
+<!--  margin-right: 15px;-->
+<!--}-->
+
+<!--.detail-progress {-->
+<!--  flex: 1;-->
+<!--}-->
+
+<!--.detail-numbers {-->
+<!--  width: 80px;-->
+<!--  text-align: right;-->
+<!--  color: #606266;-->
+<!--  font-size: 14px;-->
+<!--  margin-left: 15px;-->
 <!--}-->
 <!--</style>-->
 
 
-<!--没有饼状图的代码 -->
+
+
 <!--<template>-->
 <!--  <div class="vulnerability-container">-->
-<!--    &lt;!&ndash; 左侧IP列表 &ndash;&gt;-->
 <!--    <div class="ip-list">-->
 <!--      <div class="menu-header">-->
 <!--        <span class="title">资产</span>-->
@@ -1638,56 +2633,110 @@ export default {
 <!--          </div>-->
 <!--          <div class="info-item">-->
 <!--            <span class="label">开放端口：</span>-->
-<!--            <span class="value">{{ currentAsset.ports }}</span>-->
+<!--&lt;!&ndash;            <span class="value">{{ currentAsset.ports }}</span>&ndash;&gt;-->
+<!--            <span class="value">{{ formatOpenPorts }}</span>-->
 <!--          </div>-->
 <!--        </div>-->
 <!--      </div>-->
+<!--      &lt;!&ndash; 前面的代码保持不变，直到漏洞信息标题 &ndash;&gt;-->
 
-<!--      &lt;!&ndash; 主机漏洞表格 &ndash;&gt;-->
-<!--      <div class="table-section">-->
-<!--        <h3>主机漏洞</h3>-->
+<!--      &lt;!&ndash; 新增：端口信息列表 &ndash;&gt;-->
+<!--      <div class="ports-section">-->
+<!--        <h2>软件资产</h2>-->
+<!--        <div v-for="(ports, type) in groupedPorts" :key="type" class="port-group">-->
+<!--          <h3 class="group-title">{{ type }}</h3>-->
+<!--          <el-table-->
+<!--              :data="ports"-->
+<!--              border-->
+<!--              stripe-->
+<!--              :header-cell-style="{ backgroundColor: '#f5f7fa' }">-->
+<!--            <el-table-column prop="port" label="端口" width="80"></el-table-column>-->
+<!--            <el-table-column prop="protocol" label="协议" width="80"></el-table-column>-->
+<!--            <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>-->
+<!--            <el-table-column prop="product" label="产品" width="150"></el-table-column>-->
+<!--            <el-table-column prop="version" label="版本" width="150"></el-table-column>-->
+<!--            <el-table-column prop="status" label="状态" width="100">-->
+<!--              <template slot-scope="scope">-->
+<!--                <el-tag :type="scope.row.status === 'open' ? 'success' : 'danger'">-->
+<!--                  {{ scope.row.status }}-->
+<!--                </el-tag>-->
+<!--              </template>-->
+<!--            </el-table-column>-->
+<!--&lt;!&ndash;            &lt;!&ndash; 新增三列: 账号、弱密码和验证时间 &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;            <el-table-column prop="weak_username" label="账号" width="120"></el-table-column>&ndash;&gt;-->
+<!--&lt;!&ndash;            <el-table-column prop="weak_password" label="弱密码" width="120"></el-table-column>&ndash;&gt;-->
+<!--&lt;!&ndash;            <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>&ndash;&gt;-->
+<!--          </el-table>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; 新增弱口令项模块 &ndash;&gt;-->
+<!--      <div class="weak-password-section">-->
+<!--        <h2>风险</h2>-->
 <!--        <el-table-->
-<!--            :data="currentAsset.host_vulnerabilities"-->
+<!--            :data="weakPasswordPorts"-->
 <!--            border-->
 <!--            stripe-->
-<!--            :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
-<!--        >-->
-<!--          <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
-<!--          <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
-<!--          <el-table-column prop="cvss" label="风险等级" width="120">-->
+<!--            :header-cell-style="{ backgroundColor: '#f5f7fa' }">-->
+<!--&lt;!&ndash;          <el-table-column prop="product" label="产品" width="150"></el-table-column>&ndash;&gt;-->
+<!--          <el-table-column prop="product" label="产品" width="150">-->
 <!--            <template slot-scope="scope">-->
-<!--              <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>-->
 <!--            </template>-->
 <!--          </el-table-column>-->
-<!--          <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
-<!--          <el-table-column prop="vulExist" label="是否存在" width="100">-->
+<!--          <el-table-column prop="port" label="端口" width="80"></el-table-column>-->
+<!--          <el-table-column prop="protocol" label="协议" width="80"></el-table-column>-->
+<!--          <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>-->
+
+<!--          <el-table-column prop="software_type" label="软件类型" width="120"></el-table-column>-->
+<!--          <el-table-column prop="weak_username" label="账号" width="120">-->
 <!--            <template slot-scope="scope">-->
-<!--              <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
-<!--                {{ scope.row.vulExist }}-->
-<!--              </el-tag>-->
+<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_username }}</span>-->
 <!--            </template>-->
 <!--          </el-table-column>-->
+<!--          <el-table-column prop="weak_password" label="弱密码" width="120">-->
+<!--            <template slot-scope="scope">-->
+<!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_password }}</span>-->
+<!--            </template>-->
+<!--          </el-table-column>-->
+<!--&lt;!&ndash;          <el-table-column prop="weak_username" label="账号" width="120"></el-table-column>&ndash;&gt;-->
+<!--&lt;!&ndash;          <el-table-column prop="weak_password" label="弱密码" width="120"></el-table-column>&ndash;&gt;-->
+<!--          <el-table-column prop="verify_time" label="验证时间" width="180"></el-table-column>-->
 <!--        </el-table>-->
 <!--      </div>-->
 
-<!--      &lt;!&ndash; 端口漏洞表格 &ndash;&gt;-->
-<!--      &lt;!&ndash; 将原来的端口漏洞表格部分替换成以下代码 &ndash;&gt;-->
-<!--      &lt;!&ndash; 端口漏洞表格 &ndash;&gt;-->
-<!--      <div class="table-section">-->
-<!--        <h3>端口漏洞</h3>-->
-<!--        <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities"-->
-<!--             :key="type"-->
-<!--             class="vulnerability-group">-->
-<!--          <h4 class="group-title">{{ type }}</h4>-->
+<!--      <h2 class="flex justify-between items-center">-->
+<!--        <span style="font-size: 18px;">资产漏洞信息</span>-->
+<!--        <div class="chart-toggle">-->
+<!--          <el-radio-group v-model="displayType" size="small">-->
+<!--            <el-radio-button label="assetType">按资产类型分布</el-radio-button>-->
+<!--            <el-radio-button label="vulType">按漏洞类型分布</el-radio-button>-->
+<!--          </el-radio-group>-->
+<!--        </div>-->
+<!--      </h2>-->
+
+<!--      &lt;!&ndash; 资产类型视图 &ndash;&gt;-->
+<!--      <template v-if="displayType === 'assetType'">-->
+<!--        &lt;!&ndash; 饼图 &ndash;&gt;-->
+<!--        <el-card class="chart-section">-->
+<!--          <div slot="header" class="clearfix">-->
+<!--            <span>漏洞资产类型分布</span>-->
+<!--          </div>-->
+<!--          <div class="pie-chart" ref="pieChart" style="width: 100%; height: 300px;"></div>-->
+<!--        </el-card>-->
+
+<!--        &lt;!&ndash; 主机漏洞表格 &ndash;&gt;-->
+<!--        <div class="table-section">-->
+<!--          <h3><strong>系统漏洞</strong></h3>-->
 <!--          <el-table-->
-<!--              :data="vulnerabilities"-->
+<!--              :data="currentAsset.host_vulnerabilities"-->
 <!--              border-->
 <!--              stripe-->
 <!--              :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
 <!--          >-->
-<!--            <el-table-column prop="port_id" label="端口" width="100"></el-table-column>-->
 <!--            <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
 <!--            <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
+<!--            <el-table-column prop="vulType" label="漏洞类型" width="150"></el-table-column>-->
 <!--            <el-table-column prop="cvss" label="风险等级" width="120">-->
 <!--              <template slot-scope="scope">-->
 <!--                <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
@@ -1703,110 +2752,121 @@ export default {
 <!--            </el-table-column>-->
 <!--          </el-table>-->
 <!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
 
-<!--    &lt;!&ndash; 未选择IP时的提示 &ndash;&gt;-->
-<!--    <div class="empty-content" v-else>-->
-<!--      <el-empty description="请选择左侧IP地址查看详情"></el-empty>-->
+<!--        &lt;!&ndash; 原有的端口漏洞分组表格 &ndash;&gt;-->
+<!--        <div class="table-section">-->
+<!--          <h3><strong>软件资产漏洞</strong></h3>-->
+<!--          <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities"-->
+<!--               :key="type"-->
+<!--               class="vulnerability-group">-->
+<!--            <h4 class="group-title">{{ type }}</h4>-->
+<!--            <el-table-->
+<!--                :data="vulnerabilities"-->
+<!--                border-->
+<!--                stripe-->
+<!--                :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
+<!--            >-->
+<!--              <el-table-column prop="port_id" label="端口" width="70"></el-table-column>-->
+<!--              <el-table-column prop="service_name" label="服务名称" width="100"></el-table-column>-->
+<!--              <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
+<!--              <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
+<!--              <el-table-column prop="vulType" label="漏洞类型" width="150"></el-table-column>-->
+<!--              <el-table-column prop="cvss" label="风险等级" width="120">-->
+<!--                <template slot-scope="scope">-->
+<!--                  <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+<!--                </template>-->
+<!--              </el-table-column>-->
+<!--              <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
+<!--              <el-table-column prop="vulExist" label="是否存在" width="100">-->
+<!--                <template slot-scope="scope">-->
+<!--                  <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
+<!--                    {{ scope.row.vulExist }}-->
+<!--                  </el-tag>-->
+<!--                </template>-->
+<!--              </el-table-column>-->
+<!--            </el-table>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </template>-->
+
+<!--      &lt;!&ndash; 漏洞类型视图 &ndash;&gt;-->
+<!--      <template v-else>-->
+<!--        &lt;!&ndash; 漏洞类型饼图 &ndash;&gt;-->
+<!--        <el-card class="chart-section">-->
+<!--          <div slot="header" class="clearfix">-->
+<!--            <span>漏洞类型分布</span>-->
+<!--          </div>-->
+<!--          <div class="pie-chart" ref="vulTypePieChart" style="width: 100%; height: 300px;"></div>-->
+<!--        </el-card>-->
+
+<!--        &lt;!&ndash; 按漏洞类型分组的表格 &ndash;&gt;-->
+<!--        <div class="table-section">-->
+<!--          <h3><strong>漏洞详情</strong></h3>-->
+<!--          <div v-for="(vulnerabilities, type) in groupedVulTypeVulnerabilities"-->
+<!--               :key="type"-->
+<!--               class="vulnerability-group">-->
+<!--            <h4 class="group-title">{{ type }}</h4>-->
+<!--            <el-table-->
+<!--                :data="vulnerabilities"-->
+<!--                border-->
+<!--                stripe-->
+<!--                :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
+<!--            >-->
+<!--              <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
+<!--              <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
+<!--              <el-table-column prop="softwareType" label="资产类型" width="150"></el-table-column>-->
+<!--              <el-table-column prop="service_name" label="服务名称" width="100"></el-table-column>-->
+<!--              <el-table-column prop="cvss" label="风险等级" width="120">-->
+<!--                <template slot-scope="scope">-->
+<!--                  <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
+<!--                </template>-->
+<!--              </el-table-column>-->
+<!--              <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
+<!--              <el-table-column prop="vulExist" label="是否存在" width="100">-->
+<!--                <template slot-scope="scope">-->
+<!--                  <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
+<!--                    {{ scope.row.vulExist }}-->
+<!--                  </el-tag>-->
+<!--                </template>-->
+<!--              </el-table-column>-->
+<!--            </el-table>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </template>-->
 <!--    </div>-->
 <!--  </div>-->
 <!--</template>-->
 
 <!--<script>-->
+<!--import * as echarts from 'echarts';-->
+
 <!--export default {-->
 <!--  name: 'VulnerabilityTable',-->
 <!--  data() {-->
 <!--    return {-->
 <!--      currentIp: '',-->
+<!--      pieChart: null,-->
+<!--      vulTypePieChart: null,-->
+<!--      displayType: 'assetType',-->
 <!--      assets: [-->
-<!--        {-->
-<!--          "host_vulnerabilities": [-->
-<!--            {-->
-<!--              "cvss": "9.800000",-->
-<!--              "softwareType": "操作系统",-->
-<!--              "summary": "MongoDB 4.2.7存在权限提升漏洞，攻击者可以通过特定的构造命令绕过认证并获得管理员权限。",-->
-<!--              "vulExist": "存在",-->
-<!--              "vuln_id": "CVE-2020-12345",-->
-<!--              "vuln_name": ""-->
-<!--            },-->
-<!--            {-->
-<!--              "cvss": "7.500000",-->
-<!--              "softwareType": "操作系统",-->
-<!--              "summary": "Windows SMBv3协议存在内存损坏漏洞，允许远程代码执行。",-->
-<!--              "vulExist": "存在",-->
-<!--              "vuln_id": "CVE-2021-34527",-->
-<!--              "vuln_name": ""-->
-<!--            }-->
-<!--          ],-->
-<!--          "ip": "10.8.250.77",-->
-<!--          "port_vulnerabilities": [-->
-<!--            {-->
-<!--              "cvss": "8.900000",-->
-<!--              "port_id": 8080,-->
-<!--              "softwareType": "Web应用程序",-->
-<!--              "summary": "Apache Struts 2.3.34 存在远程代码执行漏洞，攻击者可通过恶意请求触发。",-->
-<!--              "vulExist": "存在",-->
-<!--              "vuln_id": "CVE-2018-11776",-->
-<!--              "vuln_name": ""-->
-<!--            },-->
-<!--            {-->
-<!--              "cvss": "8.900000",-->
-<!--              "port_id": 804,-->
-<!--              "softwareType": "Web应用程序",-->
-<!--              "summary": "描述。",-->
-<!--              "vulExist": "存在",-->
-<!--              "vuln_id": "CVE-2018-12436",-->
-<!--              "vuln_name": ""-->
-<!--            },-->
-<!--            {-->
-<!--              "cvss": "8.900000",-->
-<!--              "port_id": 808,-->
-<!--              "softwareType": "系统工具",-->
-<!--              "summary": "Apache Struts 2.3.34 存在远程代码执行漏洞，攻击者可通过恶意请求触发。",-->
-<!--              "vulExist": "存在",-->
-<!--              "vuln_id": "CVE-2018-1236",-->
-<!--              "vuln_name": ""-->
-<!--            },-->
-<!--            {-->
-<!--              "cvss": "8.900000",-->
-<!--              "port_id": 80,-->
-<!--              "softwareType": "未知类型",-->
-<!--              "summary": "描述。",-->
-<!--              "vulExist": "存在",-->
-<!--              "vuln_id": "CVE-2018-132",-->
-<!--              "vuln_name": ""-->
-<!--            }-->
-<!--          ]-->
-<!--        },-->
-<!--        {-->
-<!--          "host_vulnerabilities": [-->
-<!--            {-->
-<!--              "cvss": "6.500000",-->
-<!--              "softwareType": "操作系统",-->
-<!--              "summary": "VMware ESXi 7.0中的特定模块存在拒绝服务漏洞，可能导致虚拟机异常终止。",-->
-<!--              "vulExist": "存在",-->
-<!--              "vuln_id": "CVE-2022-12345",-->
-<!--              "vuln_name": ""-->
-<!--            }-->
-<!--          ],-->
-<!--          "ip": "192.168.1.100",-->
-<!--          "port_vulnerabilities": [-->
-<!--            {-->
-<!--              "cvss": "10.000000",-->
-<!--              "port_id": 443,-->
-<!--              "softwareType": "Web服务器",-->
-<!--              "summary": "nginx 1.18.0 存在缓冲区溢出漏洞，允许远程攻击者执行任意代码。",-->
-<!--              "vulExist": "存在",-->
-<!--              "vuln_id": "CVE-2021-23017",-->
-<!--              "vuln_name": ""-->
-<!--            }-->
-<!--          ]-->
-<!--        }-->
+
+<!--      ],-->
+<!--      vulTypes: [-->
+<!--        "Buffer Overflow", "File Upload Vulnerability", "Code Injection",-->
+<!--        "SQL Injection", "Cross-Site Scripting (XSS)", "Privilege Escalation",-->
+<!--        "Denial of Service (DoS)", "Authentication Bypass", "Path Traversal",-->
+<!--        "Information Disclosure", "Cross-Site Request Forgery (CSRF)",-->
+<!--        "XML External Entity (XXE)", "Remote Code Execution (RCE)",-->
+<!--        "Session Hijacking", "Unauthorized Access"-->
+<!--      ],-->
+<!--      // 新增端口信息的软件类型分类-->
+<!--      softwareTypes: [-->
+<!--        "系统工具", "Web应用", "中间件", "数据库", "操作系统", "未知类型"-->
 <!--      ]-->
 <!--    }-->
 <!--  },-->
 <!--  computed: {-->
+<!--    // 原有的计算属性保持不变-->
 <!--    currentAsset() {-->
 <!--      return this.assets.find(asset => asset.ip === this.currentIp);-->
 <!--    },-->
@@ -1822,11 +2882,130 @@ export default {
 <!--        groups[type].push(vuln);-->
 <!--        return groups;-->
 <!--      }, {});-->
+<!--    },-->
+<!--    vulnerabilityTypeStats() {-->
+<!--      const stats = {-->
+<!--        '操作系统': 0,-->
+<!--        'Web应用': 0,-->
+<!--        '系统工具': 0,-->
+<!--        '中间件': 0,-->
+<!--        '未知类型': 0-->
+<!--      };-->
+
+<!--      if (this.currentAsset?.host_vulnerabilities) {-->
+<!--        this.currentAsset.host_vulnerabilities.forEach(vuln => {-->
+<!--          const type = vuln.softwareType || '未知类型';-->
+<!--          if (Object.hasOwn(stats, type)) {-->
+<!--            stats[type]++;-->
+<!--          } else {-->
+<!--            stats['未知类型']++;-->
+<!--          }-->
+<!--        });-->
+<!--      }-->
+
+<!--      if (this.currentAsset?.port_vulnerabilities) {-->
+<!--        this.currentAsset.port_vulnerabilities.forEach(vuln => {-->
+<!--          const type = vuln.softwareType || '未知类型';-->
+<!--          if (Object.hasOwn(stats, type)) {-->
+<!--            stats[type]++;-->
+<!--          } else {-->
+<!--            stats['未知类型']++;-->
+<!--          }-->
+<!--        });-->
+<!--      }-->
+
+<!--      return stats;-->
+<!--    },-->
+<!--    // 新增：按漏洞类型统计-->
+<!--    vulTypeStats() {-->
+<!--      const stats = {};-->
+
+<!--      // 初始化所有漏洞类型的计数为0-->
+<!--      this.vulTypes.forEach(type => {-->
+<!--        stats[type] = 0;-->
+<!--      });-->
+
+<!--      // 统计主机漏洞-->
+<!--      if (this.currentAsset?.host_vulnerabilities) {-->
+<!--        this.currentAsset.host_vulnerabilities.forEach(vuln => {-->
+<!--          if (vuln.vulType) {-->
+<!--            stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;-->
+<!--          }-->
+<!--        });-->
+<!--      }-->
+
+<!--      // 统计端口漏洞-->
+<!--      if (this.currentAsset?.port_vulnerabilities) {-->
+<!--        this.currentAsset.port_vulnerabilities.forEach(vuln => {-->
+<!--          if (vuln.vulType) {-->
+<!--            stats[vuln.vulType] = (stats[vuln.vulType] || 0) + 1;-->
+<!--          }-->
+<!--        });-->
+<!--      }-->
+
+<!--      // 只返回数量大于0的类型-->
+<!--      return Object.fromEntries(-->
+<!--          Object.entries(stats).filter(([, count]) => count > 0)-->
+<!--      );-->
+<!--    },-->
+<!--    // 新增：按漏洞类型分组的所有漏洞-->
+<!--    groupedVulTypeVulnerabilities() {-->
+<!--      const groups = {};-->
+
+<!--      // 合并主机漏洞和端口漏洞-->
+<!--      const allVulnerabilities = [-->
+<!--        ...(this.currentAsset?.host_vulnerabilities || []),-->
+<!--        ...(this.currentAsset?.port_vulnerabilities || [])-->
+<!--      ];-->
+
+<!--      // 按漏洞类型分组-->
+<!--      allVulnerabilities.forEach(vuln => {-->
+<!--        const type = vuln.vulType || '未分类';-->
+<!--        if (!groups[type]) {-->
+<!--          groups[type] = [];-->
+<!--        }-->
+<!--        groups[type].push(vuln);-->
+<!--      });-->
+
+<!--      return groups;-->
+<!--    },-->
+<!--    // 新增：提取开放端口展示在资产信息中-->
+<!--    formatOpenPorts() {-->
+<!--      if (!this.currentAsset || !this.currentAsset.ports) {-->
+<!--        return '无';-->
+<!--      }-->
+<!--      return this.currentAsset.ports-->
+<!--          .filter(port => port.status === 'open')-->
+<!--          // .map(port => `${port.port}/${port.protocol}`)-->
+<!--          .map(port => `${port.port}`)-->
+<!--          .join(', ');-->
+<!--    },-->
+<!--    // 新增：按软件类型分组端口信息-->
+<!--    groupedPorts() {-->
+<!--      if (!this.currentAsset || !this.currentAsset.ports) {-->
+<!--        return {};-->
+<!--      }-->
+<!--      return this.currentAsset.ports.reduce((groups, port) => {-->
+<!--        const type = port.software_type || '未知类型';-->
+<!--        if (!groups[type]) {-->
+<!--          groups[type] = [];-->
+<!--        }-->
+<!--        groups[type].push(port);-->
+<!--        return groups;-->
+<!--      }, {});-->
+<!--    },-->
+<!--    weakPasswordPorts() {-->
+<!--      if (!this.currentAsset || !this.currentAsset.ports) {-->
+<!--        return [];-->
+<!--      }-->
+<!--      return this.currentAsset.ports.filter(port =>-->
+<!--          port.weak_username && port.weak_password && port.verify_time-->
+<!--      );-->
 <!--    }-->
 <!--  },-->
 <!--  methods: {-->
 <!--    getResults() {-->
-<!--      fetch('/api/getAllAssetsVulnData')-->
+<!--      fetch('/api/getAllAssetInfo')-->
 <!--          .then(response => response.json())-->
 <!--          .then(data => {-->
 <!--            this.assets = data;-->
@@ -1835,7 +3014,25 @@ export default {
 <!--    },-->
 <!--    handleSelect(ip) {-->
 <!--      this.currentIp = ip;-->
+<!--      this.displayType = 'assetType';-->
+<!--      // 检查图表实例是否存在-->
+<!--      if (!this.pieChart || !this.pieChart.isDisposed()) {-->
+<!--        this.initCharts();  // 不存在或已销毁:初始化-->
+<!--      } else {-->
+<!--        this.updateCharts(); // 否则直接更新数据-->
+<!--      }-->
+<!--      // this.updateCharts();-->
+<!--      // this.initCharts();-->
+<!--      // 使用 nextTick 确保 DOM 更新后再初始化图表-->
+<!--      // this.$nextTick(() => {-->
+<!--      //   this.initCharts();  // 改用 initCharts 而不是 updateCharts-->
+<!--      // });-->
 <!--    },-->
+<!--    // handleSelect(ip) {-->
+<!--    //   this.currentIp = ip;-->
+<!--    //   this.displayType ='assetType';-->
+<!--    //   this.updateCharts();-->
+<!--    // },-->
 <!--    getCvssType(score) {-->
 <!--      score = parseFloat(score);-->
 <!--      if (score >= 7.0) return 'danger';-->
@@ -1848,16 +3045,189 @@ export default {
 <!--      if (score >= 7.0) return '高风险';-->
 <!--      if (score >= 4.0) return '中风险';-->
 <!--      if (score >= 0.0) return '低风险';-->
-<!--      return '信息';-->
+<!--      return '未知';-->
+<!--    },-->
+<!--    async initCharts() {-->
+<!--      await this.$nextTick();-->
+
+<!--      // 初始化资产类型饼图-->
+<!--      if (this.$refs.pieChart) {-->
+<!--        if (this.pieChart) {-->
+<!--          this.pieChart.dispose();-->
+<!--        }-->
+<!--        this.pieChart = echarts.init(this.$refs.pieChart);-->
+<!--      }-->
+
+<!--      // 初始化漏洞类型饼图-->
+<!--      if (this.$refs.vulTypePieChart) {-->
+<!--        if (this.vulTypePieChart) {-->
+<!--          this.vulTypePieChart.dispose();-->
+<!--        }-->
+<!--        this.vulTypePieChart = echarts.init(this.$refs.vulTypePieChart);-->
+<!--      }-->
+
+<!--      window.addEventListener('resize', () => {-->
+<!--        this.pieChart && this.pieChart.resize();-->
+<!--        this.vulTypePieChart && this.vulTypePieChart.resize();-->
+<!--      });-->
+
+<!--      this.updateCharts();-->
+<!--    },-->
+<!--    updateCharts() {-->
+<!--      if (this.displayType === 'assetType') {-->
+<!--        this.updateAssetPieChart();-->
+<!--      } else {-->
+<!--        this.updateVulTypePieChart();-->
+<!--      }-->
+<!--    },-->
+<!--    // 原有的资产类型饼图更新方法-->
+<!--    updateAssetPieChart() {-->
+<!--      if (!this.pieChart) return;-->
+
+<!--      const stats = this.vulnerabilityTypeStats;-->
+<!--      const data = Object.entries(stats)-->
+<!--          .filter(([, value]) => value > 0)-->
+<!--          .map(([name, value]) => ({-->
+<!--            name,-->
+<!--            value-->
+<!--          }));-->
+
+<!--      const option = {-->
+<!--        tooltip: {-->
+<!--          trigger: 'item',-->
+<!--          formatter: '{a} <br/>{b}: {c} ({d}%)'-->
+<!--        },-->
+<!--        legend: {-->
+<!--          orient: 'vertical',-->
+<!--          right: 'right',-->
+<!--          top: 'middle',-->
+<!--          data: data.map(item => item.name)-->
+<!--        },-->
+<!--        series: [{-->
+<!--          name: '资产类型分布',-->
+<!--          type: 'pie',-->
+<!--          radius: ['40%', '70%'],-->
+<!--          center: ['40%', '50%'],-->
+<!--          avoidLabelOverlap: false,-->
+<!--          itemStyle: {-->
+<!--            borderRadius: 10,-->
+<!--            borderColor: '#fff',-->
+<!--            borderWidth: 2-->
+<!--          },-->
+<!--          label: {-->
+<!--            show: true,-->
+<!--            formatter: '{b}: {c}个'-->
+<!--          },-->
+<!--          emphasis: {-->
+<!--            label: {-->
+<!--              show: true,-->
+<!--              fontSize: '18',-->
+<!--              fontWeight: 'bold'-->
+<!--            }-->
+<!--          },-->
+<!--          labelLine: {-->
+<!--            show: true-->
+<!--          },-->
+<!--          data: data-->
+<!--        }]-->
+<!--      };-->
+
+<!--      this.pieChart.setOption(option);-->
+<!--    },-->
+<!--    // 新增：漏洞类型饼图更新方法-->
+<!--    updateVulTypePieChart() {-->
+<!--      if (!this.vulTypePieChart) return;-->
+
+<!--      const stats = this.vulTypeStats;-->
+<!--      const data = Object.entries(stats)-->
+<!--          .map(([name, value]) => ({-->
+<!--            name,-->
+<!--            value-->
+<!--          }));-->
+
+<!--      const option = {-->
+<!--        tooltip: {-->
+<!--          trigger: 'item',-->
+<!--          formatter: '{a} <br/>{b}: {c} ({d}%)'-->
+<!--        },-->
+<!--        legend: {-->
+<!--          orient: 'vertical',-->
+<!--          right: 'right',-->
+<!--          top: 'middle',-->
+<!--          data: data.map(item => item.name)-->
+<!--        },-->
+<!--        series: [{-->
+<!--          name: '漏洞类型分布',-->
+<!--          type: 'pie',-->
+<!--          radius: ['40%', '70%'],-->
+<!--          center: ['40%', '50%'],-->
+<!--          avoidLabelOverlap: false,-->
+<!--          itemStyle: {-->
+<!--            borderRadius: 10,-->
+<!--            borderColor: '#fff',-->
+<!--            borderWidth: 2-->
+<!--          },-->
+<!--          label: {-->
+<!--            show: true,-->
+<!--            formatter: '{b}: {c}个'-->
+<!--          },-->
+<!--          emphasis: {-->
+<!--            label: {-->
+<!--              show: true,-->
+<!--              fontSize: '18',-->
+<!--              fontWeight: 'bold'-->
+<!--            }-->
+<!--          },-->
+<!--          labelLine: {-->
+<!--            show: true-->
+<!--          },-->
+<!--          data: data-->
+<!--        }]-->
+<!--      };-->
+
+<!--      this.vulTypePieChart.setOption(option);-->
 <!--    }-->
 <!--  },-->
+<!--  watch: {-->
+<!--    currentAsset() {-->
+<!--      this.$nextTick(() => {-->
+<!--        this.updateCharts();-->
+<!--      });-->
+<!--    },-->
+<!--    displayType() {-->
+<!--      this.$nextTick(() => {-->
+<!--        this.initCharts();-->
+<!--      });-->
+<!--    }-->
+<!--  },-->
+<!--  // created() {-->
+<!--  //   this.getResults().then(() => {-->
+<!--  //     if (this.assets.length > 0) {-->
+<!--  //       this.currentIp = this.assets[0].ip;-->
+<!--  //       this.displayType = 'assetType';-->
+<!--  //       this.$nextTick(() => {-->
+<!--  //         this.initCharts();-->
+<!--  //       });-->
+<!--  //     }-->
+<!--  //   });-->
+<!--  // },-->
 <!--  created() {-->
 <!--    this.getResults();-->
 <!--  },-->
 <!--  mounted() {-->
-<!--    // 默认选中第一个IP-->
 <!--    if (this.assets.length > 0) {-->
 <!--      this.currentIp = this.assets[0].ip;-->
+<!--    }-->
+<!--    this.initCharts();-->
+<!--  },-->
+<!--  beforeDestroy() {-->
+<!--    if (this.pieChart) {-->
+<!--      this.pieChart.dispose();-->
+<!--      this.pieChart = null;-->
+<!--    }-->
+<!--    if (this.vulTypePieChart) {-->
+<!--      this.vulTypePieChart.dispose();-->
+<!--      this.vulTypePieChart = null;-->
 <!--    }-->
 <!--  }-->
 <!--}-->
@@ -1872,7 +3242,7 @@ export default {
 <!--}-->
 
 <!--.ip-list {-->
-<!--  width: 250px;-->
+<!--  width: 180px;-->
 <!--  border-right: 1px solid #e6e6e6;-->
 <!--  background-color: #f5f7fa;-->
 <!--}-->
@@ -1922,7 +3292,27 @@ export default {
 <!--  color: #303133;-->
 <!--  font-size: 18px;-->
 <!--  font-weight: 600;-->
+
+
 <!--  margin: 0 0 15px 0;-->
+<!--}-->
+
+<!--.chart-toggle {-->
+<!--  margin-right: 20px;-->
+<!--  margin-top: 15px;-->
+<!--}-->
+
+<!--.chart-section {-->
+<!--  margin: 20px 0;-->
+<!--  padding: 0;-->
+<!--  background-color: #fff;-->
+<!--  border-radius: 4px;-->
+<!--  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);-->
+<!--}-->
+
+<!--.pie-chart {-->
+<!--  width: 100%;-->
+<!--  height: 400px;-->
 <!--}-->
 
 <!--.asset-info {-->
@@ -1964,12 +3354,10 @@ export default {
 <!--  text-align: center;-->
 <!--}-->
 
-<!--/* 表格内的标签居中显示 */-->
 <!--.el-table .cell {-->
 <!--  text-align: center;-->
 <!--}-->
 
-<!--/* 确保描述列左对齐 */-->
 <!--.el-table .el-table__row td:nth-child(4) .cell {-->
 <!--  text-align: left;-->
 <!--}-->
@@ -1985,6 +3373,36 @@ export default {
 <!--  margin: 10px 0;-->
 <!--  padding-left: 10px;-->
 <!--  border-left: 3px solid #409EFF;-->
+<!--}-->
+
+<!--.port-group {-->
+<!--  margin-bottom: 20px;-->
+<!--}-->
+
+<!--.ports-section {-->
+<!--  margin-bottom: 30px;-->
+<!--}-->
+
+<!--.ports-section h2 {-->
+<!--  color: #303133;-->
+<!--  font-size: 18px;-->
+<!--  font-weight: 600;-->
+<!--  margin: 0 0 15px 0;-->
+<!--  padding-bottom: 10px;-->
+<!--  border-bottom: 1px solid #ebeef5;-->
+<!--}-->
+
+<!--.weak-password-section {-->
+<!--  margin-bottom: 30px;-->
+<!--}-->
+
+<!--.weak-password-section h2 {-->
+<!--  color: #303133;-->
+<!--  font-size: 18px;-->
+<!--  font-weight: 600;-->
+<!--  margin: 0 0 15px 0;-->
+<!--  padding-bottom: 10px;-->
+<!--  border-bottom: 1px solid #ebeef5;-->
 <!--}-->
 <!--</style>-->
 
