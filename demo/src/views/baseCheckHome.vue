@@ -52,26 +52,22 @@
             <div slot="header" class="card-header">
                 <span>检测项目选择</span>
                 <span>
-                        <el-checkbox label="全选" @change="handleSelectAll" v-model="isSelectAll"/>
+                    <el-checkbox v-if="versionFlag" label="全选" @change="handleCheckAllChange"
+                        :indeterminate="isIndeterminate" v-model="isSelectAll" />
 
-                    <el-button type="primary" @click="batchExecute" icon="el-icon-video-play" :loading="batchLoading">
+                    <el-button type="primary" @click="batchExecuteW" icon="el-icon-video-play" :loading="batchLoading">
                         批量执行
                     </el-button>
                 </span>
 
             </div>
 
-            <el-checkbox-group v-model="selectedItemsW" v-if="versionFlag">
-                <el-row :gutter="20">
-                    <el-col :span="8" v-for="item in checkItemsW" :key="item.id">
-                        <el-checkbox :label="item.id">
-                            <el-tooltip :content="item.name" placement="top">
-                                <span class="checkbox-label">{{ item.name }}</span>
-                            </el-tooltip>
-                        </el-checkbox>
-                    </el-col>
-                </el-row>
-            </el-checkbox-group>
+            <div v-if="versionFlag" class="checboxGroupContainer">
+                <el-checkbox-group v-model="selectedItemsW" class="checboxGroup" @change="handleCheckedItemsChange">
+                    <el-checkbox v-for="item in checkItemsW" :key="item.id" :label="item.name" />
+                </el-checkbox-group>
+            </div>
+
             <el-checkbox-group v-model="selectedItems" v-if="!flag">
                 <el-row :gutter="20">
                     <el-col :span="8" v-for="item in checkItems" :key="item.id">
@@ -273,25 +269,29 @@ export default {
                 { value: 8, label: 'Window server 2019' },
                 { value: 9, label: 'Window server 2016' },
                 { value: 10, label: 'Window server 2012' },
+                { value: 11, label: 'Window server 2008' },
             ],
             value: '',
             valueTemp: '',
             checkResult: {},
             isChecked: false,
-            isSelectAll: false
+            isSelectAll: true,
+            isIndeterminate: false //半全选状态指示符
         };
     },
     watch: {
-        // 监听 myVariable 的变化
+        //用于监听版本信息
         value(newValue, oldValue) {
             if (newValue !== '') {
                 console.log(oldValue)
                 this.versionFlag = true
+                this.isSelectAll = true
+                this.handleCheckAllChange(true)
             }
         },
     },
     methods: {
-        //切换Windows或Linux方法
+        //切换Windows或Linux方法，同时初始化其他指示值
         turnFlag() {
             this.flag = !this.flag
             this.versionFlag = false
@@ -299,7 +299,8 @@ export default {
             this.pd = ''
             this.ip = ''
             this.adminName = ''
-            this.isChecked = false
+            this.isChecked = false,
+                this.isIndeterminate = false
         },
 
         WindowsSubmitForm() {
@@ -338,6 +339,7 @@ export default {
                     // 仅在成功响应时执行UI操作
                     this.versionFlag = true
                     this.isChecked = true
+                    return true
                 })
                 .catch((error) => {
                     console.error('Error:', error);
@@ -347,7 +349,27 @@ export default {
         },
 
         sendData() {
-            this.$store.commit('updateMessage', this.checkResult); // 更新共享状态
+            if (this.isSelectAll) {
+                this.$store.commit('updateMessage', this.checkResult)
+            } else {
+                let idArr = []
+                let newres = []
+                this.checkItemsW.forEach(element => {
+                    if (this.selectedItemsW.includes(element.name)) idArr.push(element.id)
+
+                });
+                this.checkResult.Event_result.forEach((element, index) => {
+                    if (idArr.includes(index + 1)) {
+                        console.log(index)
+                        newres.push(element)
+                    }
+                })
+                console.log(newres)
+
+                this.checkResult.Event_result = newres
+                this.$store.commit('updateMessage', this.checkResult)
+            }
+            // 更新共享状态
         },
 
         LinuxSubmitForm() {
@@ -402,10 +424,15 @@ export default {
             }
         },
 
-        runProgress() {
+        runProgress(flag) {
             this.progressBarWidth = 0; // 初始化进度为0
             this.showModal = true;
             let duration = 4000;
+            if (flag) {
+                duration = 2000
+            } else {
+                duration = 20000
+            }
             let elapsed = 0;
             let intervalTime = 100;
 
@@ -469,20 +496,35 @@ export default {
 
         checkAll() {
             if (this.isChecked) {
-                this.runProgress();
+                this.runProgress(true);
                 return 0
             } else {
                 this.submitForm()
-                this.runProgress()
+                this.runProgress(false)
             }
         },
 
-        handleSelectAll(){
-            if(!this.isSelectAll){
-                this.selectedItemsW = [...this.checkItemsW]
-            }else{
-                this.selectedItemsW = []
+        batchExecuteW() {
+            if (this.isChecked) {
+                this.sendData()
+                this.runProgress(true)
+                return 0
+            } else {
+                this.submitForm()
+                this.runProgress(false)
             }
+        },
+
+        handleCheckAllChange(val) {
+            this.selectedItemsW = val ? this.checkItemsW.map(item => item.name) : [];
+            this.isIndeterminate = false; // 取消半选状态
+        },
+
+        handleCheckedItemsChange(value) {
+            const checkedCount = value.length;
+            this.isSelectAll = checkedCount === this.checkItemsW.map(item => item.name).length;
+            this.isIndeterminate =
+                checkedCount > 0 && checkedCount < this.checkItemsW.map(item => item.name).length;
         },
 
         closeModal() {
@@ -564,5 +606,23 @@ export default {
 
 .versionSelectBT {
     margin-left: 1em;
+}
+
+.checboxGroupContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.checboxGroup {
+    width: 98%;
+    display: flex;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+}
+
+.checboxGroup>.el-checkbox {
+    width: 30%;
+    overflow: hidden;
 }
 </style>

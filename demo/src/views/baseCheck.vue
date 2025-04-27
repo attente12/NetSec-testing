@@ -55,7 +55,6 @@
             <el-table-column prop="description" label="检测项"></el-table-column>
             <el-table-column prop="basis" label="检测依据"></el-table-column>
             <el-table-column prop="result" label="检测结果"></el-table-column>
-            <!--            <el-table-column prop="IsComply" label="是否符合基线" :formatter="formatCompliance"></el-table-column>-->
             <el-table-column prop="IsComply" label="是否符合基线" width="200%">
                 <template slot-scope="scope">
                     <span :class="{ 'failed-result': scope.row.IsComply === 'false' }">{{ scope.row.IsComply }}</span>
