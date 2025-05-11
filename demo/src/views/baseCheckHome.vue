@@ -28,7 +28,7 @@
                     <el-input v-model="pd" type="password" show-password placeholder="请输入密码" prefix-icon="el-icon-lock">
                     </el-input>
                 </el-form-item>
-                <p class="versionSelector" v-show="flag">
+                <p class="versionSelector" v-if="flag">
                     <span>请选择Windows版本：</span>
                     <el-select v-model="value" placeholder="请选择">
                         <el-option v-for="item in winVersions" :key="item.value" :label="item.label"
@@ -40,7 +40,7 @@
 
                 <el-form-item>
                     <el-button v-show="!flag" type="primary" @click="submitForm">开始检测</el-button>
-                    <el-button v-show="flag" type="primary" :disabled="versionFlag ? null : true"
+                    <el-button v-show="flag" type="primary" :disabled="this.ip & this.pd ? null : true"
                         @click="checkAll">检测全部</el-button>
                     <el-button type="primary" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
                 </el-form-item>
@@ -64,7 +64,7 @@
 
             <div v-if="versionFlag" class="checboxGroupContainer">
                 <el-checkbox-group v-model="selectedItemsW" class="checboxGroup" @change="handleCheckedItemsChange">
-                    <el-checkbox v-for="item in checkItemsW" :key="item.id" :label="item.name" />
+                    <el-checkbox v-for="item in checkItemsW_" :key="item.id" :label="item.name" />
                 </el-checkbox-group>
             </div>
 
@@ -258,6 +258,7 @@ export default {
                 { id: 55, name: '检查是否已开启数据DEP功能' },
                 { id: 56, name: '检查是否已开启 UAC 安全提示' }
             ],
+            checkItemsW_: [],
             winVersions: [
                 { value: 1, label: 'Windows 11' },
                 { value: 2, label: 'Windows 10' },
@@ -284,6 +285,52 @@ export default {
         value(newValue, oldValue) {
             if (newValue !== '') {
                 console.log(oldValue)
+
+                let idArr = []
+                switch (newValue) {
+                    case 1:
+                        this.checkItemsW_ = this.checkItemsW
+                        break;
+                    case 2:
+                        this.checkItemsW_ = this.checkItemsW
+                        break;
+                    case 3:
+                        idArr = [55, 56]
+                        this.checkItemsW_ = this.checkItemsW.filter(item => !idArr.includes(item.id));
+                        break;
+                    case 4:
+                        idArr = [47, 55, 56]
+                        this.checkItemsW_ = this.checkItemsW.filter(item => !idArr.includes(item.id));
+                        break;
+                    case 5:
+                        idArr = [17, 31, 47, 55, 56]
+                        this.checkItemsW_ = this.checkItemsW.filter(item => !idArr.includes(item.id));
+                        break;
+                    case 6:
+                        this.checkItemsW_ = this.checkItemsW
+                        break;
+                    case 7:
+                        this.checkItemsW_ = this.checkItemsW
+                        break;
+                    case 8:
+                        this.checkItemsW_ = this.checkItemsW
+                        break;
+                    case 9:
+                        idArr = [55, 56]
+                        this.checkItemsW_ = this.checkItemsW.filter(item => !idArr.includes(item.id));
+                        break;
+                    case 10:
+                        idArr = [55, 56]
+                        this.checkItemsW_ = this.checkItemsW.filter(item => !idArr.includes(item.id));
+                        break;
+                    case 11:
+                        idArr = [47, 55, 56]
+                        this.checkItemsW_ = this.checkItemsW.filter(item => !idArr.includes(item.id));
+                        break;
+                    default:
+                        break;
+                }
+
                 this.versionFlag = true
                 this.isSelectAll = true
                 this.handleCheckAllChange(true)
