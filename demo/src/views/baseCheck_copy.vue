@@ -129,8 +129,7 @@
 </template>
 
 <script>
-//引入xlsx库
-// import * as XLSX from 'xlsx';
+
 import jsPDF from 'jspdf';//用于在客户端生成 PDF 文件
 import html2canvas from 'html2canvas';//将 HTML 元素转换为画布 (canvas) 图像
 
@@ -162,7 +161,6 @@ export default {
 
   },
   methods: {
-
     fetchAndDisplayChenckResults() {
       fetch('/api/userinfo')
         .then(response => response.json())
@@ -268,11 +266,9 @@ export default {
       }
     }
   },
-  beforeMount() {
-    this.getData()
-  },
-  mounted() {
-  }
+  // beforeMount() {
+  //   this.getData()
+  // },
 }
 </script>
 

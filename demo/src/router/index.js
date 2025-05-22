@@ -6,7 +6,7 @@ Vue.use(Router)					//注册vue-router
 import pagesOne from '../components/pagesOne'
 import pagesTwo from '../components/pagesTwo'
 import baseCheck from '../views/baseCheck.vue';
-import homeCheckHome from '../views/baseCheckHome.vue';
+import CheckHome from '../views/baseCheckHome.vue';
 import pocManage from '../views/pocManage'
 import home from '../views/home'
 import pocScanner from '../views/pocScanner.vue'
@@ -15,6 +15,7 @@ import weakPasswordDetect from "../views/weakPasswordDetect.vue"
 import classifyProtect from "../views/classifyProtect.vue"
 import CVELibrary from "@/views/CVELibrary.vue";
 import toVerify from "@/views/toVerify.vue";
+// import BaseCheck_copy from '../views/baseCheck_copy.vue'
 
 
 export default new Router({
@@ -27,8 +28,8 @@ export default new Router({
         {
             path: '/baseCheckHome',
             name: 'baseCheckHome',
-            component: homeCheckHome,
-            meta:{title:'基线检测'}
+            component: CheckHome,
+            meta: { title: '基线检测' }
         },
         {
             path: '/pagesOne',
@@ -44,49 +45,49 @@ export default new Router({
             path: '/baseCheck',
             name: 'baseCheck',
             component: baseCheck,
-            meta:{title:'基线检测结果'}
+            meta: { title: '基线检测结果' }
         },
         {
             path: '/pocManage',
             name: 'pocManage',
             component: pocManage,
-            meta:{title:'POC管理'}
+            meta: { title: 'POC管理' }
         },
         {
             path: '/pocScanner',
             name: 'pocScanner',
             component: pocScanner,
-            meta:{title:'漏洞扫描'}
+            meta: { title: '漏洞扫描' }
         },
         {
             path: '/pocScanner/pocVerify',
             name: 'pocVerify',
             component: pocVerify,
-            meta:{title:'POC验证'}
+            meta: { title: 'POC验证' }
         },
         {
             path: '/weakPasswordDetect',
             name: 'weakPasswordDetect',
             component: weakPasswordDetect,
-            meta:{title:'弱口令检测'}
+            meta: { title: '弱口令检测' }
         },
         {
             path: '/classifyProtect',
             name: 'classifyProtect',
             component: classifyProtect,
-            meta:{title:'等级保护测评'}
+            meta: { title: '等级保护测评' }
         },
         {
             path: '/CVELibrary',
             name: 'CVELibrary',
             component: CVELibrary,
-            meta:{title:'CVE库'}
+            meta: { title: 'CVE库' }
         },
         {
             path: '/toVerify',
             name: 'toVerify',
             component: toVerify,
-            meta:{title:'单个漏洞验证'}
+            meta: { title: '单个漏洞验证' }
         },
 
     ]
