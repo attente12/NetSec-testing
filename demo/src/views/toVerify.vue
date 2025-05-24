@@ -279,7 +279,7 @@ export default {
 
       // 正则表达式数组（多行模式，处理空格和换行）
       const requiredFields = [
-        { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC' },  // 类定义
+        { regex: /class\s+DemoPOC:\s*:/m, label: 'class DemoPOC:' },  // 类定义
         { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
         { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
         { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']

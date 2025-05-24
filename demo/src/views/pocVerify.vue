@@ -11,7 +11,7 @@
         <el-card class="box-card">
           <div slot="header">POC任务</div>
           <el-button type="primary" @click="batchExecutePOC" style="margin-top: 5px;">批量执行POC</el-button>
-          <el-button @click="printResult" style="margin-top: 5px;">打印报告</el-button>
+<!--          <el-button @click="printResult" style="margin-top: 5px;">打印报告</el-button>-->
           <el-table
               ref="table"
               :data="paginatedTasks"
@@ -42,13 +42,13 @@
 
             <el-table-column prop="searchResult" label="扫描结果" width="140">
               <template slot-scope="scope">
-                <span :class="{ 'failed-result': scope.row.searchResult === '未发现漏洞' }">{{ scope.row.searchResult }}</span>
+                <span :class="{ 'failed-result': scope.row.searchResult === '存在' }">{{ scope.row.searchResult }}</span>
               </template>
             </el-table-column>
 
             <el-table-column label="操作" width="500">
               <template slot-scope="scope">
-                <el-button size="mini" @click="ToVerify(scope.row)">去验证</el-button>
+                <el-button size="mini" @click="ToVerify(scope.row)">编辑</el-button>
                 <!--                <el-button size="mini" :disabled="scope.row.POCState === '是'" @click="handleEdit(scope.$index, scope.row)">编辑/上传POC</el-button>-->
                 <!--                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑/上传POC</el-button>-->
                 <el-button size="mini" @click="executePOC(scope.row)">执行POC</el-button>
@@ -309,7 +309,7 @@ export default {
     executePOC(row) {
       axios.post('/api/pocVerify', { cve_ids: [row.CVE] })
           .then(() => {
-            this.$message.success(`POC 执行成功: ${row.CVE}`);
+            this.$message.info(`已执行POC: ${row.CVE}`);
             this.fetchCpeData(); // 刷新数据
           })
           .catch(error => {

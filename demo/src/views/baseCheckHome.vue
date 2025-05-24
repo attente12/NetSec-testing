@@ -5,7 +5,7 @@
                 <el-col :span="24">
                     <div class="header">
                         <h1>Linux基线检测</h1>
-                        <p class="subtitle">安全基线检测工具</p>
+                        <!--            <p class="subtitle">安全基线检测工具</p>-->
                     </div>
                 </el-col>
             </el-row>
@@ -13,8 +13,17 @@
             <el-form @submit.prevent="submitForm" :model="formData" :rules="rules" ref="form" label-width="120px"
                 class="login-form">
                 <el-form-item label="IP 地址" prop="ip">
-                    <el-input v-model="formData.ip" placeholder="请输入服务器IP地址" prefix-icon="el-icon-monitor">
-                    </el-input>
+                    <el-select v-model="formData.ip" placeholder="请选择或输入服务器IP地址" filterable allow-create
+                        default-first-option style="width: 100%">
+                        <el-option v-for="ip in aliveHosts" :key="ip" :label="ip" :value="ip">
+                        </el-option>
+                    </el-select>
+                    <!-- 新增查看临时结果链接 -->
+                    <div class="temp-check-link">
+                        <el-link type="primary" :underline="false" @click="handleViewTempResult" icon="el-icon-view">
+                            查看该IP最近一次检查结果
+                        </el-link>
+                    </div>
                 </el-form-item>
                 <el-form-item label="root密码" prop="pd">
                     <el-input v-model="formData.pd" type="password" placeholder="请输入root密码" prefix-icon="el-icon-lock"
@@ -22,9 +31,18 @@
                     </el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="submitForm" icon="el-icon-search" :loading="loading">
-                        开始检测
-                    </el-button>
+                    <div class="control-bar">
+                        <el-checkbox v-model="checkAll" @change="handleCheckAllChange" style="margin-right: 15px;">
+                            全选检测项目
+                        </el-checkbox>
+                        <el-button type="primary" @click="startCheck" icon="el-icon-video-play" :loading="loading"
+                            :disabled="selectedItems.length === 0">
+                            开始检测
+                        </el-button>
+                    </div>
+                    <!--          <div class="selected-info" v-if="selectedItems.length > 0">-->
+                    <!--            已选择 {{ selectedItems.length }} 项检测项目-->
+                    <!--          </div>-->
                 </el-form-item>
             </el-form>
         </el-card>
@@ -32,12 +50,9 @@
         <el-card class="box-card check-items">
             <div slot="header" class="card-header">
                 <span>检测项目选择</span>
-                <el-button type="primary" @click="batchExecute" icon="el-icon-video-play" :loading="batchLoading">
-                    批量执行
-                </el-button>
             </div>
 
-            <el-checkbox-group v-model="selectedItems">
+            <el-checkbox-group v-model="selectedItems" @change="handleCheckedItemsChange">
                 <el-row :gutter="20">
                     <el-col :span="8" v-for="item in checkItems" :key="item.id">
                         <el-checkbox :label="item.id">
@@ -48,6 +63,8 @@
                     </el-col>
                 </el-row>
             </el-checkbox-group>
+
+
         </el-card>
 
         <el-dialog title="检测完成" :visible.sync="dialogVisible" width="30%" center>
@@ -71,10 +88,11 @@ export default {
                 ip: '',
                 pd: ''
             },
+            aliveHosts: [], // 存储活跃IP列表
             selectedItems: [],
+            checkAll: false,
             dialogVisible: false,
             loading: false,
-            batchLoading: false,
             rules: {
                 ip: [
                     { required: true, message: '请输入IP地址', trigger: 'blur' },
@@ -177,57 +195,64 @@ export default {
             ]
         };
     },
+    created() {
+        // 组件创建时获取活跃IP列表
+        this.fetchAliveHosts();
+    },
     methods: {
-        submitForm() {
-            this.$refs.form.validate((valid) => {
-                if (valid) {
-                    this.loading = true;
-                    const payload = {
-                        ip: this.formData.ip,
-                        pd: this.formData.pd
-                    };
-
-                    fetch('/api/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(payload),
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                if (response.status === 500) {
-                                    throw new Error("SSH会话无法启动");
-                                }
-                                throw new Error(`HTTP status ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log(data);
-                            this.loading = false;
-                            this.dialogVisible = true;
-                        })
-                        .catch((error) => {
-                            this.loading = false;
-                            Message.error(error.message);
-                        });
-                }
-            });
+        // 获取活跃IP列表
+        fetchAliveHosts() {
+            fetch('/api/getAliveHosts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    this.aliveHosts = data.alive_hosts;
+                })
+                .catch(error => {
+                    Message.error('获取活跃IP列表失败：' + error.message);
+                });
         },
-
-        batchExecute() {
+        // 处理全选复选框变化
+        handleCheckAllChange(val) {
+            const allItemIds = this.checkItems.map(item => item.id);
+            this.selectedItems = val ? allItemIds : [];
+        },
+        // 处理选中项变化
+        handleCheckedItemsChange(value) {
+            const checkedCount = value.length;
+            this.checkAll = checkedCount === this.checkItems.length;
+        },
+        // 开始检测（合并了原来的submitForm和batchExecute方法）
+        startCheck() {
             this.$refs.form.validate((valid) => {
                 if (!valid) {
                     return;
                 }
 
                 if (this.selectedItems.length === 0) {
-                    Message.warning('请选择需要批量执行的项目');
+                    Message.warning('请选择至少一个检测项目');
                     return;
                 }
 
-                this.batchLoading = true;
+                this.loading = true;
+                //let payload; // 在 if/else 外部声明变量
+
+                // if (this.checkAll) {
+                //   payload = {
+                //     ip: this.formData.ip,
+                //     pd: this.formData.pd
+                //   }; // 给变量赋值
+                // } else {
+                //   payload = {
+                //     ip: this.formData.ip,
+                //     pd: this.formData.pd,
+                //     ids: this.selectedItems
+                //   }; // 给变量赋值
+                // }
                 const payload = {
                     ip: this.formData.ip,
                     pd: this.formData.pd,
@@ -252,22 +277,50 @@ export default {
                     })
                     .then(data => {
                         console.log(data);
-                        this.batchLoading = false;
+                        this.loading = false;
                         this.dialogVisible = true;
                     })
                     .catch((error) => {
-                        this.batchLoading = false;
+                        this.loading = false;
                         Message.error(error.message);
                     });
             });
         },
-
         viewResult() {
             this.dialogVisible = false;
             this.$nextTick(() => {
-                this.$router.push('/baseCheck');
+                this.$router.push({
+                    path: '/tempBaseCheck',  // 改为跳转到新页面
+                    query: {
+                        ip: this.formData.ip  // 传递检测的IP
+                    }
+                });
             });
-        }
+        },
+        // viewResult() {
+        //   this.dialogVisible = false;
+        //   this.$nextTick(() => {
+        //     this.$router.push('/baseCheck');
+        //   });
+        // }
+        handleViewTempResult() {
+            if (!this.formData.ip) {
+                Message.warning('请先输入服务器IP地址');
+                return;
+            }
+
+            // 验证IP格式（复用原有规则）
+            const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+            if (!ipPattern.test(this.formData.ip.trim())) {
+                Message.error('IP地址格式不正确，请检查输入');
+                return;
+            }
+
+            this.$router.push({
+                path: '/tempBaseCheck',
+                query: { ip: this.formData.ip }
+            });
+        },
     }
 }
 </script>
@@ -307,6 +360,11 @@ export default {
     align-items: center;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
 .check-items {
     margin-top: 30px;
 }
@@ -326,5 +384,37 @@ export default {
 
 .el-row {
     margin-bottom: 20px;
+}
+
+.control-bar {
+    display: flex;
+    align-items: center;
+}
+
+.selected-info {
+    margin-top: 10px;
+    color: #606266;
+    font-size: 14px;
+}
+
+.temp-check-link {
+    margin-top: -8px;
+    margin-bottom: -13px;
+    font-size: 12px;
+    text-align: right;
+
+    .el-link {
+        display: inline-flex;
+        align-items: center;
+
+        i {
+            margin-right: 3px;
+            font-size: 14px;
+        }
+    }
+}
+
+.login-form>>>.el-form-item {
+    margin-bottom: 18px;
 }
 </style>
