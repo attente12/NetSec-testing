@@ -13,8 +13,11 @@
       <h1 class="main-title">等保测评结果</h1>
 
       <div class="date-info">
-        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>
+        <el-tag type="info"> </el-tag>
       </div>
+<!--      <div class="date-info">-->
+<!--        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>-->
+<!--      </div>-->
     </div>
 
     <!-- 控制按钮区域 -->
@@ -37,7 +40,18 @@
             size="medium">
         </el-input>
       </div>
+
+      <!-- 新增保存评分按钮 -->
+      <el-button
+          type="success"
+          icon="el-icon-check"
+          @click="saveScores"
+          :loading="saveLoading"
+          size="medium">
+        保存
+      </el-button>
     </div>
+
 
     <!-- 检测结果表格 -->
     <el-card class="results-card">
@@ -57,7 +71,8 @@
           stripe
           :header-cell-style="{background:'#f5f7fa',color:'#606266'}"
           v-loading="tableLoading">
-        <el-table-column label="序号" width="70" type="index"></el-table-column>
+<!--        <el-table-column prop="item_id" label="检测项ID" min-width="50"></el-table-column>-->
+<!--        <el-table-column label="序号" width="70" type="index"></el-table-column>-->
         <el-table-column prop="description" label="检测项" min-width="80"></el-table-column>
         <el-table-column prop="basis" label="基准" min-width="150"></el-table-column>
         <el-table-column prop="result" label="检测结果" min-width="150"></el-table-column>
@@ -72,6 +87,18 @@
           <template slot-scope="scope">
             <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>
             <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="是否符合等保要求（人工判定）" width="120">
+          <template slot-scope="scope">
+            <el-select
+                v-model="scope.row.score"
+                placeholder="请选择评分"
+                size="mini">
+              <el-option label="符合" value="1"></el-option>
+              <el-option label="部分符合" value="0.5"></el-option>
+              <el-option label="不符合" value="0"></el-option>
+            </el-select>
           </template>
         </el-table-column>
       </el-table>
@@ -94,6 +121,7 @@ export default {
       showContentForPDF: false,
       pdfLoading: false,
       tableLoading: false,
+      saveLoading: false, // 保存按钮的加载状态
       ip:'',
     }
   },
@@ -116,6 +144,20 @@ export default {
     },
     totalCount() {
       return this.checkresults.length;
+    },
+    getScoreText() {
+      return (score) => {
+        const numericScore = parseFloat(score);
+        if (numericScore === 1) {
+          return '符合';
+        } else if (numericScore === 0.5) {
+          return '部分符合';
+        } else if (numericScore === 0) {
+          return '不符合';
+        } else {
+          return '未知';
+        }
+      };
     }
   },
   methods: {
@@ -132,13 +174,69 @@ export default {
       this.tableLoading = true;
       axios.get(`/api/level3TmpUserinfo?ip=${ip}`)
           .then(response => {
-            this.checkresults = response.data.checkResults;
+            this.checkresults = response.data.checkResults.map(item => {
+              // 根据 tmp_IsComply 的值来设置 score
+              let score = '0'; // 默认值为不符合
+              if (item.tmp_IsComply === 'true') {
+                score = '1'; // 符合
+              } else if (item.tmp_IsComply === 'half_true') {
+                score = '0.5'; // 部分符合
+              }
+              return {
+                ...item,
+                score: score
+              };
+            });
             this.tableLoading = false;
           })
           .catch(error => {
             console.error('Error:', error);
             this.tableLoading = false;
             this.$message.error('获取检测结果失败，请重试');
+          });
+      // axios.get(`/api/level3TmpUserinfo?ip=${ip}`)
+      //     .then(response  => {
+      //       this.checkresults = response.data.checkResults.map(item => ({
+      //         ...item,
+      //         score: item.IsComply === 'true' ? '1' : '0.5'
+      //       }));
+      //       this.tableLoading = false;
+      //     })
+      //     .catch(error => {
+      //       console.error('Error:', error);
+      //       this.tableLoading = false;
+      //       this.$message.error('获取检测结果失败，请重试');
+      //     });
+    },
+    saveScores() {
+      // 显示保存中状态
+      this.saveLoading = true;
+
+      // 准备请求数据
+      const scoreMeasures = this.checkresults.map(item => ({
+        item_id: item.item_id,
+        importantLevelJson: item.importantLevel || "2", // 如果有importantLevel字段则使用，否则默认为"2"
+        IsComplyLevel: item.score // 使用选择的评分值
+      }));
+
+      // 构建请求体
+      const requestData = {
+        ip: this.ip,
+        scoreMeasures: scoreMeasures
+      };
+
+      // 发送POST请求
+      axios.post('/api/updateLevel3Protect', requestData)
+          .then(response => {
+            // 保存成功
+            this.saveLoading = false;
+            this.$message.success(`成功更新${response.data.itemsUpdated}项评分结果`);
+          })
+          .catch(error => {
+            // 保存失败
+            this.saveLoading = false;
+            console.error('保存评分失败:', error);
+            this.$message.error('保存评分失败，请重试');
           });
     },
     goBack() {

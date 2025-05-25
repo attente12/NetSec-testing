@@ -258,8 +258,14 @@
     </el-dialog>
 
     <el-table :data="paginatedData" style="width: 100%" ref="table">
-      <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column prop="id" label="ID" width="50"></el-table-column>
+      <el-table-column type="selection" width="50"></el-table-column>
+      <!-- 新增：逻辑ID列，放在第一列 -->
+      <el-table-column label="id" width="50" align="center">
+        <template slot-scope="scope">
+          {{ (currentPage - 1) * pageSize + scope.$index + 1 }}
+        </template>
+      </el-table-column>
+<!--      <el-table-column prop="id" label="ID" width="50"></el-table-column>-->
       <el-table-column prop="cve_id" label="CVE编号" width="170"></el-table-column>
       <el-table-column prop="vul_name" label="漏洞名称" width="130"></el-table-column>
       <el-table-column prop="type" label="漏洞类型" width="110"></el-table-column>

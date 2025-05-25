@@ -3,9 +3,9 @@
     <!-- 头部区域 -->
     <div class="header-section">
       <h1 class="main-title">Linux基线检测报告</h1>
-      <div class="date-info">
-        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>
-      </div>
+<!--      <div class="date-info">-->
+<!--        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>-->
+<!--      </div>-->
     </div>
 
     <!-- 控制按钮区域 -->
@@ -137,7 +137,7 @@
         <h1 id="linuxBaseline2">Linux基线检测报告</h1>
         <!-- 检测时间 -->
         <div style="text-align:right; margin-top:20px;">
-          <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>
+          <p style="font-size:18px;">打印时间：{{ new Date().toLocaleString() }}</p>
         </div>
         <el-row :gutter="20">
           <el-col :span="24"><p>主机名：{{ serverInfo.hostname }}</p></el-col>

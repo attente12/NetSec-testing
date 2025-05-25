@@ -4,7 +4,7 @@
     <div class="header-section">
       <h1 class="main-title">等级保护测评</h1>
       <div class="date-info">
-        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>
+<!--        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>-->
       </div>
     </div>
 
@@ -28,10 +28,12 @@
         </div>
 
         <el-button
+
             @click="onExportToPDF"
             :loading="pdfLoading"
             icon="el-icon-document"
-            type="primary">
+            type="primary"
+            size="medium">
           导出为 PDF
         </el-button>
       </div>
@@ -54,8 +56,151 @@
             size="medium">
         </el-input>
       </div>
+
+      <!-- 新增保存评分按钮 -->
+      <el-button
+          type="success"
+          icon="el-icon-check"
+          @click="saveScores"
+          :loading="saveLoading"
+          size="medium">
+        保存人工判定结果
+      </el-button>
+      <el-button
+          type="primary"
+          icon="el-icon-data-analysis"
+          @click="getProtectionLevelResult"
+          :loading="resultLoading"
+          size="medium">
+        获取等保结果
+      </el-button>
     </div>
 
+    <!-- 得分显示部分，数字得分 -->
+    <el-card class="score-card" v-if="showScoreResult" style="margin-bottom: 20px">
+      <div slot="header" class="card-header">
+        <span><i class="el-icon-data-line"></i> 等保测评结果</span>
+        <el-button type="text" @click="showScoreResult = false">
+          <i class="el-icon-close"></i>
+        </el-button>
+      </div>
+
+      <div class="score-content">
+        <!-- 替换仪表盘为简单的得分显示 -->
+        <div class="score-display">
+          <div class="score-title">等保得分</div>
+          <div class="score-number" :class="getScoreClass(levelResult.score)">
+            {{ formattedScore }}
+          </div>
+        </div>
+
+        <div class="score-details">
+          <div class="detail-item">
+            <span class="detail-label">IP地址:</span>
+            <span class="detail-value">{{ levelResult.ip || selectedIP }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">等保级别:</span>
+            <span class="detail-value">三级</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">评估结论:</span>
+            <span class="detail-value" :class="getScoreClass(levelResult.score)">
+          {{ getScoreConclusion(levelResult.score) }}
+        </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">检测项总数:</span>
+            <span class="detail-value">{{ levelResult.totalItems || '0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-summary">
+        <div class="summary-text">
+          <p>{{ levelResult.message || '三级等保评估结果' }}</p>
+
+          <!-- 根据不同分数区间显示不同的提示信息 -->
+          <p v-if="levelResult.score >= 90" class="excellent-text">
+            <i class="el-icon-circle-check"></i>
+            得分优秀，符合等保三级要求，建议持续保持
+          </p>
+          <p v-else-if="levelResult.score >= 80" class="good-text">
+            <i class="el-icon-circle-check"></i>
+            得分良好，基本符合等保三级要求，可进一步完善个别项目
+          </p>
+          <p v-else-if="levelResult.score >= 60" class="warning-text">
+            <i class="el-icon-warning"></i>
+            得分基本合格，仍有提升空间，建议优化未完全符合的检测项
+          </p>
+          <p v-else class="danger-text">
+            <i class="el-icon-close"></i>
+            得分未达标，建议查看未通过检测项并根据建议进行整改
+          </p>
+        </div>
+      </div>
+    </el-card>
+<!--    <el-card class="score-card" v-if="showScoreResult" style="margin-bottom: 30px">-->
+<!--      <div slot="header" class="card-header">-->
+<!--        <span><i class="el-icon-data-line"></i> 等保测评结果</span>-->
+<!--        <el-button type="text" @click="showScoreResult = false">-->
+<!--          <i class="el-icon-close"></i>-->
+<!--        </el-button>-->
+<!--      </div>-->
+
+<!--      <div class="score-content">-->
+<!--        <div class="score-gauge">-->
+<!--          <el-progress type="dashboard" :percentage="scorePercentage" :color="scoreColors" :stroke-width="12">-->
+<!--            <div class="score-value">{{ formattedScore }}</div>-->
+<!--          </el-progress>-->
+<!--        </div>-->
+
+<!--        <div class="score-details">-->
+<!--          <div class="detail-item">-->
+<!--            <span class="detail-label">IP地址:</span>-->
+<!--            <span class="detail-value">{{ levelResult.ip || selectedIP }}</span>-->
+<!--          </div>-->
+<!--          <div class="detail-item">-->
+<!--            <span class="detail-label">等保级别:</span>-->
+<!--            <span class="detail-value">三级</span>-->
+<!--          </div>-->
+<!--          <div class="detail-item">-->
+<!--            <span class="detail-label">评估结论:</span>-->
+<!--            <span class="detail-value" :class="getScoreClass(levelResult.score)">-->
+<!--          {{ getScoreConclusion(levelResult.score) }}-->
+<!--        </span>-->
+<!--          </div>-->
+<!--          <div class="detail-item">-->
+<!--            <span class="detail-label">检测项总数:</span>-->
+<!--            <span class="detail-value">{{ levelResult.totalItems || '0' }}</span>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="score-summary">-->
+<!--        <div class="summary-text">-->
+<!--          <p>{{ levelResult.message || '三级等保评估结果' }}</p>-->
+
+<!--          &lt;!&ndash; 根据不同分数区间显示不同的提示信息 &ndash;&gt;-->
+<!--          <p v-if="levelResult.score >= 90" class="excellent-text">-->
+<!--            <i class="el-icon-circle-check"></i>-->
+<!--            得分优秀，符合等保三级要求，建议持续保持-->
+<!--          </p>-->
+<!--          <p v-else-if="levelResult.score >= 80" class="good-text">-->
+<!--            <i class="el-icon-circle-check"></i>-->
+<!--            得分良好，基本符合等保三级要求，可进一步完善个别项目-->
+<!--          </p>-->
+<!--          <p v-else-if="levelResult.score >= 60" class="warning-text">-->
+<!--            <i class="el-icon-warning"></i>-->
+<!--            得分基本合格，仍有提升空间，建议优化未完全符合的检测项-->
+<!--          </p>-->
+<!--          <p v-else class="danger-text">-->
+<!--            <i class="el-icon-close"></i>-->
+<!--            得分未达标，建议查看未通过检测项并根据建议进行整改-->
+<!--          </p>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </el-card>-->
 
 
     <!-- 检测结果表格 -->
@@ -96,6 +241,18 @@
           <template slot-scope="scope">
             <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>
             <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="是否符合等保要求（人工判定）" width="120">
+          <template slot-scope="scope">
+            <el-select
+                v-model="scope.row.score"
+                placeholder="请选择评分"
+                size="mini">
+              <el-option label="符合" value="1"></el-option>
+              <el-option label="部分符合" value="0.5"></el-option>
+              <el-option label="不符合" value="0"></el-option>
+            </el-select>
           </template>
         </el-table-column>
       </el-table>
@@ -161,6 +318,29 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column label="是否符合等保要求（人工判定）" width="120">
+          <template slot-scope="scope">
+            <span
+                :style="{
+                color:
+                  scope.row.score == 1
+                    ? 'green'
+                    : scope.row.score == 0.5
+                    ? 'orange'
+                    : 'red'
+              }"
+            >
+              {{
+                scope.row.score == 1
+                    ? '符合'
+                    : scope.row.score == 0.5
+                        ? '部分符合'
+                        : '不符合'
+              }}
+            </span>
+          </template>
+        </el-table-column>
+
       </el-table>
       <!-- 页码容器 - PDF生成时会添加 -->
       <div class="page-numbers-container"></div>
@@ -187,7 +367,17 @@ export default {
       tableLoading: false,
       totalPages: 2, // 默认至少两页
       aliveHosts: [], // 活跃主机IP列表
-      selectedIP: '' // 选中的IP
+      selectedIP: '', // 选中的IP
+      saveLoading: false, // 保存按钮的加载状态
+      // 等保评分相关计算属性
+      resultLoading: false,
+      showScoreResult: false,
+      levelResult: {
+        ip: '',
+        message: '',
+        score: 0,
+        totalItems: 0
+      },
     }
   },
   computed: {
@@ -209,6 +399,23 @@ export default {
     },
     totalCount() {
       return this.checkresults.length;
+    },
+    // 等保评分相关计算属性
+    // scorePercentage() {
+    //   return this.levelResult.score ? Math.min(Math.round(parseFloat(this.levelResult.score)), 100) : 0;
+    // },
+    //
+    // scoreColors() {
+    //   return [
+    //     {color: '#f56c6c', percentage: 60},
+    //     {color: '#e6a23c', percentage: 70},
+    //     {color: '#409eff', percentage: 80},
+    //     {color: '#67c23a', percentage: 90}
+    //   ];
+    // },
+
+    formattedScore() {
+      return this.levelResult.score ? this.levelResult.score.toFixed(2) : '0.00';
     }
   },
   methods: {
@@ -246,9 +453,19 @@ export default {
       this.tableLoading = true;
       axios.get(`/api/level3Userinfo?ip=${this.selectedIP}`)
           .then(response => {
-            // this.checkresults = response.data.Event_result;
-            this.checkresults = response.data.checkResults;
-            // this.serverInfo = response.data.serverInfo;
+            this.checkresults = response.data.checkResults.map(item => {
+              // 根据 tmp_IsComply 的值来设置 score
+              let score = '0'; // 默认值为不符合
+              if (item.tmp_IsComply === 'true') {
+                score = '1'; // 符合
+              } else if (item.tmp_IsComply === 'half_true') {
+                score = '0.5'; // 部分符合
+              }
+              return {
+                ...item,
+                score: score
+              };
+            });
             this.tableLoading = false;
             // 根据数据量预估页数
             this.estimatePageCount();
@@ -258,6 +475,20 @@ export default {
             this.tableLoading = false;
             this.$message.error('获取检测结果失败，请重试');
           });
+      // axios.get(`/api/level3Userinfo?ip=${this.selectedIP}`)
+      //     .then(response => {
+      //       // this.checkresults = response.data.Event_result;
+      //       this.checkresults = response.data.checkResults;
+      //       // this.serverInfo = response.data.serverInfo;
+      //       this.tableLoading = false;
+      //       // 根据数据量预估页数
+      //       this.estimatePageCount();
+      //     })
+      //     .catch(error => {
+      //       console.error('Error:', error);
+      //       this.tableLoading = false;
+      //       this.$message.error('获取检测结果失败，请重试');
+      //     });
     },
 
     estimatePageCount() {
@@ -477,6 +708,104 @@ export default {
     goToClassifyProtect() {
       // 导航到等保测评页面
       this.$router.push('/classifyProtect');
+    },
+
+    saveScores() {
+      // 显示保存中状态
+      this.saveLoading = true;
+
+      // 准备请求数据
+      const scoreMeasures = this.checkresults.map(item => ({
+        item_id: item.item_id,
+        importantLevelJson: item.importantLevel || "2", // 如果有importantLevel字段则使用，否则默认为"2"
+        IsComplyLevel: item.score // 使用选择的评分值
+      }));
+
+      // 构建请求体
+      const requestData = {
+        ip: this.selectedIP,
+        scoreMeasures: scoreMeasures
+      };
+
+      // 发送POST请求
+      axios.post('/api/updateLevel3Protect', requestData)
+          .then(response => {
+            // 保存成功
+            this.saveLoading = false;
+            this.$message.success(`成功更新${response.data.itemsUpdated}项评分结果`);
+          })
+          .catch(error => {
+            // 保存失败
+            this.saveLoading = false;
+            console.error('保存评分失败:', error);
+            this.$message.error('保存评分失败，请重试');
+          });
+    },
+    // 获取等保评分
+    getProtectionLevelResult() {
+      if (!this.selectedIP) {
+        this.$message.warning('请先选择服务器IP');
+        return;
+      }
+
+      this.resultLoading = true;
+      axios.get(`/api/getlevel3ResultByIp?ip=${this.selectedIP}`)
+          .then(response => {
+            this.levelResult = response.data;
+            this.showScoreResult = true;
+            this.resultLoading = false;
+
+            // 根据得分显示对应的消息提示
+            const score = this.levelResult.score;
+            let message = '';
+
+            if (score >= 90) {
+              message = '恭喜！等保评估优秀';
+              this.$message.success(message);
+            } else if (score >= 80) {
+              message = '等保评估良好';
+              this.$message.success(message);
+            } else if (score >= 60) {
+              message = '等保评估合格，但仍有改进空间';
+              this.$message.warning(message);
+            } else {
+              message = '等保评估未达标，建议及时整改';
+              this.$message.error(message);
+            }
+          })
+          .catch(error => {
+            console.error('获取等保结果失败:', error);
+            this.resultLoading = false;
+            this.$message.error('获取等保结果失败，请重试');
+          });
+    },
+
+    getScoreConclusion(score) {
+      if (!score && score !== 0) return '未评估';
+
+      if (score >= 90) {
+        return '优秀';
+      } else if (score >= 80) {
+        return '良好';
+      } else if (score >= 60) {
+        return '合格';
+      } else {
+        return '未达标';
+      }
+    },
+
+    getScoreClass(score) {
+      if (!score && score !== 0) return '';
+
+      if (score >= 90) {
+        return 'score-excellent';
+      } else if (score >= 80) {
+        return 'score-good';
+      } else if (score >= 60) {
+        return 'score-moderate';
+      } else {
+        return 'score-poor';
+      }
     }
   },
   mounted() {
@@ -624,6 +953,99 @@ export default {
   .filter-group .el-input {
     width: 100%;
   }
+}
+
+/* 计算评分显示评分部分样式 */
+/* 新增样式 */
+.score-card {
+  margin-top: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.score-content {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+}
+
+/* 替换原来的仪表盘样式为数字得分样式 */
+.score-display {
+  width: 150px;
+  text-align: center;
+  margin-right: 30px;
+  flex-shrink: 0;
+  border-right: 1px solid #ebeef5;
+  padding-right: 20px;
+}
+
+.score-title {
+  font-size: 16px;
+  color: #606266;
+  margin-bottom: 10px;
+}
+
+.score-number {
+  font-size: 36px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.score-details {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7fa;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #606266;
+  margin-bottom: 5px;
+}
+
+.detail-value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.score-summary {
+  padding: 0 15px 15px;
+}
+
+.summary-text {
+  border-top: 1px solid #ebeef5;
+  padding-top: 15px;
+  color: #606266;
+}
+
+/* 不同得分等级的颜色样式 */
+.score-excellent, .excellent-text {
+  color: #67c23a;
+}
+
+.score-good, .good-text {
+  color: #409eff;
+}
+
+.score-moderate, .warning-text {
+  color: #e6a23c;
+}
+
+.score-poor, .danger-text {
+  color: #f56c6c;
+}
+
+.excellent-text, .good-text, .warning-text, .danger-text {
+  font-weight: bold;
 }
 </style>
 
