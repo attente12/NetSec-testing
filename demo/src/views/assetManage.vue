@@ -300,13 +300,13 @@
                       :header-cell-style="{ backgroundColor: '#f5f7fa' }">
                     <el-table-column prop="item_id" label="项目ID" width="80"></el-table-column>
                     <el-table-column prop="description" label="检查项" width="200"></el-table-column>
-                    <el-table-column prop="important_level" label="重要级别" width="100">
-                      <template slot-scope="scope">
-                        <el-tag :type="getLevel3ImportanceLevelType(scope.row.important_level)">
-                          {{ getLevel3ImportanceLevel(scope.row.important_level) }}
-                        </el-tag>
-                      </template>
-                    </el-table-column>
+<!--                    <el-table-column prop="important_level" label="重要级别" width="100">-->
+<!--                      <template slot-scope="scope">-->
+<!--                        <el-tag :type="getLevel3ImportanceLevelType(scope.row.important_level)">-->
+<!--                          {{ getLevel3ImportanceLevel(scope.row.important_level) }}-->
+<!--                        </el-tag>-->
+<!--                      </template>-->
+<!--                    </el-table-column>-->
                     <el-table-column prop="basis" label="检查依据"></el-table-column>
                   </el-table>
                 </div>

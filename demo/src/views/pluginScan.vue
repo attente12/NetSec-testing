@@ -93,7 +93,8 @@
         <el-card class="box-card">
           <div slot="header" class="clearfix">
             <span>扫描结果</span>
-            <div style="float: right" v-if="result.scan_time">检测时间: {{ result.scan_time }}</div>
+<!--            <div style="float: right" v-if="result.scan_time">检测时间: {{ result.scan_time }}</div>-->
+            <div style="float: right" v-if="time">检测时间: {{ time }}</div>
           </div>
           <el-button
               @click="printReport"
@@ -251,6 +252,7 @@ export default {
       detectState:false,
       runPocState:false,
       printLoading:false,
+      time:'',
     };
   },
 
@@ -459,6 +461,7 @@ export default {
       axios.post('/api/pocScan', postData)
           .then(response => {
             console.log(response.data);
+            this.time=response.data.scan_time;
             // axios.post('/api/pocScan/mergeResults', { ip: this.scanTarget })
             //     .then(response => {
             //       this.result = response.data;
