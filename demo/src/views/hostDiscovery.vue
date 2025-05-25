@@ -1,4 +1,5 @@
 <!-- HostDiscovery.vue -->
+<!-- HostDiscovery.vue -->
 <template>
   <div class="host-discovery">
     <el-card class="search-card">
@@ -23,9 +24,6 @@
         <div class="result-header" v-if="hostList.length">
           <span>发现 {{ hostList.length }} 个存活主机</span>
           <div>
-            <!--          <el-button type="text" icon="el-icon-download" @click="exportResults">-->
-            <!--            导出结果-->
-            <!--          </el-button>-->
             <el-button type="text" icon="el-icon-document" @click="exportPDF">
               导出PDF
             </el-button>
@@ -62,59 +60,71 @@
       </div>
     </el-card>
 
-    <!-- 所有存活主机列表卡片 -->
+    <!-- 主机列表卡片 - 按资产组分组展示 -->
     <el-card class="all-hosts-card">
       <div slot="header" class="card-header">
-        <span class="title" style="margin-right: 12px;">所有存活主机列表</span>
+        <span class="title" style="margin-right: 12px;">主机列表</span>
         <el-button
             type="default"
             plain
             size="small"
             icon="el-icon-refresh"
-            @click="fetchAllAliveHosts"
+            @click="fetchHostsAndGroups"
             style="background: white; border-color: #eee;"
         >刷新</el-button>
       </div>
-
-      <!--      <div slot="header" class="card-header">-->
-      <!--        <span class="title">所有存活主机列表</span>-->
-      <!--        <el-button type="primary" size="small" icon="el-icon-refresh" @click="fetchAllAliveHosts">刷新</el-button>-->
-      <!--      </div>-->
-
       <div class="result-section" v-loading="allHostsLoading">
-        <div class="result-header" v-if="allHostsList.length">
-          <span>当前共有 {{ allHostsList.length }} 个存活主机</span>
-<!--          <div>-->
-<!--            <el-button type="text" icon="el-icon-download" @click="exportAllHostsResults">-->
-<!--              导出CSV-->
-<!--            </el-button>-->
-<!--            <el-button type="text" icon="el-icon-document" @click="exportAllHostsPDF">-->
-<!--              导出PDF-->
-<!--            </el-button>-->
-<!--          </div>-->
+        <div class="result-header" v-if="Object.keys(groupedHosts).length">
+          <span>当前共有 {{ totalHostsCount }} 个主机</span>
         </div>
 
-        <el-table
-            v-if="allHostsList.length"
-            :data="allHostsList"
-            border
-            style="width: 100%"
-            :header-cell-style="{ background: '#f5f7fa' }">
-          <el-table-column prop="ip" label="IP地址" width="180">
-            <template slot-scope="scope">
-              <el-tag size="medium">{{ scope.row.ip }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="status" label="状态" width="100">
-            <template>
-              <el-tag type="success" size="small">存活</el-tag>
-            </template>
-          </el-table-column>
-        </el-table>
+        <!-- 按资产组分组展示 -->
+        <div v-if="Object.keys(groupedHosts).length" class="grouped-hosts">
+          <div v-for="(hosts, groupName) in groupedHosts" :key="groupName" class="group-section">
+            <div class="group-header" @click="toggleGroupExpanded(groupName)">
+              <i
+                  :class="groupExpandedState[groupName] ? 'el-icon-arrow-down' : 'el-icon-arrow-right'"
+                  class="expand-icon">
+              </i>
+              <el-tag type="info" size="medium">{{ groupName }}</el-tag>
+              <span class="group-count">{{ hosts.length }} 台主机</span>
+            </div>
+
+            <el-collapse-transition>
+              <el-table
+                  v-show="groupExpandedState[groupName]"
+                  :data="hosts"
+                  border
+                  size="small"
+                  style="width: 100%; margin-bottom: 20px;"
+                  :header-cell-style="{ background: '#f8f9fa' }">
+                <el-table-column prop="ip" label="IP地址" width="180">
+                  <template slot-scope="scope">
+                    <el-tag size="small">{{ scope.row.ip }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="alive" label="状态" width="100">
+                  <template slot-scope="scope">
+                    <el-tag
+                        :type="scope.row.alive ? 'success' : 'danger'"
+                        size="small">
+                      {{ scope.row.alive ? '存活' : '离线' }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="group_name" label="资产组" width="150">
+                  <template slot-scope="scope">
+                    <span>{{ scope.row.group_name }}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-collapse-transition>
+          </div>
+        </div>
 
         <el-empty
             v-else-if="!allHostsLoading"
-            description="当前没有存活主机记录">
+            description="当前没有主机记录">
         </el-empty>
       </div>
     </el-card>
@@ -153,9 +163,13 @@ export default {
       loading: false,
       searched: false,
       hostList: [],
-      // 新增字段：所有存活主机列表相关
+      // 修改后的字段：主机列表和资产组相关
       allHostsList: [],
-      allHostsLoading: false
+      allHostsLoading: false,
+      assetGroups: {},  // 资产组映射 { id: name }
+      groupedHosts: {}, // 按资产组分组的主机 { groupName: [hosts] }
+      totalHostsCount: 0,
+      groupExpandedState: {} // 各组的展开/折叠状态 { groupName: boolean }
     }
   },
   methods: {
@@ -165,24 +179,149 @@ export default {
           this.loading = true
           this.searched = true
           try {
-
             const response = await axios.post(
-                '/api/host_discovery?network=' + this.searchForm.ipInput // 将 network 作为 URL 参数
+                '/api/host_discovery?network=' + this.searchForm.ipInput
             )
-            // 处理返回的数据格式
             this.hostList = response.data.alive_hosts.map(ip => ({
               ip,
               lastSeen: new Date().toLocaleString()
             }))
           } catch (error) {
             this.$message.error('error：' + (error.response.data))
-            //this.$message.error('搜索失败：' + (error.response.data?.message || error.message))
           } finally {
             this.loading = false
           }
         }
       })
     },
+
+    // 获取资产组列表
+    async fetchAssetGroups() {
+      try {
+        const response = await axios.get('/api/asset_group/list')
+        // 构建资产组映射
+        this.assetGroups = {}
+        response.data.forEach(group => {
+          this.assetGroups[group.id] = group.name
+        })
+      } catch (error) {
+        console.error('获取资产组失败:', error)
+        this.$message.error('获取资产组失败：' + (error.response?.data?.message || error.message))
+      }
+    },
+
+    // 获取主机完整信息
+    async fetchHostsInfo() {
+      this.allHostsLoading = true
+      try {
+        const response = await axios.get('/api/assets/full_info')
+        this.allHostsList = response.data.map(host => ({
+          ip: host.ip,
+          alive: host.alive,
+          group_id: host.group_id,
+          group_name: this.assetGroups[host.group_id] || '未分组'
+        }))
+
+        // 按资产组分组
+        this.groupHostsByAssetGroup()
+        this.totalHostsCount = this.allHostsList.length
+
+        this.$message.success('获取主机列表成功')
+      } catch (error) {
+        this.$message.error('获取主机列表失败：' + (error.response?.data?.message || error.message))
+      } finally {
+        this.allHostsLoading = false
+      }
+    },
+
+    // 按资产组分组主机
+    // groupHostsByAssetGroup() {
+    //   this.groupedHosts = {}
+    //   this.groupExpandedState = {} // 重置展开状态
+    //
+    //   this.allHostsList.forEach(host => {
+    //     const groupName = host.group_name
+    //     if (!this.groupedHosts[groupName]) {
+    //       this.groupedHosts[groupName] = []
+    //       this.groupExpandedState[groupName] = true // 默认展开
+    //     }
+    //     this.groupedHosts[groupName].push(host)
+    //   })
+    //
+    //   // 对每个组内的主机按IP排序
+    //   Object.keys(this.groupedHosts).forEach(groupName => {
+    //     this.groupedHosts[groupName].sort((a, b) => {
+    //       const aIp = a.ip.split('.').map(num => parseInt(num, 10))
+    //       const bIp = b.ip.split('.').map(num => parseInt(num, 10))
+    //       for (let i = 0; i < 4; i++) {
+    //         if (aIp[i] !== bIp[i]) {
+    //           return aIp[i] - bIp[i]
+    //         }
+    //       }
+    //       return 0
+    //     })
+    //   })
+    // },
+
+    // // 切换组的展开/折叠状态
+    // toggleGroupExpanded(groupName) {
+    //   this.$set(this.groupExpandedState, groupName, !this.groupExpandedState[groupName])
+    // },
+    // 改进的切换方法
+    toggleGroupExpanded(groupName) {
+      // 使用 Vue.set 确保响应式更新
+      this.$set(this.groupExpandedState, groupName, !this.groupExpandedState[groupName])
+
+      // 强制更新（如果上面的方法不行的话）
+      // this.$forceUpdate()
+    },
+
+    // 改进的分组方法
+    groupHostsByAssetGroup() {
+      this.groupedHosts = {}
+
+      // 先收集所有组名
+      const allGroups = [...new Set(this.allHostsList.map(host => host.group_name))]
+
+      // 初始化展开状态
+      const newExpandedState = {}
+      allGroups.forEach(groupName => {
+        newExpandedState[groupName] = true // 默认展开
+      })
+
+      // 一次性设置展开状态
+      this.groupExpandedState = newExpandedState
+
+      // 分组主机
+      this.allHostsList.forEach(host => {
+        const groupName = host.group_name
+        if (!this.groupedHosts[groupName]) {
+          this.groupedHosts[groupName] = []
+        }
+        this.groupedHosts[groupName].push(host)
+      })
+
+      // 对每个组内的主机按IP排序
+      Object.keys(this.groupedHosts).forEach(groupName => {
+        this.groupedHosts[groupName].sort((a, b) => {
+          const aIp = a.ip.split('.').map(num => parseInt(num, 10))
+          const bIp = b.ip.split('.').map(num => parseInt(num, 10))
+          for (let i = 0; i < 4; i++) {
+            if (aIp[i] !== bIp[i]) {
+              return aIp[i] - bIp[i]
+            }
+          }
+          return 0
+        })
+      })
+    },
+
+    // 获取主机和资产组信息
+    async fetchHostsAndGroups() {
+      await this.fetchAssetGroups()
+      await this.fetchHostsInfo()
+    },
+
     exportResults() {
       const data = this.hostList.map(host => ({
         IP地址: host.ip,
@@ -190,73 +329,49 @@ export default {
         发现时间: host.lastSeen
       }))
 
-      // 创建CSV内容
       const csvContent = [
         Object.keys(data[0]).join(','),
         ...data.map(row => Object.values(row).join(','))
       ].join('\n')
 
-      // 创建下载链接
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       link.href = URL.createObjectURL(blob)
       link.download = `主机扫描结果_${new Date().toLocaleDateString()}.csv`
       link.click()
     },
-    // 获取所有存活主机列表
-    async fetchAllAliveHosts() {
-      this.allHostsLoading = true
-      try {
-        const response = await axios.get('/api/getAliveHosts')
-        // 处理返回的数据格式
-        this.allHostsList = response.data.alive_hosts.map(ip => ({
-          ip
-        }))
-        this.$message.success('获取存活主机列表成功');
-      } catch (error) {
-        this.$message.error('获取存活主机列表失败：' + (error.response?.data?.message || error.message))
-      } finally {
-        this.allHostsLoading = false
-      }
-    },
-    // 导出所有存活主机列表
+
+    // 导出主机列表结果
     exportAllHostsResults() {
       const data = this.allHostsList.map(host => ({
         IP地址: host.ip,
-        状态: '存活'
+        状态: host.alive ? '存活' : '离线',
+        资产组: host.group_name
       }))
 
-      // 创建CSV内容
       const csvContent = [
         Object.keys(data[0]).join(','),
         ...data.map(row => Object.values(row).join(','))
       ].join('\n')
 
-      // 创建下载链接
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       link.href = URL.createObjectURL(blob)
-      link.download = `所有存活主机列表_${new Date().toLocaleDateString()}.csv`
+      link.download = `主机列表_${new Date().toLocaleDateString()}.csv`
       link.click()
     },
 
     // 导出PDF函数 - 搜索结果
     exportPDF() {
       try {
-        // 创建一个支持中文的PDF
         const doc = new jsPDF({
           orientation: 'portrait',
           unit: 'mm',
           format: 'a4'
         });
 
-        // 获取默认字体，仅用于英文内容
-        //const defaultFont = doc.getFontList().helvetica;
-
-        // 创建表格数据（仅IP地址和存活状态）
         const tableData = this.hostList.map(host => [host.ip, 'Active']);
 
-        // 首先创建一个简单的表格，包含英文内容
         doc.autoTable({
           head: [['IP Address', 'Status']],
           body: tableData,
@@ -275,15 +390,11 @@ export default {
           }
         });
 
-        // 手动添加中文标题作为图像
-        // 在PDF顶部添加中文说明文字（作为图像）
         this.addChineseTextAsImage(doc, '存活主机列表', 105, 20, 18, 'center');
 
-        // 添加时间
         const currentTime = new Date().toLocaleString();
         this.addChineseTextAsImage(doc, `打印时间: ${currentTime}`, 105, 30, 10, 'center');
 
-        // 保存PDF
         doc.save(`主机扫描结果_${new Date().toLocaleDateString()}.pdf`);
       } catch (error) {
         console.error('导出PDF出错:', error);
@@ -291,25 +402,23 @@ export default {
       }
     },
 
-    // 导出PDF函数 - 所有存活主机
+    // 导出主机列表PDF
     exportAllHostsPDF() {
       try {
-        // 创建一个支持中文的PDF
         const doc = new jsPDF({
           orientation: 'portrait',
           unit: 'mm',
           format: 'a4'
         });
 
-        // 获取默认字体，仅用于英文内容
-        //const defaultFont = doc.getFontList().helvetica;
+        const tableData = this.allHostsList.map(host => [
+          host.ip,
+          host.alive ? 'Active' : 'Offline',
+          host.group_name
+        ]);
 
-        // 创建表格数据（仅IP地址和存活状态）
-        const tableData = this.allHostsList.map(host => [host.ip, 'Active']);
-
-        // 首先创建一个简单的表格，包含英文内容
         doc.autoTable({
-          head: [['IP Address', 'Status']],
+          head: [['IP Address', 'Status', 'Asset Group']],
           body: tableData,
           startY: 40,
           theme: 'grid',
@@ -326,56 +435,42 @@ export default {
           }
         });
 
-        // 手动添加中文标题作为图像
-        // 在PDF顶部添加中文说明文字（作为图像）
-        this.addChineseTextAsImage(doc, '存活主机列表', 105, 20, 18, 'center');
+        this.addChineseTextAsImage(doc, '主机列表', 105, 20, 18, 'center');
 
-        // 添加时间
         const currentTime = new Date().toLocaleString();
         this.addChineseTextAsImage(doc, `打印时间: ${currentTime}`, 105, 30, 10, 'center');
 
-        // 保存PDF
-        doc.save(`所有存活主机列表_${new Date().toLocaleDateString()}.pdf`);
+        doc.save(`主机列表_${new Date().toLocaleDateString()}.pdf`);
       } catch (error) {
         console.error('导出PDF出错:', error);
         this.$message.error('导出PDF失败: ' + error.message);
       }
     },
 
-    // 辅助方法：将中文文本转为canvas图像，然后添加到PDF（高清版）
+    // 辅助方法：将中文文本转为canvas图像，然后添加到PDF
     addChineseTextAsImage(doc, text, x, y, fontSize, align) {
-      // 创建一个临时canvas，使用更高的分辨率
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
-      // 设置高分辨率倍数
-      const scale = 4; // 增加4倍分辨率
+      const scale = 4;
 
-      // 设置字体大小和字体
       ctx.font = `${fontSize * scale}px "Microsoft YaHei", SimHei, Arial, sans-serif`;
 
-      // 测量文本宽度
       const textWidth = ctx.measureText(text).width;
 
-      // 设置canvas大小（留出一些额外空间并应用缩放）
       canvas.width = textWidth + 40 * scale;
       canvas.height = fontSize * 2 * scale;
 
-      // 应用缩放以提高清晰度
       ctx.scale(scale, scale);
 
-      // 重新设置字体（因为canvas resize后会重置字体设置）
       ctx.font = `${fontSize}px "Microsoft YaHei", SimHei, Arial, sans-serif`;
       ctx.textBaseline = 'middle';
 
-      // 清空canvas
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
 
-      // 绘制文本
       ctx.fillStyle = 'black';
 
-      // 根据对齐方式调整位置
       let textX = 20;
       if (align === 'center') {
         ctx.textAlign = 'center';
@@ -384,21 +479,18 @@ export default {
 
       ctx.fillText(text, textX, (canvas.height / scale) / 2);
 
-      // 将canvas转为图像，并添加到PDF
       const imgData = canvas.toDataURL('image/png');
 
-      // 计算插入位置
       let posX = x;
       if (align === 'center') {
         posX = doc.internal.pageSize.getWidth() / 2;
       }
 
-      // 插入图片，宽高保持不变（高分辨率但尺寸相同）
       doc.addImage(imgData, 'PNG', posX - (canvas.width / scale / 2) * 0.264583, y - (canvas.height / scale / 2) * 0.264583, (canvas.width / scale) * 0.264583, (canvas.height / scale) * 0.264583);
     }
   },
   mounted() {
-    this.fetchAllAliveHosts()
+    this.fetchHostsAndGroups()
   }
 }
 </script>
@@ -441,9 +533,49 @@ export default {
 .el-tag {
   margin-right: 5px;
 }
+
+/* 新增样式：资产组分组展示 */
+.grouped-hosts {
+  margin-top: 15px;
+}
+
+.group-section {
+  margin-bottom: 25px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #fafafa;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.group-header:hover {
+  background-color: #f0f0f0;
+}
+
+.expand-icon {
+  margin-right: 8px;
+  color: #666;
+  transition: transform 0.2s;
+  font-size: 14px;
+}
+
+.group-count {
+  margin-left: 10px;
+  color: #666;
+  font-size: 14px;
+}
 </style>
 
-<!--没有pdf输出的代码-->
+
+<!--版本：未展示资产组的版本-->
+<!--&lt;!&ndash; HostDiscovery.vue &ndash;&gt;-->
 <!--<template>-->
 <!--  <div class="host-discovery">-->
 <!--    <el-card class="search-card">-->
@@ -455,7 +587,7 @@ export default {
 <!--        <el-form-item label="IP/网段" prop="ipInput">-->
 <!--          <el-input-->
 <!--              v-model="searchForm.ipInput"-->
-<!--              placeholder="请输入IP地址或网段(例如: 192.168.1.0/24)"-->
+<!--              placeholder="请输入 IP地址 (例如: 192.168.1.120) 或 网段 (例如: 192.168.1.0/24)"-->
 <!--              clearable-->
 <!--              @keyup.enter.native="handleSearch">-->
 <!--            <el-button slot="append" icon="el-icon-search" @click="handleSearch">搜索</el-button>-->
@@ -467,9 +599,14 @@ export default {
 <!--      <div class="result-section" v-loading="loading">-->
 <!--        <div class="result-header" v-if="hostList.length">-->
 <!--          <span>发现 {{ hostList.length }} 个存活主机</span>-->
-<!--          &lt;!&ndash;          <el-button type="text" icon="el-icon-download" @click="exportResults">&ndash;&gt;-->
-<!--          &lt;!&ndash;            导出结果&ndash;&gt;-->
-<!--          &lt;!&ndash;          </el-button>&ndash;&gt;-->
+<!--          <div>-->
+<!--            &lt;!&ndash;          <el-button type="text" icon="el-icon-download" @click="exportResults">&ndash;&gt;-->
+<!--            &lt;!&ndash;            导出结果&ndash;&gt;-->
+<!--            &lt;!&ndash;          </el-button>&ndash;&gt;-->
+<!--            <el-button type="text" icon="el-icon-document" @click="exportPDF">-->
+<!--              导出PDF-->
+<!--            </el-button>-->
+<!--          </div>-->
 <!--        </div>-->
 
 <!--        <el-table-->
@@ -515,18 +652,10 @@ export default {
 <!--            style="background: white; border-color: #eee;"-->
 <!--        >刷新</el-button>-->
 <!--      </div>-->
-
-<!--      &lt;!&ndash;      <div slot="header" class="card-header">&ndash;&gt;-->
-<!--&lt;!&ndash;        <span class="title">所有存活主机列表</span>&ndash;&gt;-->
-<!--&lt;!&ndash;        <el-button type="primary" size="small" icon="el-icon-refresh" @click="fetchAllAliveHosts">刷新</el-button>&ndash;&gt;-->
-<!--&lt;!&ndash;      </div>&ndash;&gt;-->
-
 <!--      <div class="result-section" v-loading="allHostsLoading">-->
 <!--        <div class="result-header" v-if="allHostsList.length">-->
 <!--          <span>当前共有 {{ allHostsList.length }} 个存活主机</span>-->
-<!--          <el-button type="text" icon="el-icon-download" @click="exportAllHostsResults">-->
-<!--            导出结果-->
-<!--          </el-button>-->
+
 <!--        </div>-->
 
 <!--        <el-table-->
@@ -558,6 +687,8 @@ export default {
 
 <!--<script>-->
 <!--import axios from 'axios'-->
+<!--import jsPDF from 'jspdf'-->
+<!--import 'jspdf-autotable'-->
 
 <!--export default {-->
 <!--  name: 'HostDiscovery',-->
@@ -671,6 +802,163 @@ export default {
 <!--      link.href = URL.createObjectURL(blob)-->
 <!--      link.download = `所有存活主机列表_${new Date().toLocaleDateString()}.csv`-->
 <!--      link.click()-->
+<!--    },-->
+
+<!--    // 导出PDF函数 - 搜索结果-->
+<!--    exportPDF() {-->
+<!--      try {-->
+<!--        // 创建一个支持中文的PDF-->
+<!--        const doc = new jsPDF({-->
+<!--          orientation: 'portrait',-->
+<!--          unit: 'mm',-->
+<!--          format: 'a4'-->
+<!--        });-->
+
+<!--        // 获取默认字体，仅用于英文内容-->
+<!--        //const defaultFont = doc.getFontList().helvetica;-->
+
+<!--        // 创建表格数据（仅IP地址和存活状态）-->
+<!--        const tableData = this.hostList.map(host => [host.ip, 'Active']);-->
+
+<!--        // 首先创建一个简单的表格，包含英文内容-->
+<!--        doc.autoTable({-->
+<!--          head: [['IP Address', 'Status']],-->
+<!--          body: tableData,-->
+<!--          startY: 40,-->
+<!--          theme: 'grid',-->
+<!--          styles: {-->
+<!--            fontSize: 10,-->
+<!--            cellPadding: 3,-->
+<!--            lineWidth: 0.5,-->
+<!--            lineColor: [0, 0, 0]-->
+<!--          },-->
+<!--          headStyles: {-->
+<!--            fillColor: [240, 240, 240],-->
+<!--            textColor: [0, 0, 0],-->
+<!--            fontStyle: 'bold'-->
+<!--          }-->
+<!--        });-->
+
+<!--        // 手动添加中文标题作为图像-->
+<!--        // 在PDF顶部添加中文说明文字（作为图像）-->
+<!--        this.addChineseTextAsImage(doc, '存活主机列表', 105, 20, 18, 'center');-->
+
+<!--        // 添加时间-->
+<!--        const currentTime = new Date().toLocaleString();-->
+<!--        this.addChineseTextAsImage(doc, `打印时间: ${currentTime}`, 105, 30, 10, 'center');-->
+
+<!--        // 保存PDF-->
+<!--        doc.save(`主机扫描结果_${new Date().toLocaleDateString()}.pdf`);-->
+<!--      } catch (error) {-->
+<!--        console.error('导出PDF出错:', error);-->
+<!--        this.$message.error('导出PDF失败: ' + error.message);-->
+<!--      }-->
+<!--    },-->
+
+<!--    // 导出PDF函数 - 所有存活主机-->
+<!--    exportAllHostsPDF() {-->
+<!--      try {-->
+<!--        // 创建一个支持中文的PDF-->
+<!--        const doc = new jsPDF({-->
+<!--          orientation: 'portrait',-->
+<!--          unit: 'mm',-->
+<!--          format: 'a4'-->
+<!--        });-->
+
+<!--        // 获取默认字体，仅用于英文内容-->
+<!--        //const defaultFont = doc.getFontList().helvetica;-->
+
+<!--        // 创建表格数据（仅IP地址和存活状态）-->
+<!--        const tableData = this.allHostsList.map(host => [host.ip, 'Active']);-->
+
+<!--        // 首先创建一个简单的表格，包含英文内容-->
+<!--        doc.autoTable({-->
+<!--          head: [['IP Address', 'Status']],-->
+<!--          body: tableData,-->
+<!--          startY: 40,-->
+<!--          theme: 'grid',-->
+<!--          styles: {-->
+<!--            fontSize: 10,-->
+<!--            cellPadding: 3,-->
+<!--            lineWidth: 0.5,-->
+<!--            lineColor: [0, 0, 0]-->
+<!--          },-->
+<!--          headStyles: {-->
+<!--            fillColor: [240, 240, 240],-->
+<!--            textColor: [0, 0, 0],-->
+<!--            fontStyle: 'bold'-->
+<!--          }-->
+<!--        });-->
+
+<!--        // 手动添加中文标题作为图像-->
+<!--        // 在PDF顶部添加中文说明文字（作为图像）-->
+<!--        this.addChineseTextAsImage(doc, '存活主机列表', 105, 20, 18, 'center');-->
+
+<!--        // 添加时间-->
+<!--        const currentTime = new Date().toLocaleString();-->
+<!--        this.addChineseTextAsImage(doc, `打印时间: ${currentTime}`, 105, 30, 10, 'center');-->
+
+<!--        // 保存PDF-->
+<!--        doc.save(`所有存活主机列表_${new Date().toLocaleDateString()}.pdf`);-->
+<!--      } catch (error) {-->
+<!--        console.error('导出PDF出错:', error);-->
+<!--        this.$message.error('导出PDF失败: ' + error.message);-->
+<!--      }-->
+<!--    },-->
+
+<!--    // 辅助方法：将中文文本转为canvas图像，然后添加到PDF（高清版）-->
+<!--    addChineseTextAsImage(doc, text, x, y, fontSize, align) {-->
+<!--      // 创建一个临时canvas，使用更高的分辨率-->
+<!--      const canvas = document.createElement('canvas');-->
+<!--      const ctx = canvas.getContext('2d');-->
+
+<!--      // 设置高分辨率倍数-->
+<!--      const scale = 4; // 增加4倍分辨率-->
+
+<!--      // 设置字体大小和字体-->
+<!--      ctx.font = `${fontSize * scale}px "Microsoft YaHei", SimHei, Arial, sans-serif`;-->
+
+<!--      // 测量文本宽度-->
+<!--      const textWidth = ctx.measureText(text).width;-->
+
+<!--      // 设置canvas大小（留出一些额外空间并应用缩放）-->
+<!--      canvas.width = textWidth + 40 * scale;-->
+<!--      canvas.height = fontSize * 2 * scale;-->
+
+<!--      // 应用缩放以提高清晰度-->
+<!--      ctx.scale(scale, scale);-->
+
+<!--      // 重新设置字体（因为canvas resize后会重置字体设置）-->
+<!--      ctx.font = `${fontSize}px "Microsoft YaHei", SimHei, Arial, sans-serif`;-->
+<!--      ctx.textBaseline = 'middle';-->
+
+<!--      // 清空canvas-->
+<!--      ctx.fillStyle = 'white';-->
+<!--      ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);-->
+
+<!--      // 绘制文本-->
+<!--      ctx.fillStyle = 'black';-->
+
+<!--      // 根据对齐方式调整位置-->
+<!--      let textX = 20;-->
+<!--      if (align === 'center') {-->
+<!--        ctx.textAlign = 'center';-->
+<!--        textX = (canvas.width / scale) / 2;-->
+<!--      }-->
+
+<!--      ctx.fillText(text, textX, (canvas.height / scale) / 2);-->
+
+<!--      // 将canvas转为图像，并添加到PDF-->
+<!--      const imgData = canvas.toDataURL('image/png');-->
+
+<!--      // 计算插入位置-->
+<!--      let posX = x;-->
+<!--      if (align === 'center') {-->
+<!--        posX = doc.internal.pageSize.getWidth() / 2;-->
+<!--      }-->
+
+<!--      // 插入图片，宽高保持不变（高分辨率但尺寸相同）-->
+<!--      doc.addImage(imgData, 'PNG', posX - (canvas.width / scale / 2) * 0.264583, y - (canvas.height / scale / 2) * 0.264583, (canvas.width / scale) * 0.264583, (canvas.height / scale) * 0.264583);-->
 <!--    }-->
 <!--  },-->
 <!--  mounted() {-->

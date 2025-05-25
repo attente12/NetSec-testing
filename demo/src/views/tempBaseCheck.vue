@@ -13,12 +13,19 @@
       <h1 class="main-title">Linux基线检测结果</h1>
 
       <div class="date-info">
-        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>
+        <el-tag type="info"> </el-tag>
       </div>
     </div>
 
     <!-- 控制按钮区域 -->
     <div class="control-section">
+      <el-button
+          @click="onExportToPDF"
+          :loading="pdfLoading"
+          icon="el-icon-document"
+          type="">
+        导出为 PDF
+      </el-button>
       <div class="filter-group">
         <el-select
             v-model="selectedStatus"
@@ -104,10 +111,80 @@
       </el-table>
     </el-card>
 
+    <!-- PDF内容（隐藏） -->
+    <div class="pdf-content" v-show="showContentForPDF">
+      <div class="server1">
+        <h1 id="linuxBaseline2">Linux基线检测报告</h1>
+        <!-- 检测时间 -->
+        <div style="text-align:right; margin-top:20px;">
+          <p style="font-size:18px;">打印时间：{{ new Date().toLocaleString() }}</p>
+        </div>
+        <el-row :gutter="20">
+          <el-col :span="24"><p>主机名：{{ serverInfo.hostname }}</p></el-col>
+          <el-col :span="24"><p>主机架构：{{ serverInfo.arch }}</p></el-col>
+          <el-col :span="24"><p>主机CPU信息：{{ serverInfo.cpu }}</p></el-col>
+          <el-col :span="24"><p>主机物理CPU个数：{{ serverInfo.cpuPhysical }}</p></el-col>
+          <el-col :span="24"><p>主机物理CPU核心数：{{ serverInfo.cpuCore }}</p></el-col>
+          <el-col :span="12"><p>主机空闲内存：{{ serverInfo.free }}</p></el-col>
+          <el-col :span="24"><p>硬件型号：{{ serverInfo.ProductName }}</p></el-col>
+          <el-col :span="24"><p>主机版本信息：{{ serverInfo.version }}</p></el-col>
+          <el-col :span="24"><p>服务器IP：{{ selectedIP }}</p></el-col>
+        </el-row>
+        <!-- 空白分隔 -->
+        <div style="height:200px;"></div>
+        <!-- 检测人员签名 -->
+        <div style="text-align:right; margin-top:20px;">
+          <span style="font-size:20px;">检测人员签名：</span>
+          <span style="display: inline-block; width: 200px; border-bottom: 2px solid #000; margin-left: 10px;"></span>
+        </div>
+        <!-- 页码 -->
+        <div class="page-number">
+          <span>1/{{ totalPages }}</span>
+        </div>
+      </div>
+
+      <!-- 测试正文标题 -->
+      <div class="report-content-title">
+        <h2>测试正文</h2>
+      </div>
+
+      <el-table :data="filteredCheckresults" style="width: 100%">
+        <el-table-column label="序号" width="70" type="index"></el-table-column>
+        <el-table-column prop="description" label="检测项"></el-table-column>
+        <el-table-column prop="basis" label="检测依据" min-width="150"></el-table-column>
+        <el-table-column prop="result" label="检测结果" min-width="150"></el-table-column>
+        <!--        <el-table-column label="基准/检测结果" min-width="200">-->
+        <!--          <template slot-scope="scope">-->
+        <!--            {{ scope.row.basis }}/{{ scope.row.result }}-->
+        <!--          </template>-->
+        <!--        </el-table-column>-->
+        <el-table-column prop="IsComply" label="是否通过检查" width="120">
+          <template slot-scope="scope">
+            <!--            <span :class="{ 'failed-result': scope.row.IsComply === 'false' }">-->
+            <!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
+            <!--            </span>-->
+            <span :class="getStatusClass(scope.row.IsComply)">
+                 {{ getStatusText(scope.row.IsComply) }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="修改建议" width="400">
+          <template slot-scope="scope">
+            <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <!-- 页码容器 - PDF生成时会添加 -->
+      <div class="page-numbers-container"></div>
+    </div>
+
   </div>
 </template>
 
 <script>
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import axios from 'axios'; // 引入axios
 
 export default {
@@ -122,6 +199,8 @@ export default {
       pdfLoading: false,
       tableLoading: false,
       ip:'',
+      totalPages: 2, // 默认至少两页
+      aliveHosts: [], // 活跃主机IP列表
     }
   },
   computed: {
@@ -195,6 +274,223 @@ export default {
         case 'pending': return '待检查';
         default: return '未知';
       }
+    },
+
+    estimatePageCount() {
+      // 粗略估算页数：第一页为封面，剩余按每页约10条记录计算
+      const recordsPerPage = 10;
+      this.totalPages = Math.ceil(this.checkresults.length / recordsPerPage) + 1;
+    },
+
+    onExportToPDF() {
+      this.pdfLoading = true;
+      this.showContentForPDF = true;
+
+      this.$message({
+        message: '正在生成PDF，请稍候...',
+        type: 'info',
+        duration: 5000
+      });
+
+      // 延迟执行，确保DOM已完全渲染
+      setTimeout(() => {
+        // 创建PDF对象
+        const pdf = new jsPDF({
+          orientation: 'p',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        // 关键点：采用两遍渲染策略
+        // 第一遍：只渲染，不保存，仅记录最终页码
+        // 第二遍：用记录的正确页码重新渲染并保存
+
+        // 第一阶段：模拟渲染，计算总页数
+        this.simulatePdfRendering(pdf).then(actualPageCount => {
+          // 保存实际总页数
+          this.totalPages = actualPageCount;
+          console.log('确定的总页数:', this.totalPages);
+
+          // 第二阶段：使用确定的总页数重新生成PDF
+          this.renderFinalPdf(pdf, this.totalPages);
+        }).catch(err => {
+          console.error('PDF生成过程出错:', err);
+          this.pdfLoading = false;
+          this.showContentForPDF = false;
+          this.$message.error('PDF生成失败，请重试！');
+        });
+      }, 1000);
+    },
+
+    // 模拟渲染，确定实际总页数
+    async simulatePdfRendering(pdf) {
+      try {
+        // 保存PDF状态
+        const originalPage = pdf.internal.getCurrentPageInfo().pageNumber;
+
+        let pageCount = 0;
+
+        // 模拟渲染封面页
+        const coverPage = this.$el.querySelector('.pdf-content .server1');
+        await html2canvas(coverPage, { scale: 2, useCORS: true });
+        pageCount = 1;  // 封面算第一页
+
+        // 模拟渲染内容页
+        pdf.addPage();
+        pageCount++;
+
+        // 页面参数
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20;
+
+        // 模拟渲染标题
+        const titleElement = this.$el.querySelector('.pdf-content .report-content-title');
+        const titleCanvas = await html2canvas(titleElement, { scale: 2, useCORS: true });
+        const titleWidth = 190;
+        const titleHeight = titleCanvas.height * titleWidth / titleCanvas.width;
+
+        let yPosition = 10 + titleHeight + 5;
+
+        // 模拟渲染表头
+        const headerElement = this.$el.querySelector('.pdf-content .el-table__header-wrapper');
+        const headerCanvas = await html2canvas(headerElement, { scale: 2, useCORS: true });
+        const headerWidth = 190;
+        const headerHeight = headerCanvas.height * headerWidth / headerCanvas.width;
+
+        yPosition += headerHeight + 2;
+
+        // 模拟渲染每一行并计算页码
+        const tableRows = this.$el.querySelectorAll('.pdf-content .el-table__body-wrapper table tr');
+
+        for (let i = 0; i < tableRows.length; i++) {
+          const row = tableRows[i];
+          const rowCanvas = await html2canvas(row, { scale: 2, useCORS: true });
+          const rowWidth = 190;
+          const rowHeight = rowCanvas.height * rowWidth / rowCanvas.width;
+
+          // 如果当前行放不下，需要新页面
+          if (yPosition + rowHeight > pageHeight) {
+            // 新页面
+            if (i < tableRows.length - 1) { // 不是最后一行才需要新页面
+              pdf.addPage();
+              pageCount++;
+              yPosition = 10; // 重置Y位置
+            }
+          }
+
+          yPosition += rowHeight + 2;
+        }
+
+        // 恢复PDF状态
+        while (pdf.internal.getCurrentPageInfo().pageNumber > originalPage) {
+          pdf.deletePage(pdf.internal.getCurrentPageInfo().pageNumber);
+        }
+
+        return pageCount;
+      } catch (error) {
+        console.error('模拟渲染计算页数出错:', error);
+        throw error;
+      }
+    },
+
+    // 使用正确页码渲染最终PDF
+    async renderFinalPdf(pdf, totalPageCount) {
+      try {
+        // 渲染封面页
+        const coverPage = this.$el.querySelector('.pdf-content .server1');
+        const coverCanvas = await html2canvas(coverPage, { scale: 2, useCORS: true });
+        const imgData = coverCanvas.toDataURL('image/jpeg', 0.8);
+        const imgWidth = 190;
+        const imgHeight = coverCanvas.height * imgWidth / coverCanvas.width;
+
+        pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
+
+        // 封面页页码
+        pdf.setFontSize(10);
+        pdf.text(`1/${totalPageCount}`, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 10);
+
+        // 添加内容页
+        pdf.addPage();
+
+        // 页面参数
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20;
+        let currentPageNum = 2; // 从第二页开始
+
+        // 添加标题
+        const titleElement = this.$el.querySelector('.pdf-content .report-content-title');
+        const titleCanvas = await html2canvas(titleElement, { scale: 2, useCORS: true });
+        const titleImgData = titleCanvas.toDataURL('image/jpeg', 0.8);
+        const titleWidth = 190;
+        const titleHeight = titleCanvas.height * titleWidth / titleCanvas.width;
+
+        pdf.addImage(titleImgData, 'JPEG', 10, 10, titleWidth, titleHeight);
+        let yPosition = 10 + titleHeight + 5;
+
+        // 添加表头
+        const headerElement = this.$el.querySelector('.pdf-content .el-table__header-wrapper');
+        const headerCanvas = await html2canvas(headerElement, { scale: 2, useCORS: true });
+        const headerImgData = headerCanvas.toDataURL('image/jpeg', 0.8);
+        const headerWidth = 190;
+        const headerHeight = headerCanvas.height * headerWidth / headerCanvas.width;
+
+        pdf.addImage(headerImgData, 'JPEG', 10, yPosition, headerWidth, headerHeight);
+        yPosition += headerHeight + 2;
+
+        // 逐行添加表格内容
+        const tableRows = this.$el.querySelectorAll('.pdf-content .el-table__body-wrapper table tr');
+
+        for (let i = 0; i < tableRows.length; i++) {
+          const row = tableRows[i];
+          const rowCanvas = await html2canvas(row, { scale: 2, useCORS: true });
+          const rowImgData = rowCanvas.toDataURL('image/jpeg', 0.8);
+          const rowWidth = 190;
+          const rowHeight = rowCanvas.height * rowWidth / rowCanvas.width;
+
+          // 检查是否需要换页
+          if (yPosition + rowHeight > pageHeight) {
+            // 添加当前页码
+            pdf.setFontSize(10);
+            pdf.text(`${currentPageNum}/${totalPageCount}`, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 10);
+
+            // 不是最后一行才需要新页面
+            if (i < tableRows.length - 1) {
+              // 新页面
+              pdf.addPage();
+              currentPageNum++;
+              yPosition = 10;
+            }
+          }
+
+          // 添加当前行
+          pdf.addImage(rowImgData, 'JPEG', 10, yPosition, rowWidth, rowHeight);
+          yPosition += rowHeight + 2;
+        }
+
+        // 最后一页页码
+        pdf.setFontSize(10);
+        pdf.text(`${currentPageNum}/${totalPageCount}`, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 10);
+
+        // 保存PDF
+        const filename = `Linux基线检测报告_${this.selectedIP}_${new Date().toISOString().slice(0,10)}.pdf`;
+        pdf.save(filename);
+
+        // 清理和完成
+        this.showContentForPDF = false;
+        this.pdfLoading = false;
+        this.$message.success('PDF报告导出成功！');
+
+      } catch (err) {
+        console.error('生成PDF时出错:', err);
+        this.pdfLoading = false;
+        this.showContentForPDF = false;
+        this.$message.error('PDF生成失败，请重试！');
+      }
+    },
+    // 获取PDF中状态对应的CSS类
+    getStatusClass(status) {
+      return {
+        'failed-result': status === 'false',
+        'pending-result': status === 'pending'
+      };
     },
 
 
@@ -275,6 +571,9 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
+.failed-result {
+  color: #f56c6c;  /* 这是Element UI的危险红色 */
+}
 .pending-result {
   color: #e6a23c;
 }
@@ -319,6 +618,37 @@ export default {
   margin: 0;
 }
 
+/*以下新增*/
+/* PDF内容样式 */
+.pdf-content {
+  font-size: 10pt;
+  max-width: 297mm;
+  padding: 15mm;
+  box-sizing: border-box;
+}
+
+#linuxBaseline2 {
+  font-size: 24pt;
+  color: #141010e1;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.page-number {
+  position: absolute;
+  bottom: 10mm;
+  right: 10mm;
+  font-size: 12px;
+}
+
+.report-content-title {
+  margin-top: 20px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+
+/*到这*/
 @media (max-width: 768px) {
   .control-section {
     flex-direction: column;

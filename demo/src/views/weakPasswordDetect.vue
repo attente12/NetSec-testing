@@ -212,6 +212,7 @@
               必须包含数字、小写字母、大写字母和特殊字符的组合（6-18位）。
               "
               placement="top"
+              :popper-style="{ width: '400px', maxWidth: '450px' }"
               :popper-class="'password-rule-tooltip'">
             <i class="el-icon-question" style="cursor: pointer;"></i>
           </el-tooltip>
@@ -735,6 +736,7 @@ export default {
 </script>
 
 <style scoped>
+
 .weak-password-container {
   padding: 20px;
   background-color: #f5f7fa;
@@ -942,4 +944,5 @@ export default {
 .service-header .el-checkbox {
   margin-left: 20px;
 }
+
 </style>

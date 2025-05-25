@@ -163,7 +163,7 @@ export default {
   methods:{
     lookDetails() {
       axios
-          .post('/api/pocExcute', { CVE_id: this.cveData.CVE })
+          .post('/api/pocExcute', { CVE_id: this.cveData.CVE ,ip: this.cveData.ip})
           .then((response) => {
             this.details = response.data.message || '未提供详情';
           })
@@ -279,7 +279,7 @@ export default {
 
       // 正则表达式数组（多行模式，处理空格和换行）
       const requiredFields = [
-        { regex: /class\s+DemoPOC:\s*:/m, label: 'class DemoPOC:' },  // 类定义
+        { regex: /class\s+DemoPOC\s*:/m, label: 'class DemoPOC:' },  // 类定义
         { regex: /def\s+__init__\s*\(self,\s*url,\s*ip,\s*port\)/m, label: 'def __init__(self,url,ip,port)' },  // 构造函数
         { regex: /def\s+_verify\s*\(self\)/m, label: 'def _verify(self)' },  // _verify 方法
         { regex: /result\['VerifyInfo'\]/m, label: "result['VerifyInfo']" },  // result['VerifyInfo']
@@ -340,7 +340,10 @@ export default {
     //       });
     // },
     startVerify() {
-      axios.post('/api/pocVerify', { cve_ids:[this.cveData.CVE] })
+      axios.post('/api/pocVerify', {
+        cve_ids:[this.cveData.CVE] ,
+        ip: this.cveData.ip
+      })
           .then(() => {
             this.$message.success("操作成功");
             this.getPoc(); // 刷新数据
@@ -353,9 +356,24 @@ export default {
     },
     returnFront() {
       this.$nextTick(() => {
-        this.$router.push('/pocScanner/pocVerify');
+        // 从 cveData 中获取 ip 参数并传递到返回的路径中
+        const ip = this.cveData.ip;
+        if (ip) {
+          this.$router.push({
+            path: '/pocScanner/pocVerify',
+            query: { ip: ip }
+          });
+        } else {
+          // 如果没有 ip 参数，则直接跳转
+          this.$router.push('/pocScanner/pocVerify');
+        }
       });
     },
+    // returnFront() {
+    //   this.$nextTick(() => {
+    //     this.$router.push('/pocScanner/pocVerify');
+    //   });
+    // },
     async loadFile() {
       try {
         const response = await fetch("/nmap_infrastructure_list_grouped_multiline.txt");

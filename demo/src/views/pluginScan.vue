@@ -391,14 +391,24 @@ export default {
             this.$message.error('获取活跃IP列表失败');
           });
     },
+    // loadTableData(){
+    //   axios.get('/api/getAllData').then(response => {
+    //     this.pocList=response.data;
+    //   })
+    //   axios.post('/api/pocScan/mergeResults', { ip: this.scanTarget })
+    //       .then(response => {
+    //         this.result = response.data;
+    //         console.log(response.data);
+    //       })
+    //       .catch(error => {
+    //         console.error('error:', error);
+    //       });
+    // },
     loadTableData(){
-      // const dataStorage=localStorage.getItem('scanTarget');
-      // if (dataStorage) {
-      //   this.scanTarget = JSON.parse(dataStorage);
-      // }
       axios.get('/api/getAllData').then(response => {
         this.pocList=response.data;
       })
+
       axios.post('/api/pocScan/mergeResults', { ip: this.scanTarget })
           .then(response => {
             this.result = response.data;
@@ -406,6 +416,22 @@ export default {
           })
           .catch(error => {
             console.error('error:', error);
+
+            // 处理400错误或其他错误情况
+            if (error.response && error.response.status === 400) {
+              // 清空扫描结果
+              this.result = { ports: [] };
+
+              // 显示错误提示
+              const errorMessage = error.response.data && error.response.data.details
+                  ? error.response.data.details
+                  : 'Scan result for the IP not found.';
+              this.$message.error(errorMessage);
+            } else {
+              // 处理其他错误
+              this.result = { ports: [] };
+              this.$message.error('获取扫描结果失败，请检查网络连接或稍后重试');
+            }
           });
     },
 
@@ -433,6 +459,14 @@ export default {
       axios.post('/api/pocScan', postData)
           .then(response => {
             console.log(response.data);
+            // axios.post('/api/pocScan/mergeResults', { ip: this.scanTarget })
+            //     .then(response => {
+            //       this.result = response.data;
+            //       console.log(response.data);
+            //     })
+            //     .catch(error => {
+            //       console.error('error:', error);
+            //     });
             axios.post('/api/pocScan/mergeResults', { ip: this.scanTarget })
                 .then(response => {
                   this.result = response.data;
@@ -440,6 +474,22 @@ export default {
                 })
                 .catch(error => {
                   console.error('error:', error);
+
+                  // 处理400错误或其他错误情况
+                  if (error.response && error.response.status === 400) {
+                    // 清空扫描结果
+                    this.result = { ports: [] };
+
+                    // 显示错误提示
+                    const errorMessage = error.response.data && error.response.data.details
+                        ? error.response.data.details
+                        : 'Scan result for the IP not found.';
+                    this.$message.error(errorMessage);
+                  } else {
+                    // 处理其他错误
+                    this.result = { ports: [] };
+                    this.$message.error('获取扫描结果失败，请检查网络连接或稍后重试');
+                  }
                 });
             this.runPocState=false;
             // this.loadTableData();
@@ -587,7 +637,7 @@ export default {
   },
 
   mounted() {
-    this.loadTableData();
+    // this.loadTableData();
     this.fetchAliveHosts(); // 新增：组件挂载时获取活跃IP列表
   }
 }
