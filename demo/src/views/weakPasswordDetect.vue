@@ -258,7 +258,7 @@
     <div id="printable" class="printable">
       <h1 class="print-title">弱口令检测报告</h1>
       <div class="print-info">
-        <p>检测时间：{{ new Date().toLocaleString() }}</p>
+        <p>打印时间：{{ new Date().toLocaleString() }}</p>
         <p>检测主机IP: {{ scanTarget }}</p>
       </div>
       <table class="print-table">
@@ -288,7 +288,7 @@
     <div id="printableAllHosts" class="printable">
       <h1 class="print-title">全部主机弱口令检测报告</h1>
       <div class="print-info">
-        <p>检测时间：{{ new Date().toLocaleString() }}</p>
+        <p>打印时间：{{ new Date().toLocaleString() }}</p>
       </div>
       <table class="print-table">
         <thead>

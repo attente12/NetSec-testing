@@ -183,6 +183,10 @@
                 <div class="item-value" style="color: #67C23A;">{{ currentAsset.baseline_summary.compliant_items }}</div>
               </div>
               <div class="stat-item">
+                <div class="item-header">待检测项数</div>
+                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.baseline_summary.pending_items }}</div>
+              </div>
+              <div class="stat-item">
                 <div class="item-header">不合格项数</div>
                 <div class="item-value" style="color: #F56C6C;">{{ currentAsset.baseline_summary.non_compliant_items }}</div>
               </div>
