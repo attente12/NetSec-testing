@@ -12,7 +12,31 @@
 
             <el-form @submit.prevent="submitForm" :model="formData" :rules="rules" ref="form" label-width="120px"
                 class="login-form">
-                <el-form-item label="IP 地址：">
+                <el-form-item label="IP 地址" prop="ip" v-show="!flag">
+                    <el-select v-model="formData.ip" placeholder="请选择或输入服务器IP地址" filterable allow-create
+                        default-first-option style="width: 100%">
+                        <el-option v-for="ip in aliveHosts" :key="ip" :label="ip" :value="ip">
+                        </el-option>
+                    </el-select>
+
+                    <!-- 新增查看临时结果链接 -->
+                    <div class="temp-check-link">
+                        <el-link type="primary" :underline="false" @click="handleViewTempResult" icon="el-icon-view">
+                            查看该IP最近一次检查结果
+                        </el-link>
+                    </div>
+
+                </el-form-item>
+                <el-form-item v-show="!flag" label="root密码：" prop="pd">
+                    <el-input v-model="formData.pd" type="password" placeholder="请输入root密码" prefix-icon="el-icon-lock"
+                        show-password>
+                    </el-input>
+                </el-form-item>
+
+                <!-- 以上为Linux检测登录项 -->
+                <!-- 以下为Windows检测登录项 -->
+
+                <el-form-item label="IP 地址：" v-show="flag">
                     <el-input v-model="ip" placeholder="请输入服务器IP地址" prefix-icon="el-icon-monitor">
                     </el-input>
                 </el-form-item>
@@ -24,23 +48,28 @@
                     <el-input v-model="pd" type="password" show-password placeholder="请输入密码" prefix-icon="el-icon-lock">
                     </el-input>
                 </el-form-item>
-                <el-form-item v-show="!flag" label="root密码：">
-                    <el-input v-model="pd" type="password" show-password placeholder="请输入密码" prefix-icon="el-icon-lock">
-                    </el-input>
-                </el-form-item>
                 <p class="versionSelector" v-if="isChecked">
-                    <span>您的Windows版本为： <span class="winVerText">Windows xp</span></span>
-                    <!-- <el-select v-model="value" placeholder="请选择">
-                        <el-option v-for="item in winVersions" :key="item.value" :label="item.label"
-                            :value="item.value">
-                        </el-option>
-                    </el-select> -->
+                    <span>您的Windows版本为： <span class="winVerText">{{ value }}</span></span>
                 </p>
 
                 <el-form-item>
-                    <el-button v-show="!flag" type="primary" @click="submitForm">开始检测</el-button>
-                    <el-button v-show="flag" type="primary" class="versionSelectBT" @click="submitForm"
-                        :disabled="ip && pd && adminName ? null : true">开始检测</el-button>
+
+                    <div class="control-bar">
+                        <el-checkbox v-if="flag" v-model="isSelectAll" @change="handleCheckAllChangeW"
+                            style="margin-right: 15px;">
+                            全选检测项目
+                        </el-checkbox>
+                        <el-checkbox v-else v-model="checkAll" @change="handleCheckAllChange"
+                            style="margin-right: 15px;">
+                            全选检测项目
+                        </el-checkbox>
+                        <el-button v-show="!flag" type="primary" @click="LinuxSubmitForm" icon="el-icon-video-play"
+                            :loading="loading" :disabled="selectedItems.length === 0">
+                            开始检测
+                        </el-button>
+                        <el-button v-show="flag" type="primary" class="versionSelectBT" @click="WindowsSubmitForm"
+                            :disabled="ip && pd && adminName ? null : true">开始检测</el-button>
+                    </div>
 
                     <el-button type="primary" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
                 </el-form-item>
@@ -50,24 +79,20 @@
 
         <el-card class="box-card check-items">
             <div slot="header" class="card-header">
+
                 <span>检测项目选择</span>
-                <span>
-                    <el-checkbox v-if="versionFlag" label="全选" @change="handleCheckAllChange"
-                        :indeterminate="isIndeterminate" v-model="isSelectAll" />
-
-                    <el-button type="primary" :disabled="isChecked ? null : true"
-                        @click="isSelectAll ? checkAll : batchExecuteW" icon="el-icon-video-play"
-                        :loading="batchLoading">
-                        批量执行
-                    </el-button>
-                </span>
-
+                <el-button type="primary" :disabled="isChecked ? null : true"
+                    @click="isSelectAll ? checkAll : batchExecuteW" icon="el-icon-video-play" :loading="batchLoading">
+                    批量执行
+                </el-button>
             </div>
 
             <div v-if="versionFlag" class="checboxGroupContainer">
+
                 <el-checkbox-group v-model="selectedItemsW" class="checboxGroup" @change="handleCheckedItemsChange">
                     <el-checkbox v-for="item in checkItemsW_" :key="item.id" :label="item.name" />
                 </el-checkbox-group>
+
             </div>
 
             <el-checkbox-group v-model="selectedItems" v-if="!flag">
@@ -81,16 +106,17 @@
                     </el-col>
                 </el-row>
             </el-checkbox-group>
+
         </el-card>
 
-        <el-dialog :visible.sync="showModal" title="进度" width="30%">
-            <div class="progress-bar-container">
-                <el-progress :percentage="progressBarWidth"></el-progress>
-            </div>
+        <el-dialog title="检测完成" :visible.sync="dialogVisible" width="30%" center>
+            <span>检测任务已完成，是否查看结果？</span>
             <span slot="footer" class="dialog-footer">
-                <el-button :disabled="!showButton" @click="closeModal">查看结果</el-button>
+                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="viewResult">查看结果</el-button>
             </span>
         </el-dialog>
+
         <!-- Popup遮罩层 -->
         <div v-if="showPopup" class="overlay" @click="showPopup = false"></div>
         <div v-if="showPopup" class="popup">
@@ -110,6 +136,22 @@ export default {
     },
     data() {
         return {
+            formData: {
+                ip: '',
+                pd: ''
+            },
+            aliveHosts: [], // 存储活跃IP列表
+            dialogVisible: false,
+            loading: false,
+            rules: {
+                ip: [
+                    { required: true, message: '请输入IP地址', trigger: 'blur' },
+                    { pattern: /^(\d{1,3}\.){3}\d{1,3}$/, message: 'IP地址格式不正确', trigger: 'blur' }
+                ],
+                pd: [
+                    { required: true, message: '请输入密码', trigger: 'blur' }
+                ]
+            },
             flag: false,
             versionFlag: false,
             ip: '',
@@ -117,7 +159,6 @@ export default {
             pd: '',
             selectedItems: [],
             selectedItemsW: [],
-            showModal: false,
             progressBarWidth: 0,
             showButton: false,
             checkItems: [
@@ -270,25 +311,12 @@ export default {
                 { id: 56, name: '检查是否已开启 UAC 安全提示' }
             ],
             checkItemsW_: [],
-            winVersions: [
-                { value: 1, label: 'Windows 11' },
-                { value: 2, label: 'Windows 10' },
-                { value: 3, label: 'Windows 8' },
-                { value: 4, label: 'Windows 7' },
-                { value: 5, label: 'Windows xp' },
-                { value: 6, label: 'Window server 2025' },
-                { value: 7, label: 'Window server 2022' },
-                { value: 8, label: 'Window server 2019' },
-                { value: 9, label: 'Window server 2016' },
-                { value: 10, label: 'Window server 2012' },
-                { value: 11, label: 'Window server 2008' },
-            ],
             value: '',
             valueTemp: '',
             checkResult: {},
             isChecked: false,
-            isSelectAll: true,
-            isIndeterminate: false, //半全选状态指示符
+            checkAll: false,//linux全选标记
+            isSelectAll: false,//windows全选标记
             showPopup: false
         };
     },
@@ -350,6 +378,22 @@ export default {
         },
     },
     methods: {
+        // 获取活跃IP列表
+        fetchAliveHosts() {
+            fetch('/api/getAliveHosts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    this.aliveHosts = data.alive_hosts;
+                })
+                .catch(error => {
+                    Message.error('获取活跃IP列表失败：' + error.message);
+                });
+        },
         //切换Windows或Linux方法，同时初始化其他指示值
         turnFlag() {
             this.flag = !this.flag
@@ -358,8 +402,7 @@ export default {
             this.pd = ''
             this.ip = ''
             this.adminName = ''
-            this.isChecked = false,
-                this.isIndeterminate = false
+            this.isChecked = false
         },
 
         WindowsSubmitForm() {
@@ -407,6 +450,7 @@ export default {
                 });
         },
 
+        //用于组件之间传递数据
         sendData() {
             if (this.isSelectAll) {
                 this.$store.commit('updateMessage', this.checkResult)
@@ -432,93 +476,31 @@ export default {
         },
 
         LinuxSubmitForm() {
-            const payload = {
-                ip: this.ip,
-                pd: this.pd
-            };
-            console.log("Submitting form...", payload);
-
-            fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        if (response.status === 500) {
-                            // 处理特定的500内部错误
-                            alert("请求失败，SSH会话无法启动");
-                            return null; // 返回null但不结束Promise链，以防止进一步的.then执行
-                        }
-                        // 对于除500外的其他错误，抛出错误并附带状态码
-                        throw new Error(`HTTP status ${response.status}`);
-                    }
-                    console.log(response.json)
-                    return response.json();
-                })
-                .then(data => {
-                    // 检查data是否为null来避免执行不需要的代码
-                    if (data === null) return;
-
-                    console.log("Response received:", data);
-                    // 仅在成功响应时执行UI操作
-                    this.progressBarWidth = 0; // 初始化进度为0
-                    this.showModal = true;
-                    this.runProgress();
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    // 显示除500外的其他HTTP错误的错误码
-                    alert(`发生错误：${error.message}`);
-                });
-        },
-
-        submitForm() {
-            if (this.flag) {
-                this.WindowsSubmitForm()
-            } else {
-                this.LinuxSubmitForm()
-            }
-        },
-
-        runProgress(flag) {
-            this.progressBarWidth = 0; // 初始化进度为0
-            this.showModal = true;
-            let duration = 4000;
-            if (flag) {
-                duration = 2000
-            } else {
-                duration = 20000
-            }
-            let elapsed = 0;
-            let intervalTime = 100;
-
-            const interval = setInterval(() => {
-                elapsed += intervalTime;
-                this.progressBarWidth = Math.round((elapsed / duration) * 100); // 四舍五入到整数
-
-                if (elapsed >= duration) {
-                    clearInterval(interval);
-                    this.progressBarWidth = 100; // 确保最后是100%
-                    this.showButton = true;
-                }
-            }, intervalTime);
-        },
-
-        batchExecute() {
             this.$refs.form.validate((valid) => {
                 if (!valid) {
                     return;
                 }
 
                 if (this.selectedItems.length === 0) {
-                    Message.warning('请选择需要批量执行的项目');
+                    Message.warning('请选择至少一个检测项目');
                     return;
                 }
 
-                this.batchLoading = true;
+                this.loading = true;
+                //let payload; // 在 if/else 外部声明变量
+
+                // if (this.checkAll) {
+                //   payload = {
+                //     ip: this.formData.ip,
+                //     pd: this.formData.pd
+                //   }; // 给变量赋值
+                // } else {
+                //   payload = {
+                //     ip: this.formData.ip,
+                //     pd: this.formData.pd,
+                //     ids: this.selectedItems
+                //   }; // 给变量赋值
+                // }
                 const payload = {
                     ip: this.formData.ip,
                     pd: this.formData.pd,
@@ -543,64 +525,115 @@ export default {
                     })
                     .then(data => {
                         console.log(data);
-                        this.batchLoading = false;
+                        this.loading = false;
                         this.dialogVisible = true;
                     })
                     .catch((error) => {
-                        this.batchLoading = false;
+                        this.loading = false;
                         Message.error(error.message);
                     });
             });
         },
 
-        checkAll() {
+        viewResult() {
+            this.dialogVisible = false;
+            if (this.flag) {
+                this.showPopup = true; // 显示PDF相关内容
+            } else {
+                this.$nextTick(() => {
+                    this.$router.push({
+                        path: '/tempBaseCheck',  // 改为跳转到新页面
+                        query: {
+                            ip: this.formData.ip  // 传递检测的IP
+                        }
+                    });
+                });
+            }
+
+        },
+
+        checkAllW() {
             if (this.isChecked) {
-                this.runProgress(true);
+                this.viewResult();
                 return 0
             } else {
                 this.submitForm()
-                this.runProgress(false)
+                this.viewResult()
             }
         },
 
         batchExecuteW() {
             if (this.isChecked) {
                 this.sendData()
-                this.runProgress(true)
+                this.viewResult()
                 return 0
             } else {
                 this.submitForm()
-                this.runProgress(false)
+                this.viewResult()
             }
         },
 
+
+        // 处理全选复选框变化
         handleCheckAllChange(val) {
+            const allItemIds = this.checkItems.map(item => item.id);
+            this.selectedItems = val ? allItemIds : [];
+        },
+        // 处理选中项变化
+        handleCheckedItemsChange(value) {
+            const checkedCount = value.length;
+            this.checkAll = checkedCount === this.checkItems.length;
+        },
+
+        handleCheckAllChangeW(val) {
             this.selectedItemsW = val ? this.checkItemsW.map(item => item.name) : [];
             this.isIndeterminate = false; // 取消半选状态
         },
 
-        handleCheckedItemsChange(value) {
+        handleCheckedItemsChangeW(value) {
             const checkedCount = value.length;
             this.isSelectAll = checkedCount === this.checkItemsW.map(item => item.name).length;
             this.isIndeterminate =
                 checkedCount > 0 && checkedCount < this.checkItemsW.map(item => item.name).length;
         },
 
-        closeModal() {
-            this.showModal = false;
-            this.progressBarWidth = 0;
-            this.showButton = false;
-            console.log("Closing modal and redirecting.");
-            this.$nextTick(() => {
-                this.$router.push('/baseCheck');
-            });
-        },
+        // closeModal() {
+        //     this.showModal = false;
+        //     this.progressBarWidth = 0;
+        //     this.showButton = false;
+        //     this.$nextTick(() => {
+        //         this.showPopup = true; // 显示当前ip检测内容
+        //     });
+        // },
 
         closePopup(event) {
             if (event.key === 'Escape') {
                 this.showPopup = false; // 隐藏PDF相关内容
             }
-        }
+        },
+
+        handleViewTempResult() {
+            if (!this.formData.ip) {
+                Message.warning('请先输入服务器IP地址');
+                return;
+            }
+
+            // 验证IP格式（复用原有规则）
+            const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+            if (!ipPattern.test(this.formData.ip.trim())) {
+                Message.error('IP地址格式不正确，请检查输入');
+                return;
+            }
+
+            this.$router.push({
+                path: '/tempBaseCheck',
+                query: { ip: this.formData.ip }
+            });
+        },
+    },
+    created() {
+        // 组件创建时获取活跃IP列表
+        this.fetchAliveHosts();
     },
     mounted() {
         window.addEventListener('keydown', this.closePopup);
@@ -646,6 +679,11 @@ export default {
     align-items: center;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
 .check-items {
     margin-top: 30px;
 }
@@ -667,16 +705,36 @@ export default {
     margin-bottom: 20px;
 }
 
-.versionSelector {
+.control-bar {
+    display: flex;
+    align-items: center;
+}
+
+.selected-info {
+    margin-top: 10px;
+    color: #606266;
     font-size: 14px;
 }
 
-.versionSelector>.el-select {
-    width: 40%;
+.temp-check-link {
+    margin-top: -8px;
+    margin-bottom: -13px;
+    font-size: 12px;
+    text-align: right;
+
+    .el-link {
+        display: inline-flex;
+        align-items: center;
+
+        i {
+            margin-right: 3px;
+            font-size: 14px;
+        }
+    }
 }
 
-.versionSelectBT {
-    margin-left: 1em;
+.login-form>>>.el-form-item {
+    margin-bottom: 18px;
 }
 
 .checboxGroupContainer {

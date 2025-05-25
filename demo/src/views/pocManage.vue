@@ -3,24 +3,20 @@
     <h1 id="pocmanage">POC管理</h1>
 
     <div style="margin: 10px 0">
-      <el-input style="width: 200px;margin-left: 5px;margin-right: 10px" placeholder="请输入搜索关键字" suffix-icon="el-icon-search" v-model="searchKeyword"></el-input>
+      <el-input style="width: 200px;margin-left: 5px;margin-right: 10px" placeholder="请输入搜索关键字"
+        suffix-icon="el-icon-search" v-model="searchKeyword"></el-input>
       <el-button class="ml-5" type="primary" @click="load">搜索</el-button>
       <el-button type="warning" @click="reset">重置</el-button>
     </div>
 
     <div style="margin: 10px 0">
-      <el-button style="width: 80px;margin-left: 5px" type="primary" @click="handleAdd">新增 <i class="el-icon-circle-plus-outline"></i></el-button>
-      <el-popconfirm
-          class="ml-5"
-          confirm-button-text="确定"
-          cancel-button-text="我再想想"
-          icon="el-icon-info"
-          icon-color="red"
-          title="您确定批量删除这些数据吗？"
-          @confirm="delBatch"
-      >
+      <el-button style="width: 80px;margin-left: 5px" type="primary" @click="handleAdd">新增 <i
+          class="el-icon-circle-plus-outline"></i></el-button>
+      <el-popconfirm class="ml-5" confirm-button-text="确定" cancel-button-text="我再想想" icon="el-icon-info"
+        icon-color="red" title="您确定批量删除这些数据吗？" @confirm="delBatch">
         <template v-slot:reference>
-          <el-button style="width: 120px;margin: 10px" type="danger">批量删除 <i class="el-icon-remove-outline"></i></el-button>
+          <el-button style="width: 120px;margin: 10px" type="danger">批量删除 <i
+              class="el-icon-remove-outline"></i></el-button>
         </template>
       </el-popconfirm>
     </div>
@@ -45,14 +41,8 @@
         </el-form-item>
         <!-- POC代码 上传文件 -->
         <el-form-item label="POC代码">
-          <el-upload
-              class="upload-demo"
-              ref="upload"
-              :http-request="handleFileUpload"
-              :before-upload="beforeFileUpload"
-              :on-remove="handleRemove"
-              :file-list="fileList"
-              :limit="1">
+          <el-upload class="upload-demo" ref="upload" :http-request="handleFileUpload" :before-upload="beforeFileUpload"
+            :on-remove="handleRemove" :file-list="fileList" :limit="1">
             <el-button>选择文件</el-button>
           </el-upload>
           <el-button @click="editCode" style="margin-right: 10px;margin-left: 70px;margin-top: 10px">编辑</el-button>
@@ -64,11 +54,7 @@
         <el-button type="primary" @click="submitNewPoc">确定</el-button>
       </span>
 
-      <el-dialog
-          :visible.sync="codeDialogVisible"
-          :append-to-body="true"
-          width="1200px"
-          class="custom-dialog">
+      <el-dialog :visible.sync="codeDialogVisible" :append-to-body="true" width="1200px" class="custom-dialog">
 
         <!-- 标题部分，添加内联样式 -->
         <template slot="title">
@@ -103,14 +89,16 @@
           </el-form-item>
 
           <!-- Can we get result of command? -->
-          <el-form-item v-if="vulnerabilityType === 1 || vulnerabilityType === 2" label="Can we get result of command?" style="margin-bottom: 10px; font-weight: bold;">
+          <el-form-item v-if="vulnerabilityType === 1 || vulnerabilityType === 2" label="Can we get result of command?"
+            style="margin-bottom: 10px; font-weight: bold;">
             <el-radio-group v-model="canGetCommandResult">
               <el-radio :label="1">Yes</el-radio>
               <el-radio :label="0">No</el-radio>
             </el-radio-group>
           </el-form-item>
 
-          <el-button type="primary" @click="generateTemplate" style="margin-bottom: 20px;">生成模板</el-button> <!-- 生成模板按钮 -->
+          <el-button type="primary" @click="generateTemplate" style="margin-bottom: 20px;">生成模板</el-button>
+          <!-- 生成模板按钮 -->
 
           <el-form-item label="文件名" style="margin-bottom: 0px; font-weight: bold;">
             <el-input type="textarea" v-model="tempFilename" rows="1"></el-input> <!-- 临时变量 -->
@@ -119,9 +107,9 @@
           <el-form-item style="margin-bottom: 0px;">
             <CodeEditor v-model="tempnewcode" />
           </el-form-item>
-<!--          <el-form-item label="代码" style="margin-bottom: 0px; font-weight: bold;">-->
-<!--            <el-input type="textarea" v-model="tempnewcode" rows="15"></el-input> &lt;!&ndash; 临时变量 &ndash;&gt;-->
-<!--          </el-form-item>-->
+          <!--          <el-form-item label="代码" style="margin-bottom: 0px; font-weight: bold;">-->
+          <!--            <el-input type="textarea" v-model="tempnewcode" rows="15"></el-input> &lt;!&ndash; 临时变量 &ndash;&gt;-->
+          <!--          </el-form-item>-->
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="clearCode">清空</el-button> <!-- 添加“清空”按钮 -->
@@ -132,10 +120,10 @@
     </el-dialog>
 
     <el-dialog :visible.sync="dialogVisible" width="60%" :height="400" title="POC代码">
-        <pre style="height: 500px; overflow-y: scroll;"><code class="language-python">{{ selectedPocCode }}</code></pre>
+      <pre style="height: 500px; overflow-y: scroll;"><code class="language-python">{{ selectedPocCode }}</code></pre>
     </el-dialog>
 
-<!--    编辑poc代码   -->
+    <!--    编辑poc代码   -->
     <el-dialog :visible.sync="editDialogVisible" title="编辑POC" width="500px" :close-on-click-modal="false">
       <el-form :model="editPoc" ref="editPocForm">
         <el-form-item label="CVE编号">
@@ -155,17 +143,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="POC代码">
-          <el-upload
-              class="upload-demo"
-              ref="upload"
-              :http-request="handleFileUpload"
-              :before-upload="beforeFileUpload"
-              :on-remove="handleRemove"
-              :file-list="fileList"
-              :limit="1"
-              accept=".py">
+          <el-upload class="upload-demo" ref="upload" :http-request="handleFileUpload" :before-upload="beforeFileUpload"
+            :on-remove="handleRemove" :file-list="fileList" :limit="1" accept=".py">
             <el-button>选择文件</el-button>
-<!--            <span slot="tip" class="el-upload__tip">只能上传.py文件</span>-->
+            <!--            <span slot="tip" class="el-upload__tip">只能上传.py文件</span>-->
           </el-upload>
           <el-button @click="editPocCode" style="margin-top: 10px;margin-left: 69px">编辑poc代码</el-button>
           <i v-if="newcode" class="el-icon-circle-check" style="color: green;"></i>
@@ -176,12 +157,8 @@
         <el-button type="primary" @click="submitEditPoc">确定</el-button>
       </span>
 
-<!--      编辑poc-编辑poc代码       -->
-      <el-dialog
-          :visible.sync="editPocCodeDialogVisible"
-          :append-to-body="true"
-          width="1000px"
-          class="custom-dialog">
+      <!--      编辑poc-编辑poc代码       -->
+      <el-dialog :visible.sync="editPocCodeDialogVisible" :append-to-body="true" width="1000px" class="custom-dialog">
 
         <!-- 标题部分，添加内联样式 -->
         <template slot="title">
@@ -198,10 +175,10 @@
           <el-form-item style="margin-bottom: 0px;">
             <CodeEditor v-model="tempnewcode" />
           </el-form-item>
-<!--          <el-form-item label="代码" style="margin-bottom: 0px; font-weight: bold;">-->
-<!--            <CodeEditor v-model="tempnewcode"/>-->
-<!--&lt;!&ndash;            <el-input type="textarea" v-model="tempnewcode" rows="15"></el-input> &lt;!&ndash; 临时变量 &ndash;&gt;&ndash;&gt;-->
-<!--          </el-form-item>-->
+          <!--          <el-form-item label="代码" style="margin-bottom: 0px; font-weight: bold;">-->
+          <!--            <CodeEditor v-model="tempnewcode"/>-->
+          <!--&lt;!&ndash;            <el-input type="textarea" v-model="tempnewcode" rows="15"></el-input> &lt;!&ndash; 临时变量 &ndash;&gt;&ndash;&gt;-->
+          <!--          </el-form-item>-->
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="clearCode">清空</el-button> <!-- 添加“清空”按钮 -->
@@ -220,16 +197,18 @@
       <el-table-column prop="vul_name" label="漏洞名称" width="130"></el-table-column>
       <el-table-column prop="description" label="漏洞描述" width="280">
         <template slot-scope="scope">
-                    <span v-if="!scope.row.showFullDescription">
-                        {{ scope.row.description.slice(0, 40) }}...
-                        <el-button type="text" @click="toggleDescription(scope.row)">展开</el-button>
-                    </span>
+          <span v-if="!scope.row.showFullDescription">
+            {{ scope.row.description.slice(0, 40) }}...
+            <el-button type="text" @click="toggleDescription(scope.row)">展开</el-button>
+          </span>
           <span v-else>
-                        {{ scope.row.description }}
-                        <el-button type="text" @click="toggleDescription(scope.row)">收起</el-button>
-                    </span>
+            {{ scope.row.description }}
+            <el-button type="text" @click="toggleDescription(scope.row)">收起</el-button>
+          </span>
         </template>
       </el-table-column>
+      <el-table-column prop="cvss_mark" label="CVSS评分" width="130"></el-table-column>
+      <el-table-column prop="script_state" label="POC状态" width="130"></el-table-column>
       <el-table-column prop="script_type" label="POC类型" width="130"></el-table-column>
 
       <el-table-column prop="script" label="POC代码" width="150">
@@ -240,26 +219,20 @@
       <el-table-column prop="timestamp" label="修改时间" width="160"></el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
-          <el-button type="success" style="width: 80px;margin-left: 5px" @click="handleEdit(scope.row)">编辑 <i class="el-icon-edit"></i></el-button>
-          <el-popconfirm
-              title="您确定要删除这条数据吗？"
-              @confirm="del(scope.row.id)"
-          >
+          <el-button type="success" style="width: 80px;margin-left: 5px" @click="handleEdit(scope.row)">编辑 <i
+              class="el-icon-edit"></i></el-button>
+          <el-popconfirm title="您确定要删除这条数据吗？" @confirm="del(scope.row.id)">
             <template v-slot:reference>
-              <el-button type="danger" style="width: 80px;margin-left: 5px">删除 <i class="el-icon-delete"></i></el-button>
+              <el-button type="danger" style="width: 80px;margin-left: 5px">删除 <i
+                  class="el-icon-delete"></i></el-button>
             </template>
           </el-popconfirm>
 
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-size="pageSize"
-        :total="totalItems"
-        layout="total, sizes, prev, pager, next, jumper">
+    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+      :page-size="pageSize" :total="totalItems" layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
   </div>
 </template>
@@ -275,8 +248,8 @@ export default {
   components: {
     CodeEditor,
   },
-  data(){
-    return{
+  data() {
+    return {
       addDialogVisible: false,
       codeDialogVisible: false,
       newPoc: {
@@ -297,7 +270,7 @@ export default {
       },
       editDialogVisible: false,
       codeEditDialogVisible: false,
-      editPocCodeDialogVisible:false,
+      editPocCodeDialogVisible: false,
       tempCode: '', // 临时存储代码输入
       //用来是实现搜索
       searchKeyword: '',
@@ -307,7 +280,7 @@ export default {
       currentPage: 1,
       pageSize: 10,
       totalItems: 0,
-      pocs:[],
+      pocs: [],
       fileList: [],
       tempFilename: '',  // 临时文件名变量
       tempnewcode: '',      // 临时代码内容变量
@@ -368,29 +341,29 @@ export default {
       return this.pocs.slice(start, end);
     }
   },
-  methods:{
+  methods: {
     //搜索的实现
     load() {
       // let keyword = encodeURIComponent(this.searchKeyword.trim());
       // let query = new URLSearchParams({ keyword }).toString();
       let query = new URLSearchParams({ keyword: this.searchKeyword.trim() }).toString();
       fetch(`/api/searchData?${query}`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json();
-          })
-          .then(data => {
-            this.pocs = data.map(poc => ({
-              ...poc,
-              showFullDescription: false
-            }));
-            this.totalItems = this.pocs.length;
-          })
-          .catch(error => {
-            console.error('Error fetching data:', error);
-          });
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          this.pocs = data.map(poc => ({
+            ...poc,
+            showFullDescription: false
+          }));
+          this.totalItems = this.pocs.length;
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
     },
 
     reset() {
@@ -409,28 +382,28 @@ export default {
           id: row.id
         }
       })
-          .then(response => {
-            if (response.status === 200) {
-              this.selectedPocCode = response.data.content;
-              this.$nextTick(() => {
-                this.dialogVisible = true;
-              });
-            } else {
-              // 处理非200响应状态码
-              console.error('Failed to fetch POC content:', response.status, response.statusText);
-              // this.$message.error('操作失败: ' + response.data.error);
-            }
-          })
-          .catch(error => {
-            if (error.response && error.response.status === 500) {
-              // 处理500错误状态码
-              this.$message.error(error.response.data.error);
-            } else {
-              // 处理其他错误
-              console.error('Error fetching POC content:', error);
-              this.$message.error('操作失败: ' + error);
-            }
-          });
+        .then(response => {
+          if (response.status === 200) {
+            this.selectedPocCode = response.data.content;
+            this.$nextTick(() => {
+              this.dialogVisible = true;
+            });
+          } else {
+            // 处理非200响应状态码
+            console.error('Failed to fetch POC content:', response.status, response.statusText);
+            // this.$message.error('操作失败: ' + response.data.error);
+          }
+        })
+        .catch(error => {
+          if (error.response && error.response.status === 500) {
+            // 处理500错误状态码
+            this.$message.error(error.response.data.error);
+          } else {
+            // 处理其他错误
+            console.error('Error fetching POC content:', error);
+            this.$message.error('操作失败: ' + error);
+          }
+        });
     },
 
     handleSizeChange(newSize) {
@@ -443,28 +416,28 @@ export default {
     },
     loadData() {
       fetch('/api/getAllData')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.json();
-          })
-          .then(data => {
-            this.pocs = data.map(poc => ({
-              id: poc.id,
-              cve_id: poc.cve_id,
-              vul_name: poc.vul_name,
-              description: poc.description,
-              script_type: poc.script_type,
-              script: poc.script,
-              timestamp: poc.timestamp,
-              showFullDescription: false  // 保持这个字段，用于控制描述的展开/收起
-            }));
-            this.totalItems = this.pocs.length;
-          })
-          .catch(error => {
-            console.error('Error fetching data:', error);
-          });
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          this.pocs = data.map(poc => ({
+            id: poc.id,
+            cve_id: poc.cve_id,
+            vul_name: poc.vul_name,
+            description: poc.description,
+            script_type: poc.script_type,
+            script: poc.script,
+            timestamp: poc.timestamp,
+            showFullDescription: false  // 保持这个字段，用于控制描述的展开/收起
+          }));
+          this.totalItems = this.pocs.length;
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
     },
     handleAdd() {
       this.addDialogVisible = true;
@@ -479,10 +452,10 @@ export default {
           id: row.id
         }
       })
-          .then(response => {
-              this.selectedPocCode = response.data.content;
-          })
-      this.editDialogVisible=true;
+        .then(response => {
+          this.selectedPocCode = response.data.content;
+        })
+      this.editDialogVisible = true;
     },
 
     del(id) {
@@ -493,18 +466,18 @@ export default {
         },
         body: JSON.stringify({ ids: id })
       })
-          .then(response => {
-            if (response.ok) {
-              this.$message.success('删除成功！');
-              this.loadData();  // 重新加载数据
-            } else {
-              this.$message.error('删除失败！');
-            }
-          })
-          .catch(error => {
-            console.error('删除操作失败:', error);
-            this.$message.error('删除操作失败: ' + error.message);
-          });
+        .then(response => {
+          if (response.ok) {
+            this.$message.success('删除成功！');
+            this.loadData();  // 重新加载数据
+          } else {
+            this.$message.error('删除失败！');
+          }
+        })
+        .catch(error => {
+          console.error('删除操作失败:', error);
+          this.$message.error('删除操作失败: ' + error.message);
+        });
     },
 
     delBatch() {
@@ -516,18 +489,18 @@ export default {
         },
         body: JSON.stringify({ ids: idsToDelete })
       })
-          .then(response => {
-            if (response.ok) {
-              this.$message.success('批量删除成功！');
-              this.loadData();  // 重新加载数据
-            } else {
-              this.$message.error('批量删除失败！');
-            }
-          })
-          .catch(error => {
-            console.error('批量删除操作失败:', error);
-            this.$message.error('批量删除操作失败: ' + error.message);
-          });
+        .then(response => {
+          if (response.ok) {
+            this.$message.success('批量删除成功！');
+            this.loadData();  // 重新加载数据
+          } else {
+            this.$message.error('批量删除失败！');
+          }
+        })
+        .catch(error => {
+          console.error('批量删除操作失败:', error);
+          this.$message.error('批量删除操作失败: ' + error.message);
+        });
     },
 
     beforeFileUpload(file) {
@@ -685,12 +658,12 @@ export default {
       formData.append('description', this.newPoc.description);
       formData.append('script_type', this.newPoc.script_type);
       if (this.fileList.length > 0) {
-        formData.append('mode','upload');
+        formData.append('mode', 'upload');
         formData.append('file', this.fileList[0].raw || this.fileList[0]); // 添加文件到表单数据
-      }else if(this.newcode.length>0){
-        formData.append('mode','edit');
-        formData.append('edit_filename',this.editFilename);
-        formData.append('poc_content',this.newcode);
+      } else if (this.newcode.length > 0) {
+        formData.append('mode', 'edit');
+        formData.append('edit_filename', this.editFilename);
+        formData.append('poc_content', this.newcode);
       }
 
       try {
@@ -722,12 +695,12 @@ export default {
 
       // 添加文件，如果有的话
       if (this.fileList.length > 0) {
-        formData.append('mode','upload');
+        formData.append('mode', 'upload');
         formData.append('file', this.fileList[0]); // 这里的字段名称应与后端一致
-      }else if(this.editFilename.length>0&&this.newcode.length>0){
-        formData.append('mode','edit');
-        formData.append('edit_filename',this.editFilename);
-        formData.append('poc_content',this.newcode);
+      } else if (this.editFilename.length > 0 && this.newcode.length > 0) {
+        formData.append('mode', 'edit');
+        formData.append('edit_filename', this.editFilename);
+        formData.append('poc_content', this.newcode);
       }
 
       try {
@@ -761,19 +734,19 @@ export default {
 
       // 加载文件内容，从`public`目录下读取
       fetch(`/${filename}`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            return response.text();
-          })
-          .then(data => {
-            this.tempnewcode = data; // 将文件内容保存到tempnewcode
-          })
-          .catch(error => {
-            console.error('无法读取模板文件:', error);
-            this.tempnewcode = '# 无法读取模板文件';
-          });
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
+        .then(data => {
+          this.tempnewcode = data; // 将文件内容保存到tempnewcode
+        })
+        .catch(error => {
+          console.error('无法读取模板文件:', error);
+          this.tempnewcode = '# 无法读取模板文件';
+        });
     },
 
   },
@@ -788,17 +761,23 @@ export default {
 <style scoped>
 /*设置窗口内容自动换行*/
 pre {
-  white-space: pre-wrap;      /* CSS3 的换行方式，保持格式的同时允许自动换行 */
-  word-wrap: break-word;      /* 较旧的浏览器也可以理解这种方式 */
-  overflow-wrap: break-word;  /* 标准的换行方式 */
+  white-space: pre-wrap;
+  /* CSS3 的换行方式，保持格式的同时允许自动换行 */
+  word-wrap: break-word;
+  /* 较旧的浏览器也可以理解这种方式 */
+  overflow-wrap: break-word;
+  /* 标准的换行方式 */
   overflow-y: auto;
 }
 
 code[class*="language-"],
 pre[class*="language-"] {
-  color: black; /* 代码文字颜色 */
-  background: none; /* 背景色 */
-  text-shadow: 0 1px white; /* 文字阴影 */
+  color: black;
+  /* 代码文字颜色 */
+  background: none;
+  /* 背景色 */
+  text-shadow: 0 1px white;
+  /* 文字阴影 */
   font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
   font-size: 1em;
   text-align: left;
@@ -817,6 +796,4 @@ pre[class*="language-"] {
   -ms-hyphens: none;
   hyphens: none;
 }
-
-
 </style>
