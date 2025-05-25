@@ -2,10 +2,10 @@
   <div class="baseline-container">
     <!-- 头部区域 -->
     <div class="header-section">
-      <h1 class="main-title">Linux基线检测报告</h1>
-<!--      <div class="date-info">-->
-<!--        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>-->
-<!--      </div>-->
+      <h1 class="main-title">{{ isWindows ? 'Windows' : 'Linux' }}基线检测报告</h1>
+      <div class="date-info">
+        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>
+      </div>
     </div>
 
     <!-- 控制按钮区域 -->
@@ -13,52 +13,37 @@
       <div class="button-group">
         <!-- 新增的IP选择下拉框 -->
         <div class="control-item">
-          <el-select
-              v-model="selectedIP"
-              placeholder="选择服务器IP"
-              @change="changeServer"
-              size="medium">
-            <el-option
-                v-for="ip in aliveHosts"
-                :key="ip"
-                :label="ip"
-                :value="ip">
+          <el-select v-show="!isWindows" v-model="selectedIP" placeholder="选择服务器IP" @change="changeServer"
+            size="medium">
+            <el-option v-for="ip in aliveHosts" :key="ip" :label="ip" :value="ip">
             </el-option>
           </el-select>
         </div>
 
-        <el-button
-            @click="onExportToPDF"
-            :loading="pdfLoading"
-            icon="el-icon-document"
-            type="primary">
+        <el-button @click="onExportToPDF" :loading="pdfLoading" icon="el-icon-document" type="primary">
           导出为 PDF
         </el-button>
-<!--        <el-button-->
-<!--            @click="goToClassifyProtect"-->
-<!--            type="success"-->
-<!--            icon="el-icon-s-check">-->
-<!--          去进行等保测评-->
-<!--        </el-button>-->
+        <el-button @click="changeOS" type="primary">
+          切换到{{ isWindows ? 'Linux' : 'Windows' }}检测报告
+        </el-button>
+        <!--        <el-button-->
+        <!--            @click="goToClassifyProtect"-->
+        <!--            type="success"-->
+        <!--            icon="el-icon-s-check">-->
+        <!--          去进行等保测评-->
+        <!--        </el-button>-->
       </div>
 
       <div class="filter-group">
-        <el-select
-            v-model="selectedStatus"
-            placeholder="请选择状态"
-            size="medium">
+        <el-select v-model="selectedStatus" placeholder="请选择状态" size="medium">
           <el-option label="全部" value="all"></el-option>
           <el-option label="通过" value="passed"></el-option>
           <el-option label="未通过" value="failed"></el-option>
           <el-option label="待检查" value="pending"></el-option>
         </el-select>
 
-        <el-input
-            placeholder="输入检测项关键字..."
-            v-model="searchTerm"
-            @input="filterSearchResults"
-            prefix-icon="el-icon-search"
-            size="medium">
+        <el-input placeholder="输入检测项关键字..." v-model="searchTerm" @input="filterSearchResults"
+          prefix-icon="el-icon-search" size="medium">
         </el-input>
       </div>
     </div>
@@ -70,14 +55,30 @@
       </div>
       <div class="server-info-grid">
         <el-row :gutter="30">
-          <el-col :span="12"><div class="info-item"><span class="info-label">主机名：</span>{{serverInfo.hostname || '未知'}}</div></el-col>
-          <el-col :span="12"><div class="info-item"><span class="info-label">主机架构：</span>{{serverInfo.arch || '未知'}}</div></el-col>
-          <el-col :span="12"><div class="info-item"><span class="info-label">主机CPU信息：</span>{{serverInfo.cpu || '未知'}}</div></el-col>
-          <el-col :span="12"><div class="info-item"><span class="info-label">主机物理CPU个数：</span>{{serverInfo.cpuPhysical || '未知'}}</div></el-col>
-          <el-col :span="12"><div class="info-item"><span class="info-label">主机物理CPU核心数：</span>{{serverInfo.cpuCore || '未知'}}</div></el-col>
-          <el-col :span="12"><div class="info-item"><span class="info-label">主机空闲内存：</span>{{serverInfo.free || '未知'}}</div></el-col>
-          <el-col :span="12"><div class="info-item"><span class="info-label">硬件型号：</span>{{serverInfo.ProductName || '未知'}}</div></el-col>
-          <el-col :span="12"><div class="info-item"><span class="info-label">主机版本信息：</span>{{serverInfo.version || '未知'}}</div></el-col>
+          <el-col :span="12">
+            <div class="info-item"><span class="info-label">主机名：</span>{{ serverInfo.hostname || '未知' }}</div>
+          </el-col>
+          <el-col :span="12">
+            <div class="info-item"><span class="info-label">主机架构：</span>{{ serverInfo.arch || '未知' }}</div>
+          </el-col>
+          <el-col :span="12">
+            <div class="info-item"><span class="info-label">主机CPU信息：</span>{{ serverInfo.cpu || '未知' }}</div>
+          </el-col>
+          <el-col :span="12">
+            <div class="info-item"><span class="info-label">主机物理CPU个数：</span>{{ serverInfo.cpuPhysical || '未知' }}</div>
+          </el-col>
+          <el-col :span="12">
+            <div class="info-item"><span class="info-label">主机物理CPU核心数：</span>{{ serverInfo.cpuCore || '未知' }}</div>
+          </el-col>
+          <el-col :span="12">
+            <div class="info-item"><span class="info-label">主机空闲内存：</span>{{ serverInfo.free || '未知' }}</div>
+          </el-col>
+          <el-col :span="12">
+            <div class="info-item"><span class="info-label">硬件型号：</span>{{ serverInfo.ProductName || '未知' }}</div>
+          </el-col>
+          <el-col :span="12">
+            <div class="info-item"><span class="info-label">主机版本信息：</span>{{ serverInfo.version || '未知' }}</div>
+          </el-col>
           <!--          <el-col :span="12"><div class="info-item"><span class="info-label">联网检测：</span>{{serverInfo.isInternet || '未知'}}</div></el-col>-->
         </el-row>
       </div>
@@ -95,13 +96,8 @@
         </div>
       </div>
 
-      <el-table
-          :data="filteredCheckresults"
-          style="width: 100%"
-          border
-          stripe
-          :header-cell-style="{background:'#f5f7fa',color:'#606266'}"
-          v-loading="tableLoading">
+      <el-table v-show="!isWindows" :data="filteredCheckresults" style="width: 100%" border stripe
+        :header-cell-style="{ background: '#f5f7fa', color: '#606266' }" v-loading="tableLoading">
         <el-table-column label="序号" width="70" type="index"></el-table-column>
         <el-table-column prop="description" label="检测项" min-width="150"></el-table-column>
         <el-table-column prop="basis" label="基准" min-width="150"></el-table-column>
@@ -113,42 +109,93 @@
         <!--        </el-table-column>-->
         <el-table-column label="是否通过检查" width="120">
           <template slot-scope="scope">
-<!--            <el-tag :type="scope.row.IsComply === 'true' ? 'success' : 'danger'">-->
-<!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
-<!--            </el-tag>-->
+            <!--            <el-tag :type="scope.row.IsComply === 'true' ? 'success' : 'danger'">-->
+            <!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
+            <!--            </el-tag>-->
             <el-tag :type="getStatusType(scope.row.IsComply)">
-                   {{ getStatusText(scope.row.IsComply) }}
+              {{ getStatusText(scope.row.IsComply) }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="修改建议" min-width="250">
           <template slot-scope="scope">
-<!--            <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>-->
-            <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{ scope.row.recommend }}</span>
+            <!--            <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>-->
+            <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{ scope.row.recommend
+            }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
       </el-table>
+
+      <el-table v-show="isWindows" :data="filteredCheckresults" style="width: 100%" border stripe
+        :header-cell-style="{ background: '#f5f7fa', color: '#606266' }" v-loading="tableLoading">
+        <el-table-column label="序号" width="70" type="index"></el-table-column>
+        <el-table-column prop="description" label="检测项" min-width="150"></el-table-column>
+        <el-table-column prop="basis" label="基准" min-width="150"></el-table-column>
+        <el-table-column prop="result" label="检测结果" min-width="150"></el-table-column>
+        <!--        <el-table-column label="基准/检测结果" min-width="200">-->
+        <!--          <template slot-scope="scope">-->
+        <!--            {{ scope.row.basis }}/{{ scope.row.result }}-->
+        <!--          </template>-->
+        <!--        </el-table-column>-->
+        <el-table-column label="是否通过检查" width="120">
+          <template slot-scope="scope">
+            <!--            <el-tag :type="scope.row.IsComply === 'true' ? 'success' : 'danger'">-->
+            <!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
+            <!--            </el-tag>-->
+            <el-tag :type="getStatusType(scope.row.IsComply)">
+              {{ getStatusText(scope.row.IsComply) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="修改建议" min-width="250">
+          <template slot-scope="scope">
+            <!--            <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>-->
+            <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{ scope.row.recommend
+            }}</span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+      </el-table>
+
     </el-card>
 
     <!-- PDF内容（隐藏） -->
     <div class="pdf-content" v-show="showContentForPDF">
       <div class="server1">
-        <h1 id="linuxBaseline2">Linux基线检测报告</h1>
+        <h1 id="linuxBaseline2">{{ isWindows ? 'Windows' : 'Linux' }}</h1>
         <!-- 检测时间 -->
         <div style="text-align:right; margin-top:20px;">
-          <p style="font-size:18px;">打印时间：{{ new Date().toLocaleString() }}</p>
+          <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>
         </div>
         <el-row :gutter="20">
-          <el-col :span="24"><p>主机名：{{ serverInfo.hostname }}</p></el-col>
-          <el-col :span="24"><p>主机架构：{{ serverInfo.arch }}</p></el-col>
-          <el-col :span="24"><p>主机CPU信息：{{ serverInfo.cpu }}</p></el-col>
-          <el-col :span="24"><p>主机物理CPU个数：{{ serverInfo.cpuPhysical }}</p></el-col>
-          <el-col :span="24"><p>主机物理CPU核心数：{{ serverInfo.cpuCore }}</p></el-col>
-          <el-col :span="12"><p>主机空闲内存：{{ serverInfo.free }}</p></el-col>
-          <el-col :span="24"><p>硬件型号：{{ serverInfo.ProductName }}</p></el-col>
-          <el-col :span="24"><p>主机版本信息：{{ serverInfo.version }}</p></el-col>
-          <el-col :span="24"><p>服务器IP：{{ selectedIP }}</p></el-col>
+          <el-col :span="24">
+            <p>主机名：{{ serverInfo.hostname }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机架构：{{ serverInfo.arch }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机CPU信息：{{ serverInfo.cpu }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机物理CPU个数：{{ serverInfo.cpuPhysical }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机物理CPU核心数：{{ serverInfo.cpuCore }}</p>
+          </el-col>
+          <el-col :span="12">
+            <p>主机空闲内存：{{ serverInfo.free }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>硬件型号：{{ serverInfo.ProductName }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机版本信息：{{ serverInfo.version }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>服务器IP：{{ selectedIP }}</p>
+          </el-col>
         </el-row>
         <!-- 空白分隔 -->
         <div style="height:200px;"></div>
@@ -180,11 +227,11 @@
         <!--        </el-table-column>-->
         <el-table-column prop="IsComply" label="是否通过检查" width="120">
           <template slot-scope="scope">
-<!--            <span :class="{ 'failed-result': scope.row.IsComply === 'false' }">-->
-<!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
-<!--            </span>-->
+            <!--            <span :class="{ 'failed-result': scope.row.IsComply === 'false' }">-->
+            <!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
+            <!--            </span>-->
             <span :class="getStatusClass(scope.row.IsComply)">
-                 {{ getStatusText(scope.row.IsComply) }}
+              {{ getStatusText(scope.row.IsComply) }}
             </span>
           </template>
         </el-table-column>
@@ -220,19 +267,22 @@ export default {
       tableLoading: false,
       totalPages: 2, // 默认至少两页
       aliveHosts: [], // 活跃主机IP列表
-      selectedIP: '' // 选中的IP
+      selectedIP: '', // 选中的IP
+      isWindows: false // 是否为Windows系统
     }
   },
   computed: {
+    message() {
+      return this.$store.state.message; // 读取共享状态
+    },
     filteredCheckresults() {
       return this.checkresults.filter(result => {
         const matchesStatus = this.selectedStatus === 'all' ||
-            (this.selectedStatus === 'passed' && result.IsComply === 'true') ||
-            (this.selectedStatus === 'failed' && result.IsComply === 'false') ||
-            (this.selectedStatus === 'pending' && result.IsComply === 'pending');
-            // (this.selectedStatus === 'failed' && result.IsComply === 'false');
+          (this.selectedStatus === 'passed' && result.IsComply === 'true') ||
+          (this.selectedStatus === 'failed' && result.IsComply === 'false') ||
+          (this.selectedStatus === 'pending' && result.IsComply === 'pending');
         const matchesSearch = !this.searchTerm ||
-            result.description.toLowerCase().includes(this.searchTerm.toLowerCase());
+          result.description.toLowerCase().includes(this.searchTerm.toLowerCase());
         return matchesStatus && matchesSearch;
       });
     },
@@ -248,23 +298,42 @@ export default {
     totalCount() {
       return this.checkresults.length;
     }
+
   },
   methods: {
+
+    // 切换到W/L系统
+    changeOS() {
+      this.isWindows = !this.isWindows;
+      if (this.isWindows) {
+        if (this.message.Event_result) {
+          this.checkresults = this.message.Event_result
+          this.serverInfo = this.message.ServerInfo
+        }
+      } else {
+        this.checkresults = []
+        this.serverInfo = []
+      }
+    },
+
+
     // 获取活跃IP列表
     fetchAliveHosts() {
       axios.get('/api/getAliveHosts')
-          .then(response => {
-            this.aliveHosts = response.data.alive_hosts;
-            // 如果有IP，默认选择第一个
-            if (this.aliveHosts && this.aliveHosts.length > 0) {
-              this.selectedIP = this.aliveHosts[0];
-              this.fetchAndDisplayChenckResults();
-            }
-          })
-          .catch(error => {
+        .then(response => {
+          this.aliveHosts = response.data.alive_hosts;
+          // 如果有IP，默认选择第一个
+          if (this.aliveHosts && this.aliveHosts.length > 0) {
+            this.selectedIP = this.aliveHosts[0];
+            this.fetchAndDisplayChenckResults();
+          }
+        })
+        .catch(error => {
+          if (!this.isWindows) {
             console.error('获取活跃IP列表失败:', error);
             this.$message.error('获取活跃IP列表失败');
-          });
+          }
+        });
     },
 
     // 切换服务器
@@ -283,19 +352,19 @@ export default {
 
       this.tableLoading = true;
       axios.get(`/api/userinfo?ip=${this.selectedIP}`)
-          .then(response => {
-            // this.checkresults = response.data.Event_result;
-            this.checkresults = response.data.checkResults;
-            this.serverInfo = response.data.serverInfo;
-            this.tableLoading = false;
-            // 根据数据量预估页数
-            this.estimatePageCount();
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            this.tableLoading = false;
-            this.$message.error('获取检测结果失败，请重试');
-          });
+        .then(response => {
+          // this.checkresults = response.data.Event_result;
+          this.checkresults = response.data.checkResults;
+          this.serverInfo = response.data.serverInfo;
+          this.tableLoading = false;
+          // 根据数据量预估页数
+          this.estimatePageCount();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          this.tableLoading = false;
+          this.$message.error('获取检测结果失败，请重试');
+        });
     },
 
     estimatePageCount() {
@@ -492,7 +561,7 @@ export default {
         pdf.text(`${currentPageNum}/${totalPageCount}`, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 10);
 
         // 保存PDF
-        const filename = `Linux基线检测报告_${this.selectedIP}_${new Date().toISOString().slice(0,10)}.pdf`;
+        const filename = `Linux基线检测报告_${this.selectedIP}_${new Date().toISOString().slice(0, 10)}.pdf`;
         pdf.save(filename);
 
         // 清理和完成
@@ -518,7 +587,7 @@ export default {
     },
     // 获取状态对应的类型（用于el-tag的type属性）
     getStatusType(status) {
-      switch(status) {
+      switch (status) {
         case 'true': return 'success';
         case 'false': return 'danger';
         case 'pending': return 'warning';
@@ -526,9 +595,9 @@ export default {
       }
     },
 
-// 获取状态对应的文本
+    // 获取状态对应的文本
     getStatusText(status) {
-      switch(status) {
+      switch (status) {
         case 'true': return '通过';
         case 'false': return '未通过';
         case 'pending': return '待检查';
@@ -536,7 +605,7 @@ export default {
       }
     },
 
-// 获取PDF中状态对应的CSS类
+    // 获取PDF中状态对应的CSS类
     getStatusClass(status) {
       return {
         'failed-result': status === 'false',
@@ -658,6 +727,7 @@ export default {
 .failed-result {
   color: #f56c6c;
 }
+
 .pending-result {
   color: #e6a23c;
 }
@@ -697,4 +767,3 @@ export default {
   }
 }
 </style>
-
