@@ -112,11 +112,11 @@
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column prop="group_name" label="资产组" width="150">
-                  <template slot-scope="scope">
-                    <span>{{ scope.row.group_name }}</span>
-                  </template>
-                </el-table-column>
+<!--                <el-table-column prop="group_name" label="资产组" width="150">-->
+<!--                  <template slot-scope="scope">-->
+<!--                    <span>{{ scope.row.group_name }}</span>-->
+<!--                  </template>-->
+<!--                </el-table-column>-->
               </el-table>
             </el-collapse-transition>
           </div>
