@@ -71,9 +71,6 @@
             <div class="info-item"><span class="info-label">主机物理CPU核心数：</span>{{ serverInfo.cpuCore || '未知' }}</div>
           </el-col>
           <el-col :span="12">
-            <div class="info-item"><span class="info-label">主机空闲内存：</span>{{ serverInfo.free || '未知' }}</div>
-          </el-col>
-          <el-col :span="12">
             <div class="info-item"><span class="info-label">硬件型号：</span>{{ serverInfo.ProductName || '未知' }}</div>
           </el-col>
           <el-col :span="12">
@@ -618,6 +615,9 @@ export default {
   mounted() {
     // 先获取活跃IP列表，然后会自动选择第一个IP并获取检测结果
     this.fetchAliveHosts();
+    if (this.message.Event_result && !this.isWindows) {
+      this.changeOS()
+    }
   }
 }
 </script>

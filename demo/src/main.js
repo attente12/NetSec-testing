@@ -14,6 +14,8 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/python/python.js';
 import 'codemirror/theme/material.css';
 
+import { store } from './store.js'; // 引入你创建的 Vuex store 文件
+
 Vue.use(ElementUI);
 Vue.use(Router);
 Vue.use(VueCodemirror);
@@ -22,6 +24,7 @@ Vue.config.productionTip = false
 
 new Vue({
   router,
+  store,
   render: h => h(App),
 }).$mount('#app')
 

@@ -55,11 +55,11 @@
                 <el-form-item>
 
                     <div class="control-bar">
-                        <el-checkbox v-if="flag" v-model="isSelectAll" @change="handleCheckAllChangeW"
+                        <el-checkbox v-if="isChecked" v-model="isSelectAll" @change="handleCheckAllChangeW"
                             style="margin-right: 15px;">
                             全选检测项目
                         </el-checkbox>
-                        <el-checkbox v-else v-model="checkAll" @change="handleCheckAllChange"
+                        <el-checkbox v-if="!flag" v-model="checkAll" @change="handleCheckAllChange"
                             style="margin-right: 15px;">
                             全选检测项目
                         </el-checkbox>
@@ -67,11 +67,12 @@
                             :loading="loading" :disabled="selectedItems.length === 0">
                             开始检测
                         </el-button>
-                        <el-button v-show="flag" type="primary" class="versionSelectBT" @click="WindowsSubmitForm"
-                            :disabled="ip && pd && adminName ? null : true">检测全部</el-button>
+
                     </div>
 
                     <el-button type="primary" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
+                    <el-button v-show="flag" type="primary" class="versionSelectBT" @click="WindowsSubmitForm"
+                        :disabled="ip && pd && adminName ? null : true">检测全部</el-button>
                 </el-form-item>
             </el-form>
 
@@ -316,7 +317,7 @@ export default {
             checkResult: {},
             isChecked: false,
             checkAll: false,//linux全选标记
-            isSelectAll: false,//windows全选标记
+            isSelectAll: true,//windows全选标记
             showPopup: false
         };
     },
@@ -436,12 +437,17 @@ export default {
                 .then(data => {
                     // 检查data是否为null来避免执行不需要的代码
                     if (data === null) return;
-                    this.checkResult = data
+                    let simplifyData = data
+                    simplifyData.Event_result = simplifyData.Event_result.slice(0, 50)
+                    console.log("Received data:", simplifyData.Event_result)
+                    this.checkResult.ServerInfo = simplifyData.ServerInfo
+                    this.checkResult.Event_result = simplifyData.Event_result
                     this.sendData()
                     if (!this.value) this.value = data.ServerInfo.version
                     // 仅在成功响应时执行UI操作
                     this.versionFlag = true
                     this.isChecked = true
+                    this.showPopup = true // 显示遮罩层
                     return true
                 })
                 .catch((error) => {
@@ -780,5 +786,11 @@ export default {
     height: 100vh;
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+}
+
+.popup {
+    width: 75%;
+    height: 80vh;
+    overflow: auto;
 }
 </style>
