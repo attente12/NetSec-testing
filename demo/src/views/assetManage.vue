@@ -230,8 +230,8 @@
             </div>
             <div class="score-display-inline">
               <div class="score-circle-small" :class="getScoreGradeClass(currentAsset.M)">
-                <span class="score-number-small">{{ currentAsset.M }}</span>
-                <!--                <span class="score-number-small">{{ formattedM }}</span>-->
+<!--                <span class="score-number-small">{{ currentAsset.M }}</span>-->
+                <span class="score-number-small">{{ formattedM }}</span>
 
                 <span class="score-unit-small">分</span>
               </div>
