@@ -68,7 +68,7 @@
                             开始检测
                         </el-button>
                         <el-button v-show="flag" type="primary" class="versionSelectBT" @click="WindowsSubmitForm"
-                            :disabled="ip && pd && adminName ? null : true">开始检测</el-button>
+                            :disabled="ip && pd && adminName ? null : true">检测全部</el-button>
                     </div>
 
                     <el-button type="primary" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
@@ -81,7 +81,7 @@
             <div slot="header" class="card-header">
 
                 <span>检测项目选择</span>
-                <el-button type="primary" :disabled="isChecked ? null : true"
+                <el-button v-if="flag" type="primary" :disabled="isChecked ? null : true"
                     @click="isSelectAll ? checkAll : batchExecuteW" icon="el-icon-video-play" :loading="batchLoading">
                     批量执行
                 </el-button>
@@ -368,6 +368,7 @@ export default {
                         this.checkItemsW_ = this.checkItemsW.filter(item => !idArr.includes(item.id));
                         break;
                     default:
+                        this.checkItemsW_ = this.checkItemsW
                         break;
                 }
 
