@@ -1066,10 +1066,11 @@ export default {
       if (!this.currentAsset || !this.currentAsset.level3_baseline_summary) {
         return '#F56C6C';
       }
-      const rate = this.currentAsset.level3_baseline_summary.compliance_rate;
-      if (rate < 30) return '#F56C6C';
-      if (rate < 60) return '#E6A23C';
-      return '#67C23A';
+      // const rate = this.currentAsset.level3_baseline_summary.compliance_rate;
+      // if (rate < 30) return '#F56C6C';
+      // if (rate < 60) return '#E6A23C';
+      // return '#67C23A';
+      return '#F56C6C';
     }
   },
   methods: {
