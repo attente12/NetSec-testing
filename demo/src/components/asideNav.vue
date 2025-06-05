@@ -29,16 +29,21 @@
                     <span slot="title">主机发现</span>
                   </el-menu-item>
 
-                    <el-submenu index="1">
-                        <template slot="title">
-                            <i class="el-icon-location"></i>
-                            <span>安全基线检测</span>
-                        </template>
-                        <el-menu-item-group>
-                            <el-menu-item index="/baseCheckHome">基线检测</el-menu-item>
-                            <el-menu-item index="/baseCheck">基线检测报告</el-menu-item>
-                        </el-menu-item-group>
-                    </el-submenu>
+                  <el-menu-item index="/baseCheckHome">
+                    <i class="el-icon-location"></i>
+                    <span slot="title">安全基线检测</span>
+                  </el-menu-item>
+
+<!--                    <el-submenu index="1">-->
+<!--                        <template slot="title">-->
+<!--                            <i class="el-icon-location"></i>-->
+<!--                            <span>安全基线检测</span>-->
+<!--                        </template>-->
+<!--                        <el-menu-item-group>-->
+<!--                            <el-menu-item index="/baseCheckHome">基线检测</el-menu-item>-->
+<!--                            <el-menu-item index="/baseCheck">基线检测报告</el-menu-item>-->
+<!--                        </el-menu-item-group>-->
+<!--                    </el-submenu>-->
 
                     <el-submenu index="2">
                         <template slot="title">
@@ -57,16 +62,22 @@
                     <i class="el-icon-attract"></i>
                     <span slot="title">弱口令检测</span>
                   </el-menu-item>
-                  <el-submenu index="4">
-                    <template slot="title">
-                      <i class="el-icon-share"></i>
-                      <span>等级保护测评</span>
-                    </template>
-                    <el-menu-item-group>
-                      <el-menu-item index="/classifyProtectHome">等级保护测评</el-menu-item>
-                      <el-menu-item index="/classifyProtect">测评历史</el-menu-item>
-                    </el-menu-item-group>
-                  </el-submenu>
+
+                  <el-menu-item index="/classifyProtectHome">
+                    <i class="el-icon-share"></i>
+                    <span slot="title">等级保护测评</span>
+                  </el-menu-item>
+
+<!--                  <el-submenu index="4">-->
+<!--                    <template slot="title">-->
+<!--                      <i class="el-icon-share"></i>-->
+<!--                      <span>等级保护测评</span>-->
+<!--                    </template>-->
+<!--                    <el-menu-item-group>-->
+<!--                      <el-menu-item index="/classifyProtectHome">等级保护测评</el-menu-item>-->
+<!--                      <el-menu-item index="/classifyProtect">测评历史</el-menu-item>-->
+<!--                    </el-menu-item-group>-->
+<!--                  </el-submenu>-->
 
 <!--                  <el-menu-item index="/classifyProtect">-->
 <!--                    <i class="el-icon-share"></i>-->
@@ -130,9 +141,7 @@
             this.activeMenu = path;
 
             // 根据当前路径决定要展开哪些子菜单
-            if (path.startsWith('/baseCheckHome') || path.startsWith('/baseCheck')) {
-              this.openeds = ['1'];
-            } else if ([ '/pocScanner', '/pluginScan'].some(p => path.startsWith(p))) {
+            if ([ '/pocScanner', '/pluginScan'].some(p => path.startsWith(p))) {
               this.openeds = ['2'];
             }else if (['/CVELibrary', '/pocManage'].some(p => path.startsWith(p))) {
               this.openeds = ['3'];}

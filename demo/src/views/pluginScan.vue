@@ -207,7 +207,7 @@
             <th>漏洞ID</th>
             <th>漏洞名称</th>
             <th>CVSS</th>
-            <th>POC存在</th>
+<!--            <th>POC存在</th>-->
 <!--            <th>是否检查</th>-->
             <th>漏洞状态</th>
             <th>描述</th>
@@ -218,7 +218,7 @@
             <td>{{ vuln.Vuln_id }}</td>
             <td>{{ vuln.vul_name }}</td>
             <td>{{ vuln.CVSS || '-' }}</td>
-            <td>{{ vuln.pocExist ? '是' : '否' }}</td>
+<!--            <td>{{ vuln.pocExist ? '是' : '否' }}</td>-->
 <!--            <td>{{ vuln.ifCheck ? '是' : '否' }}</td>-->
             <td>{{ vuln.vulExist }}</td>
             <td>{{ vuln.summary }}</td>

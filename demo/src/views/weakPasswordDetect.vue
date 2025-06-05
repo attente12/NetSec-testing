@@ -190,6 +190,7 @@
           <el-table-column prop="service_name" label="服务" width="180"></el-table-column>
           <el-table-column prop="weak_username" label="账号" width="180"></el-table-column>
           <el-table-column label="结果" width="180">存在弱密码</el-table-column>
+          <el-table-column prop="verify_time" label="检测时间" width="180"></el-table-column>
         </el-table>
       </el-card>
     </div>
@@ -268,6 +269,7 @@
           <th>服务</th>
           <th>账号</th>
           <th>密码</th>
+          <th>检测时间</th>
         </tr>
         </thead>
         <tbody>
@@ -276,6 +278,7 @@
           <td>{{ item.service_name }}</td>
           <td>{{ item.weak_username }}</td>
           <td>存在弱密码</td>
+          <td>{{ item.verify_time }}</td>
         </tr>
         </tbody>
       </table>
@@ -298,6 +301,7 @@
           <th>服务</th>
           <th>账号</th>
           <th>结果</th>
+          <th>检测时间</th>
         </tr>
         </thead>
         <tbody>
@@ -308,6 +312,7 @@
             <td>{{ item.service_name }}</td>
             <td>{{ item.weak_username }}</td>
             <td>存在弱密码</td>
+            <td>{{ item.verify_time }}</td>
           </tr>
         </template>
         </tbody>
