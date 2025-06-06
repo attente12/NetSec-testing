@@ -400,21 +400,41 @@ export default {
       this.selectedServices = val ? this.services.map(s => s.name) : [];
       this.isIndeterminate = false;
     },
-    // 获取活跃IP列表
+    // 获取活跃IP列表 - 修改为从localStorage获取
     fetchAliveHosts() {
-      axios.get('/api/getAliveHosts')
-          .then(response => {
-            this.aliveHosts = response.data.alive_hosts;
-            if (!this.scanTarget) {
-              this.scanTarget = this.aliveHosts[0];
-            }
-            this.fetchAndDisplayPasswordResults();
-          })
-          .catch(error => {
-            console.error('获取活跃IP列表失败:', error);
-            this.$message.error('获取活跃IP列表失败');
-          });
+      try {
+        const storedHosts = localStorage.getItem('hostdiscovery');
+        if (storedHosts) {
+          this.aliveHosts = JSON.parse(storedHosts);
+          if (!this.scanTarget && this.aliveHosts.length > 0) {
+            this.scanTarget = this.aliveHosts[0];
+          }
+          this.fetchAndDisplayPasswordResults();
+        } else {
+          this.aliveHosts = [];
+          this.$message.warning('未找到存活主机列表，请先进行主机发现');
+        }
+      } catch (error) {
+        console.error('解析localStorage数据失败:', error);
+        this.aliveHosts = [];
+        this.$message.error('获取存活主机列表失败');
+      }
     },
+    // 获取活跃IP列表
+    // fetchAliveHosts() {
+    //   axios.get('/api/getAliveHosts')
+    //       .then(response => {
+    //         this.aliveHosts = response.data.alive_hosts;
+    //         if (!this.scanTarget) {
+    //           this.scanTarget = this.aliveHosts[0];
+    //         }
+    //         this.fetchAndDisplayPasswordResults();
+    //       })
+    //       .catch(error => {
+    //         console.error('获取活跃IP列表失败:', error);
+    //         this.$message.error('获取活跃IP列表失败');
+    //       });
+    // },
     fetchAndDisplayPasswordResults() {
       if (!this.scanTarget) {
         this.$message.warning('请先选择服务器IP');

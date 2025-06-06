@@ -381,21 +381,36 @@ export default {
     },
     methods: {
         // 获取活跃IP列表
-        fetchAliveHosts() {
-            fetch('/api/getAliveHosts')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP status ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    this.aliveHosts = data.alive_hosts;
-                })
-                .catch(error => {
-                    Message.error('获取活跃IP列表失败：' + error.message);
-                });
-        },
+      fetchAliveHosts() {
+        try {
+          const storedHosts = localStorage.getItem('hostdiscovery');
+          if (storedHosts) {
+            this.aliveHosts = JSON.parse(storedHosts);
+          } else {
+            this.aliveHosts = [];
+            Message.warning('未找到存活主机列表，请先进行主机发现');
+          }
+        } catch (error) {
+          console.error('解析localStorage数据失败:', error);
+          this.aliveHosts = [];
+          Message.error('获取存活主机列表失败');
+        }
+      },
+        // fetchAliveHosts() {
+        //     fetch('/api/getAliveHosts')
+        //         .then(response => {
+        //             if (!response.ok) {
+        //                 throw new Error(`HTTP status ${response.status}`);
+        //             }
+        //             return response.json();
+        //         })
+        //         .then(data => {
+        //             this.aliveHosts = data.alive_hosts;
+        //         })
+        //         .catch(error => {
+        //             Message.error('获取活跃IP列表失败：' + error.message);
+        //         });
+        // },
         //切换Windows或Linux方法，同时初始化其他指示值
         turnFlag() {
             this.flag = !this.flag

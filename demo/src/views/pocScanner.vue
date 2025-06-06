@@ -435,17 +435,32 @@ export default {
       });
     },
 
-    // 获取活跃IP列表
+    // 获取活跃IP列表 - 修改为从localStorage获取
     fetchAliveHosts() {
-      axios.get('/api/getAliveHosts')
-          .then(response => {
-            this.aliveHosts = response.data.alive_hosts;
-          })
-          .catch(error => {
-            console.error('获取活跃IP列表失败:', error);
-            Message.error('获取活跃IP列表失败');
-          });
+      try {
+        const storedHosts = localStorage.getItem('hostdiscovery');
+        if (storedHosts) {
+          this.aliveHosts = JSON.parse(storedHosts);
+        } else {
+          this.aliveHosts = [];
+          Message.warning('未找到存活主机列表，请先进行主机发现');
+        }
+      } catch (error) {
+        console.error('解析localStorage数据失败:', error);
+        this.aliveHosts = [];
+        Message.error('获取存活主机列表失败');
+      }
     },
+    // fetchAliveHosts() {
+    //   axios.get('/api/getAliveHosts')
+    //       .then(response => {
+    //         this.aliveHosts = response.data.alive_hosts;
+    //       })
+    //       .catch(error => {
+    //         console.error('获取活跃IP列表失败:', error);
+    //         Message.error('获取活跃IP列表失败');
+    //       });
+    // },
 
     // 获取CVSS标签类型
     getCvssTagType(cvss) {

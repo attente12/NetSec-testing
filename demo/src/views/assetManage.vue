@@ -70,14 +70,14 @@
                 <div class="asset-info">
                   <i class="el-icon-monitor"></i>
                   <span class="asset-ip" :title="asset.ip">{{ asset.ip }}</span>
-                  <div class="asset-status">
-                    <el-tag
-                        :type="asset.alive ? 'success' : 'danger'"
-                        size="mini"
-                        style="width: 30px; display: inline-block; text-align: center; margin-left: 0px;margin-right: 0px;">
-                      {{ asset.alive ? '在线' : '离线' }}
-                    </el-tag>
-                  </div>
+<!--                  <div class="asset-status">-->
+<!--                    <el-tag-->
+<!--                        :type="asset.alive ? 'success' : 'danger'"-->
+<!--                        size="mini"-->
+<!--                        style="width: 30px; display: inline-block; text-align: center; margin-left: 0px;margin-right: 0px;">-->
+<!--                      {{ asset.alive ? '在线' : '离线' }}-->
+<!--                    </el-tag>-->
+<!--                  </div>-->
                 </div>
                 <div class="asset-actions" @click.stop>
                   <el-dropdown @command="(groupId) => moveAssetToGroup(asset.ip, groupId)" v-if="assetGroups.filter(g => g.id !== group.id).length > 0">
@@ -487,6 +487,7 @@
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column prop="scan_time" label="检测时间"></el-table-column>
           </el-table>
         </div>
 
@@ -521,6 +522,7 @@
                   </el-tag>
                 </template>
               </el-table-column>
+              <el-table-column prop="scan_time" label="检测时间"></el-table-column>
             </el-table>
           </div>
         </div>
@@ -599,6 +601,7 @@
                   </el-tag>
                 </template>
               </el-table-column>
+              <el-table-column prop="scan_time" label="检测时间"></el-table-column>
             </el-table>
           </div>
         </div>
@@ -1988,6 +1991,7 @@ export default {
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center;">风险等级</th>
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center;">是否存在</th>
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center;">漏洞描述</th>
+                <th style="padding: 5px; border: 1px solid #ddd; text-align: center;">检测时间</th>
               </tr>
             </thead>
             <tbody>
@@ -2006,6 +2010,7 @@ export default {
             <td style="padding: 5px; border: 1px solid #ddd; text-align: center; color: ${riskColor};">${this.getRiskLevel(vuln.cvss)}</td>
             <td style="padding: 5px; border: 1px solid #ddd; text-align: center; color: ${existColor};">${vuln.vulExist}</td>
             <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${vuln.summary}</td>
+            <td style="padding: 5px; border: 1px solid #ddd;">${vuln.scan_time}</td>
           </tr>
         `;
         });
@@ -2035,6 +2040,7 @@ export default {
                   <th style="padding: 4px; border: 1px solid #ddd; text-align: center;">漏洞名称</th>
                   <th style="padding: 4px; border: 1px solid #ddd; text-align: center;">风险等级</th>
                   <th style="padding: 4px; border: 1px solid #ddd; text-align: center;">是否存在</th>
+                  <th style="padding: 4px; border: 1px solid #ddd; text-align: center;">检测时间</th>
                 </tr>
               </thead>
               <tbody>
@@ -2053,6 +2059,7 @@ export default {
               <td style="padding: 4px; border: 1px solid #ddd;">${vuln.vuln_name}</td>
               <td style="padding: 4px; border: 1px solid #ddd; text-align: center; color: ${riskColor};">${this.getRiskLevel(vuln.cvss)}</td>
               <td style="padding: 4px; border: 1px solid #ddd; text-align: center; color: ${existColor};">${vuln.vulExist}</td>
+              <td style="padding: 4px; border: 1px solid #ddd; ">${vuln.scan_time}</td>
             </tr>
           `;
           });

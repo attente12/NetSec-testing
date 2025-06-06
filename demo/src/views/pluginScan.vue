@@ -94,7 +94,7 @@
           <div slot="header" class="clearfix">
             <span>扫描结果</span>
 <!--            <div style="float: right" v-if="result.scan_time">检测时间: {{ result.scan_time }}</div>-->
-            <div style="float: right" v-if="time">检测时间: {{ time }}</div>
+<!--            <div style="float: right" v-if="time">检测时间: {{ time }}</div>-->
           </div>
           <el-button
               @click="printReport"
@@ -157,11 +157,11 @@
                 {{ scope.row.pocExist ? '是' : '否' }}
               </template>
             </el-table-column>
-            <el-table-column prop="ifCheck" label="是否检查" width="100">
-              <template slot-scope="scope">
-                {{ scope.row.ifCheck ? '是' : '否' }}
-              </template>
-            </el-table-column>
+<!--            <el-table-column prop="ifCheck" label="是否检查" width="100">-->
+<!--              <template slot-scope="scope">-->
+<!--                {{ scope.row.ifCheck ? '是' : '否' }}-->
+<!--              </template>-->
+<!--            </el-table-column>-->
             <el-table-column
                 prop="vulExist"
                 label="漏洞状态"
@@ -180,6 +180,7 @@
               </template>
             </el-table-column>
             <el-table-column prop="summary" label="描述"></el-table-column>
+            <el-table-column prop="scan_time" label="检测时间" width="200"></el-table-column>
           </el-table>
         </el-card>
       </el-col>
@@ -194,7 +195,7 @@
           <p><strong>IP地址：</strong>{{ result.ip }}</p>
           <p><strong>操作系统：</strong>{{ result.os_list ? result.os_list.join(', ') : '未知' }}</p>
           <p><strong>系统版本：</strong>{{ result.os_matches ? result.os_matches.join(', ') : '未知' }}</p>
-          <p><strong>扫描时间：</strong>{{ result.scan_time }}</p>
+<!--          <p><strong>扫描时间：</strong>{{ result.scan_time }}</p>-->
         </div>
       </div>
 
@@ -211,6 +212,7 @@
 <!--            <th>是否检查</th>-->
             <th>漏洞状态</th>
             <th>描述</th>
+            <th>检测时间</th>
           </tr>
           </thead>
           <tbody>
@@ -222,6 +224,7 @@
 <!--            <td>{{ vuln.ifCheck ? '是' : '否' }}</td>-->
             <td>{{ vuln.vulExist }}</td>
             <td>{{ vuln.summary }}</td>
+            <td>{{ vuln.scan_time }}</td>
           </tr>
           </tbody>
         </table>
@@ -378,21 +381,41 @@ export default {
             // 在这里处理错误
           });
     },
-    // 新增：获取活跃IP列表的方法
+    // 获取活跃IP列表 - 修改为从localStorage获取
     fetchAliveHosts() {
-      axios.get('/api/getAliveHosts')
-          .then(response => {
-            this.aliveHosts = response.data.alive_hosts;
-            if (!this.scanTarget) {
-              this.scanTarget = this.aliveHosts[0];
-              this.loadTableData();
-            }
-          })
-          .catch(error => {
-            console.error('获取活跃IP列表失败:', error);
-            this.$message.error('获取活跃IP列表失败');
-          });
+      try {
+        const storedHosts = localStorage.getItem('hostdiscovery');
+        if (storedHosts) {
+          this.aliveHosts = JSON.parse(storedHosts);
+          if (!this.scanTarget && this.aliveHosts.length > 0) {
+            this.scanTarget = this.aliveHosts[0];
+            this.loadTableData();
+          }
+        } else {
+          this.aliveHosts = [];
+          Message.warning('未找到存活主机列表，请先进行主机发现');
+        }
+      } catch (error) {
+        console.error('解析localStorage数据失败:', error);
+        this.aliveHosts = [];
+        this.$message.error('获取存活主机列表失败');
+      }
     },
+    // 新增：获取活跃IP列表的方法
+    // fetchAliveHosts() {
+    //   axios.get('/api/getAliveHosts')
+    //       .then(response => {
+    //         this.aliveHosts = response.data.alive_hosts;
+    //         if (!this.scanTarget) {
+    //           this.scanTarget = this.aliveHosts[0];
+    //           this.loadTableData();
+    //         }
+    //       })
+    //       .catch(error => {
+    //         console.error('获取活跃IP列表失败:', error);
+    //         this.$message.error('获取活跃IP列表失败');
+    //       });
+    // },
     // loadTableData(){
     //   axios.get('/api/getAllData').then(response => {
     //     this.pocList=response.data;

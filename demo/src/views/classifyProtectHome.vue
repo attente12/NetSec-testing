@@ -210,22 +210,38 @@ export default {
     this.fetchAliveHosts();
   },
   methods: {
-    // 获取活跃IP列表
+    // 获取活跃IP列表 - 修改为从localStorage获取
     fetchAliveHosts() {
-      fetch('/api/getAliveHosts')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`HTTP status ${response.status}`);
-            }
-            return response.json();
-          })
-          .then(data => {
-            this.aliveHosts = data.alive_hosts;
-          })
-          .catch(error => {
-            Message.error('获取活跃IP列表失败：' + error.message);
-          });
+      try {
+        const storedHosts = localStorage.getItem('hostdiscovery');
+        if (storedHosts) {
+          this.aliveHosts = JSON.parse(storedHosts);
+        } else {
+          this.aliveHosts = [];
+          Message.warning('未找到存活主机列表，请先进行主机发现');
+        }
+      } catch (error) {
+        console.error('解析localStorage数据失败:', error);
+        this.aliveHosts = [];
+        Message.error('获取存活主机列表失败');
+      }
     },
+    // 获取活跃IP列表
+    // fetchAliveHosts() {
+    //   fetch('/api/getAliveHosts')
+    //       .then(response => {
+    //         if (!response.ok) {
+    //           throw new Error(`HTTP status ${response.status}`);
+    //         }
+    //         return response.json();
+    //       })
+    //       .then(data => {
+    //         this.aliveHosts = data.alive_hosts;
+    //       })
+    //       .catch(error => {
+    //         Message.error('获取活跃IP列表失败：' + error.message);
+    //       });
+    // },
     // 处理全选复选框变化
     handleCheckAllChange(val) {
       const allItemIds = this.checkItems.map(item => item.id);
