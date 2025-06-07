@@ -13,7 +13,7 @@
 
       <h1 class="main-title">{{ isWindows ? 'Windows' : 'Linux' }}基线检测报告</h1>
       <div class="date-info">
-        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>
+<!--        <el-tag type="info">检测时间：{{ new Date().toLocaleString() }}</el-tag>-->
       </div>
     </div>
 
@@ -34,12 +34,12 @@
           </el-tag>
         </div>
 
-        <el-button @click="onExportToPDF" :loading="pdfLoading" icon="el-icon-document" type="primary">
-          导出为 PDF
-        </el-button>
-        <el-button @click="changeOS" type="primary">
-          切换到{{ isWindows ? 'Linux' : 'Windows' }}检测报告
-        </el-button>
+<!--        <el-button @click="onExportToPDF" :loading="pdfLoading" icon="el-icon-document" type="primary">-->
+<!--          导出为 PDF-->
+<!--        </el-button>-->
+<!--        <el-button @click="changeOS" type="primary">-->
+<!--          切换到{{ isWindows ? 'Linux' : 'Windows' }}检测报告-->
+<!--        </el-button>-->
         <!--        <el-button-->
         <!--            @click="goToClassifyProtect"-->
         <!--            type="success"-->
@@ -120,9 +120,6 @@
         <!--        </el-table-column>-->
         <el-table-column label="是否通过检查" width="120">
           <template slot-scope="scope">
-            <!--            <el-tag :type="scope.row.IsComply === 'true' ? 'success' : 'danger'">-->
-            <!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
-            <!--            </el-tag>-->
             <el-tag :type="getStatusType(scope.row.IsComply)">
               {{ getStatusText(scope.row.IsComply) }}
             </el-tag>

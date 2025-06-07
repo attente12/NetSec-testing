@@ -1621,6 +1621,7 @@ export default {
       ${this.generatePortsHTML()}
       ${this.generateRisksHTML()}
       ${this.generateVulnerabilitiesHTML()}
+      ${this.generateSignatureHTML()}
     `;
     },
 
@@ -2108,6 +2109,22 @@ export default {
       html += '</div>';
       return html;
     },
+
+    generateSignatureHTML() {
+      return `
+        <div style="margin-top: 40px; margin-bottom: 30px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
+            <div style="flex: 1;">
+              <p style="margin: 0; font-size: 14px; line-height: 2;">检测人员签名：____________________________</p>
+            </div>
+            <div style="flex: 1; text-align: right;">
+              <p style="margin: 0; font-size: 14px; line-height: 2;">时间：____________________________</p>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+
     getResults() {
       fetch('/api//assets/full_info')
           .then(response => response.json())
