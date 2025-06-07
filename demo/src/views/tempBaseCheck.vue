@@ -54,13 +54,13 @@
       </div>
       <div class="server-info-grid">
         <el-row :gutter="30">
-          <el-col :span="24"><div class="info-item"><span class="info-label">ip：</span>{{ip || '未知'}}</div></el-col>
+          <el-col :span="12"><div class="info-item"><span class="info-label">ip：</span>{{ip || '未知'}}</div></el-col>
           <el-col :span="12"><div class="info-item"><span class="info-label">主机名：</span>{{serverInfo.hostname || '未知'}}</div></el-col>
           <el-col :span="12"><div class="info-item"><span class="info-label">主机架构：</span>{{serverInfo.arch || '未知'}}</div></el-col>
           <el-col :span="12"><div class="info-item"><span class="info-label">主机CPU信息：</span>{{serverInfo.cpu || '未知'}}</div></el-col>
           <el-col :span="12"><div class="info-item"><span class="info-label">主机物理CPU个数：</span>{{serverInfo.cpuPhysical || '未知'}}</div></el-col>
           <el-col :span="12"><div class="info-item"><span class="info-label">主机物理CPU核心数：</span>{{serverInfo.cpuCore || '未知'}}</div></el-col>
-          <el-col :span="12"><div class="info-item"><span class="info-label">主机空闲内存：</span>{{serverInfo.free || '未知'}}</div></el-col>
+<!--          <el-col :span="12"><div class="info-item"><span class="info-label">主机空闲内存：</span>{{serverInfo.free || '未知'}}</div></el-col>-->
           <el-col :span="12"><div class="info-item"><span class="info-label">硬件型号：</span>{{serverInfo.ProductName || '未知'}}</div></el-col>
           <el-col :span="12"><div class="info-item"><span class="info-label">主机版本信息：</span>{{serverInfo.version || '未知'}}</div></el-col>
           <!--          <el-col :span="12"><div class="info-item"><span class="info-label">联网检测：</span>{{serverInfo.isInternet || '未知'}}</div></el-col>-->
@@ -108,6 +108,7 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
       </el-table>
     </el-card>
 
@@ -125,10 +126,10 @@
           <el-col :span="24"><p>主机CPU信息：{{ serverInfo.cpu }}</p></el-col>
           <el-col :span="24"><p>主机物理CPU个数：{{ serverInfo.cpuPhysical }}</p></el-col>
           <el-col :span="24"><p>主机物理CPU核心数：{{ serverInfo.cpuCore }}</p></el-col>
-          <el-col :span="12"><p>主机空闲内存：{{ serverInfo.free }}</p></el-col>
+<!--          <el-col :span="12"><p>主机空闲内存：{{ serverInfo.free }}</p></el-col>-->
           <el-col :span="24"><p>硬件型号：{{ serverInfo.ProductName }}</p></el-col>
           <el-col :span="24"><p>主机版本信息：{{ serverInfo.version }}</p></el-col>
-          <el-col :span="24"><p>服务器IP：{{ selectedIP }}</p></el-col>
+          <el-col :span="24"><p>服务器IP：{{ ip }}</p></el-col>
         </el-row>
         <!-- 空白分隔 -->
         <div style="height:200px;"></div>
@@ -158,7 +159,7 @@
         <!--            {{ scope.row.basis }}/{{ scope.row.result }}-->
         <!--          </template>-->
         <!--        </el-table-column>-->
-        <el-table-column prop="IsComply" label="是否通过检查" width="120">
+        <el-table-column prop="IsComply" label="是否通过检查" width="80">
           <template slot-scope="scope">
             <!--            <span :class="{ 'failed-result': scope.row.IsComply === 'false' }">-->
             <!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
@@ -168,12 +169,13 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="修改建议" width="400">
+        <el-table-column label="修改建议" width="300">
           <template slot-scope="scope">
             <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
       </el-table>
       <!-- 页码容器 - PDF生成时会添加 -->
       <div class="page-numbers-container"></div>
@@ -470,7 +472,7 @@ export default {
         pdf.text(`${currentPageNum}/${totalPageCount}`, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 10);
 
         // 保存PDF
-        const filename = `Linux基线检测报告_${this.selectedIP}_${new Date().toISOString().slice(0,10)}.pdf`;
+        const filename = `Linux基线检测报告_${this.ip}_${new Date().toISOString().slice(0,10)}.pdf`;
         pdf.save(filename);
 
         // 清理和完成

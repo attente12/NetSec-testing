@@ -39,15 +39,15 @@
           </el-tag>
         </div>
 
-        <el-button
+<!--        <el-button-->
 
-            @click="onExportToPDF"
-            :loading="pdfLoading"
-            icon="el-icon-document"
-            type="primary"
-            size="medium">
-          导出为 PDF
-        </el-button>
+<!--            @click="onExportToPDF"-->
+<!--            :loading="pdfLoading"-->
+<!--            icon="el-icon-document"-->
+<!--            type="primary"-->
+<!--            size="medium">-->
+<!--          导出为 PDF-->
+<!--        </el-button>-->
       </div>
 
       <div class="filter-group">
@@ -279,44 +279,45 @@
             </el-select>
           </template>
         </el-table-column>
+        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
       </el-table>
     </el-card>
 
     <!-- PDF内容（隐藏） -->
     <div class="pdf-content" v-show="showContentForPDF">
-      <div class="server1">
-        <h1 id="linuxBaseline2">Linux基线检测报告</h1>
-        <!-- 检测时间 -->
-        <div style="text-align:right; margin-top:20px;">
-          <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>
-        </div>
-        <el-row :gutter="20">
-          <el-col :span="24"><p>主机名：{{ serverInfo.hostname }}</p></el-col>
-          <el-col :span="24"><p>主机架构：{{ serverInfo.arch }}</p></el-col>
-          <el-col :span="24"><p>主机CPU信息：{{ serverInfo.cpu }}</p></el-col>
-          <el-col :span="24"><p>主机物理CPU个数：{{ serverInfo.cpuPhysical }}</p></el-col>
-          <el-col :span="24"><p>主机物理CPU核心数：{{ serverInfo.cpuCore }}</p></el-col>
-          <el-col :span="12"><p>主机空闲内存：{{ serverInfo.free }}</p></el-col>
-          <el-col :span="24"><p>硬件型号：{{ serverInfo.ProductName }}</p></el-col>
-          <el-col :span="24"><p>主机版本信息：{{ serverInfo.version }}</p></el-col>
-          <el-col :span="24"><p>服务器IP：{{ selectedIP }}</p></el-col>
-        </el-row>
-        <!-- 空白分隔 -->
-        <div style="height:200px;"></div>
-        <!-- 检测人员签名 -->
-        <div style="text-align:right; margin-top:20px;">
-          <span style="font-size:20px;">检测人员签名：</span>
-          <span style="display: inline-block; width: 200px; border-bottom: 2px solid #000; margin-left: 10px;"></span>
-        </div>
-        <!-- 页码 -->
-        <div class="page-number">
-          <span>1/{{ totalPages }}</span>
-        </div>
-      </div>
+<!--      <div class="server1">-->
+<!--        <h1 id="linuxBaseline2">Linux基线检测报告</h1>-->
+<!--        &lt;!&ndash; 检测时间 &ndash;&gt;-->
+<!--        <div style="text-align:right; margin-top:20px;">-->
+<!--          <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>-->
+<!--        </div>-->
+<!--        <el-row :gutter="20">-->
+<!--          <el-col :span="24"><p>主机名：{{ serverInfo.hostname }}</p></el-col>-->
+<!--          <el-col :span="24"><p>主机架构：{{ serverInfo.arch }}</p></el-col>-->
+<!--          <el-col :span="24"><p>主机CPU信息：{{ serverInfo.cpu }}</p></el-col>-->
+<!--          <el-col :span="24"><p>主机物理CPU个数：{{ serverInfo.cpuPhysical }}</p></el-col>-->
+<!--          <el-col :span="24"><p>主机物理CPU核心数：{{ serverInfo.cpuCore }}</p></el-col>-->
+<!--          <el-col :span="12"><p>主机空闲内存：{{ serverInfo.free }}</p></el-col>-->
+<!--          <el-col :span="24"><p>硬件型号：{{ serverInfo.ProductName }}</p></el-col>-->
+<!--          <el-col :span="24"><p>主机版本信息：{{ serverInfo.version }}</p></el-col>-->
+<!--          <el-col :span="24"><p>服务器IP：{{ selectedIP }}</p></el-col>-->
+<!--        </el-row>-->
+<!--        &lt;!&ndash; 空白分隔 &ndash;&gt;-->
+<!--        <div style="height:200px;"></div>-->
+<!--        &lt;!&ndash; 检测人员签名 &ndash;&gt;-->
+<!--        <div style="text-align:right; margin-top:20px;">-->
+<!--          <span style="font-size:20px;">检测人员签名：</span>-->
+<!--          <span style="display: inline-block; width: 200px; border-bottom: 2px solid #000; margin-left: 10px;"></span>-->
+<!--        </div>-->
+<!--        &lt;!&ndash; 页码 &ndash;&gt;-->
+<!--        <div class="page-number">-->
+<!--          <span>1/{{ totalPages }}</span>-->
+<!--        </div>-->
+<!--      </div>-->
 
       <!-- 测试正文标题 -->
       <div class="report-content-title">
-        <h2>测试正文</h2>
+        <h2>等级保护测评报告</h2>
       </div>
 
       <el-table :data="filteredCheckresults" style="width: 100%">
@@ -380,6 +381,7 @@
             </span>
           </template>
         </el-table-column>
+        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
 
       </el-table>
       <!-- 页码容器 - PDF生成时会添加 -->

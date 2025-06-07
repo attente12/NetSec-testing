@@ -136,6 +136,7 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
       </el-table>
 
       <el-table v-show="isWindows" :data="filteredCheckresults" style="width: 100%" border stripe
@@ -167,6 +168,7 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
       </el-table>
 
     </el-card>
@@ -176,9 +178,9 @@
       <div class="server1">
         <h1 id="linuxBaseline2">{{ isWindows ? 'Windows' : 'Linux' }}</h1>
         <!-- 检测时间 -->
-        <div style="text-align:right; margin-top:20px;">
-          <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>
-        </div>
+<!--        <div style="text-align:right; margin-top:20px;">-->
+<!--          <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>-->
+<!--        </div>-->
         <el-row :gutter="20">
           <el-col :span="24">
             <p>主机名：{{ serverInfo.hostname }}</p>
@@ -195,9 +197,9 @@
           <el-col :span="24">
             <p>主机物理CPU核心数：{{ serverInfo.cpuCore }}</p>
           </el-col>
-          <el-col :span="12">
-            <p>主机空闲内存：{{ serverInfo.free }}</p>
-          </el-col>
+<!--          <el-col :span="12">-->
+<!--            <p>主机空闲内存：{{ serverInfo.free }}</p>-->
+<!--          </el-col>-->
           <el-col :span="24">
             <p>硬件型号：{{ serverInfo.ProductName }}</p>
           </el-col>
@@ -236,7 +238,7 @@
         <!--            {{ scope.row.basis }}/{{ scope.row.result }}-->
         <!--          </template>-->
         <!--        </el-table-column>-->
-        <el-table-column prop="IsComply" label="是否通过检查" width="120">
+        <el-table-column prop="IsComply" label="是否通过检查" width="80">
           <template slot-scope="scope">
             <!--            <span :class="{ 'failed-result': scope.row.IsComply === 'false' }">-->
             <!--              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}-->
@@ -246,12 +248,13 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="修改建议" width="400">
+        <el-table-column label="修改建议" width="300">
           <template slot-scope="scope">
             <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
+        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
       </el-table>
       <!-- 页码容器 - PDF生成时会添加 -->
       <div class="page-numbers-container"></div>

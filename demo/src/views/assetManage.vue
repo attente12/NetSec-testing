@@ -180,12 +180,23 @@
         </h2>
         <div class="baseline-info">
           <div class="baseline-summary">
-            <div class="compliance-dashboard">
-              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格率</div>
-              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.compliance_rate" :color="'#F56C6C'" :stroke-width="10">
+            <div class="compliance-dashboard" style="margin-right: 30px">
+              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/已检测项数</div>
+              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.non_compliance_rate" :color="'#F56C6C'" :stroke-width="10">
                 <template v-slot:default>
                   <div class="progress-content">
-                    <span class="rate">{{ currentAsset.baseline_summary.compliance_rate }}%</span>
+                    <span class="rate">{{ currentAsset.baseline_summary.non_compliance_rate }}%</span>
+                  </div>
+                </template>
+              </el-progress>
+            </div>
+
+            <div class="compliance-dashboard">
+              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/总项数</div>
+              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.non_compliance_rate_to_initial_checks" :color="'#F56C6C'" :stroke-width="10">
+                <template v-slot:default>
+                  <div class="progress-content">
+                    <span class="rate">{{ currentAsset.baseline_summary.non_compliance_rate_to_initial_checks }}%</span>
                   </div>
                 </template>
               </el-progress>
@@ -297,12 +308,22 @@
             </div>
           </div>
           <div class="baseline-summary">
-            <div class="compliance-dashboard">
-              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格率</div>
-              <el-progress type="dashboard" :percentage="currentAsset.level3_baseline_summary.compliance_rate" :color="getLevel3ComplianceColor" :stroke-width="10">
+            <div class="compliance-dashboard" style="margin-right: 30px">
+              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/已检测项数</div>
+              <el-progress type="dashboard" :percentage="currentAsset.level3_baseline_summary.non_compliance_rate" :color="getLevel3ComplianceColor" :stroke-width="10">
                 <template v-slot:default>
                   <div class="progress-content">
-                    <span class="rate">{{ currentAsset.level3_baseline_summary.compliance_rate }}%</span>
+                    <span class="rate">{{ currentAsset.level3_baseline_summary.non_compliance_rate }}%</span>
+                  </div>
+                </template>
+              </el-progress>
+            </div>
+            <div class="compliance-dashboard">
+              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/总项数</div>
+              <el-progress type="dashboard" :percentage="currentAsset.level3_baseline_summary.non_compliance_rate_to_initial_checks" :color="getLevel3ComplianceColor" :stroke-width="10">
+                <template v-slot:default>
+                  <div class="progress-content">
+                    <span class="rate">{{ currentAsset.level3_baseline_summary.non_compliance_rate_to_initial_checks }}%</span>
                   </div>
                 </template>
               </el-progress>
@@ -319,7 +340,7 @@
               </div>
               <div class="stat-item">
                 <div class="item-header">部分合格项数</div>
-                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.level3_baseline_summary.half_compliant_items }}</div>
+                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.level3_baseline_summary.pending_items }}</div>
               </div>
               <div class="stat-item">
                 <div class="item-header">不合格项数</div>
@@ -1648,8 +1669,12 @@ export default {
         <h2 style="color: #409EFF; font-size: 18px; border-bottom: 2px solid #409EFF; padding-bottom: 5px;">基线检测</h2>
         <div style="display: flex; align-items: center; margin-top: 15px;">
           <div style="text-align: center; margin-right: 30px;">
-            <div style="font-weight: bold; margin-bottom: 5px;">不合格率</div>
-            <div style="font-size: 24px; color: #F56C6C; font-weight: bold;">${asset.baseline_summary.compliance_rate}%</div>
+            <div style="font-weight: bold; margin-bottom: 5px;">不合格/已检测项数</div>
+            <div style="font-size: 24px; color: #F56C6C; font-weight: bold;">${asset.baseline_summary.non_compliance_rate}%</div>
+          </div>
+          <div style="text-align: center; margin-right: 30px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">不合格/总项数</div>
+            <div style="font-size: 24px; color: #F56C6C; font-weight: bold;">${asset.baseline_summary.non_compliance_rate_to_initial_checks}%</div>
           </div>
           <table style="flex: 1; border-collapse: collapse;">
             <tr>
@@ -1681,6 +1706,7 @@ export default {
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center; width: 20%;">检查依据</th>
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center; width: 25%;">检查结果</th>
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center; width: 22%;">建议</th>
+                <th style="padding: 5px; border: 1px solid #ddd; text-align: center; width: 22%;">检测时间</th>
               </tr>
             </thead>
             <tbody>
@@ -1700,6 +1726,7 @@ export default {
             <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${item.basis || '-'}</td>
             <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${item.result || '-'}</td>
             <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${suggestion}</td>
+            <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${item.check_time}</td>
           </tr>
         `;
         });
@@ -1768,8 +1795,12 @@ export default {
         ` : ''}
         <div style="display: flex; align-items: center; margin-top: 15px;">
           <div style="text-align: center; margin-right: 30px;">
-            <div style="font-weight: bold; margin-bottom: 5px;">不合格率</div>
-            <div style="font-size: 24px; color: #F56C6C; font-weight: bold;">${asset.level3_baseline_summary.compliance_rate}%</div>
+            <div style="font-weight: bold; margin-bottom: 5px;">不合格/已检测项数</div>
+            <div style="font-size: 24px; color: #F56C6C; font-weight: bold;">${asset.level3_baseline_summary.non_compliance_rate}%</div>
+          </div>
+          <div style="text-align: center; margin-right: 30px;">
+            <div style="font-weight: bold; margin-bottom: 5px;">不合格/总项数</div>
+            <div style="font-size: 24px; color: #F56C6C; font-weight: bold;">${asset.level3_baseline_summary.non_compliance_rate_to_initial_checks}%</div>
           </div>
           <table style="flex: 1; border-collapse: collapse;">
             <tr>
@@ -1781,7 +1812,7 @@ export default {
             <tr>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${asset.level3_baseline_summary.total_checks}</td>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #67C23A;">${asset.level3_baseline_summary.compliant_items}</td>
-              <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #E6A23C;">${asset.level3_baseline_summary.half_compliant_items}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #E6A23C;">${asset.level3_baseline_summary.pending_items}</td>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #F56C6C;">${asset.level3_baseline_summary.non_compliant_items}</td>
             </tr>
           </table>
@@ -1803,6 +1834,7 @@ export default {
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center; width: 20%;">检查依据</th>
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center; width: 25%;">检查结果</th>
                 <th style="padding: 5px; border: 1px solid #ddd; text-align: center; width: 22%;">建议</th>
+                <th style="padding: 5px; border: 1px solid #ddd; text-align: center; width: 22%;">检测时间</th>
               </tr>
             </thead>
             <tbody>
@@ -1822,6 +1854,7 @@ export default {
             <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${item.basis || '-'}</td>
             <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${item.result || '-'}</td>
             <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${suggestion}</td>
+            <td style="padding: 5px; border: 1px solid #ddd; font-size: 10px;">${item.check_time}</td>
           </tr>
         `;
         });

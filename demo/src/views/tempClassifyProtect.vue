@@ -207,19 +207,6 @@ export default {
             this.tableLoading = false;
             this.$message.error('获取检测结果失败，请重试');
           });
-      // axios.get(`/api/level3TmpUserinfo?ip=${ip}`)
-      //     .then(response  => {
-      //       this.checkresults = response.data.checkResults.map(item => ({
-      //         ...item,
-      //         score: item.IsComply === 'true' ? '1' : '0.5'
-      //       }));
-      //       this.tableLoading = false;
-      //     })
-      //     .catch(error => {
-      //       console.error('Error:', error);
-      //       this.tableLoading = false;
-      //       this.$message.error('获取检测结果失败，请重试');
-      //     });
     },
     saveScores() {
       // 显示保存中状态
@@ -290,23 +277,6 @@ export default {
   font-weight: bold;
   margin: 0 !important; /* 移除原有标题的margin */
 }
-
-/*
-.header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.main-title {
-  color: #303133;
-  font-size: 24px;
-  font-weight: bold;
-  margin: 0;
-}
-
- */
 
 .control-section {
   display: flex;
