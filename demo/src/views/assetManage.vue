@@ -340,12 +340,17 @@
               </div>
               <div class="stat-item">
                 <div class="item-header">部分合格项数</div>
-                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.level3_baseline_summary.pending_items }}</div>
+                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.level3_baseline_summary.half_compliant_items }}</div>
               </div>
+
               <div class="stat-item">
                 <div class="item-header">不合格项数</div>
                 <div class="item-value" style="color: #F56C6C;">{{ currentAsset.level3_baseline_summary.non_compliant_items }}</div>
               </div>
+<!--              <div class="stat-item">-->
+<!--                <div class="item-header">待人工检查项数</div>-->
+<!--                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.level3_baseline_summary.pending_items }}</div>-->
+<!--              </div>-->
             </div>
           </div>
 
@@ -1809,12 +1814,14 @@ export default {
               <td style="padding: 8px; border: 1px solid #ddd; background: #f5f7fa; text-align: center; font-weight: bold;">合格项数</td>
               <td style="padding: 8px; border: 1px solid #ddd; background: #f5f7fa; text-align: center; font-weight: bold;">部分合格项数</td>
               <td style="padding: 8px; border: 1px solid #ddd; background: #f5f7fa; text-align: center; font-weight: bold;">不合格项数</td>
+              <td style="padding: 8px; border: 1px solid #ddd; background: #f5f7fa; text-align: center; font-weight: bold;">待人工检查项数</td>
             </tr>
             <tr>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${asset.level3_baseline_summary.total_checks}</td>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #67C23A;">${asset.level3_baseline_summary.compliant_items}</td>
-              <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #E6A23C;">${asset.level3_baseline_summary.pending_items}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #E6A23C;">${asset.level3_baseline_summary.half_compliant_items}</td>
               <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #F56C6C;">${asset.level3_baseline_summary.non_compliant_items}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: center; ">${asset.level3_baseline_summary.pending_items}</td>
             </tr>
           </table>
         </div>
