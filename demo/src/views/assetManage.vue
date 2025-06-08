@@ -177,6 +177,9 @@
           <el-tooltip content="查看详细信息" placement="top">
             <i class="el-icon-view baseline-info-icon" @click="showBaselineDetails2"></i>
           </el-tooltip>
+          <span v-if="currentAsset.baseline_check_time" class="check-time">
+            检测时间：{{ currentAsset.baseline_check_time }}
+          </span>
         </h2>
         <div class="baseline-info">
           <div class="baseline-summary">
@@ -277,6 +280,9 @@
           <el-tooltip content="查看详细信息" placement="top">
             <i class="el-icon-view baseline-info-icon" @click="showClassifyProtectDetails2"></i>
           </el-tooltip>
+          <span v-if="currentAsset.level3_check_time" class="check-time">
+            检测时间：{{ currentAsset.level3_check_time }}
+          </span>
         </h2>
         <div class="baseline-info">
           <!-- 等保得分显示区域 -->
@@ -689,10 +695,16 @@
             stripe
             :header-cell-style="{ backgroundColor: '#f5f7fa' }">
           <el-table-column label="合规状态" width="100">
+<!--            <template slot-scope="scope">-->
+<!--              <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>-->
+<!--              <el-tag v-else-if="scope.row.IsComply === 'pending'" type="warning">待检查</el-tag>-->
+<!--              <el-tag v-else type="danger">不通过</el-tag>-->
+<!--            </template>-->
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>
-              <el-tag v-else-if="scope.row.IsComply === 'pending'" type="warning">待检查</el-tag>
-              <el-tag v-else type="danger">不通过</el-tag>
+              <el-tag v-if="scope.row.tmp_IsComply === 'true'" type="success">合规</el-tag>
+              <el-tag v-else-if="scope.row.tmp_IsComply === 'pending'" type="warning">待检查</el-tag>
+              <el-tag v-else-if="scope.row.tmp_IsComply === 'half_true'" type="info">部分合规</el-tag>
+              <el-tag v-else type="danger">不合规</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="description" label="检查项" width="200"></el-table-column>
@@ -707,7 +719,7 @@
           <el-table-column prop="result" label="检查结果"></el-table-column>
           <el-table-column label="建议" width="350">
             <template slot-scope="scope">
-              <span v-if="scope.row.IsComply === 'true'">-</span>
+              <span v-if="scope.row.tmp_IsComply === 'true'">-</span>
               <span v-else>{{ scope.row.recommend }}</span>
             </template>
           </el-table-column>
@@ -1672,7 +1684,11 @@ export default {
 
       let html = `
       <div style="margin-bottom: 25px;">
-        <h2 style="color: #409EFF; font-size: 18px; border-bottom: 2px solid #409EFF; padding-bottom: 5px;">基线检测</h2>
+<!--        <h2 style="color: #409EFF; font-size: 18px; border-bottom: 2px solid #409EFF; padding-bottom: 5px;">基线检测</h2>-->
+        <h2 style="color: #409EFF; font-size: 18px; border-bottom: 2px solid #409EFF; padding-bottom: 5px;">
+          基线检测
+          ${asset.baseline_check_time ? `<span style="float: right; font-size: 12px; color: #666; font-weight: normal;">检测时间：${asset.baseline_check_time}</span>` : ''}
+        </h2>
         <div style="display: flex; align-items: center; margin-top: 15px;">
           <div style="text-align: center; margin-right: 30px;">
             <div style="font-weight: bold; margin-bottom: 5px;">不合格/已检测项数</div>
@@ -1787,7 +1803,11 @@ export default {
 
       let html = `
       <div style="margin-bottom: 25px;">
-        <h2 style="color: #409EFF; font-size: 18px; border-bottom: 2px solid #409EFF; padding-bottom: 5px;">等级保护测评</h2>
+<!--        <h2 style="color: #409EFF; font-size: 18px; border-bottom: 2px solid #409EFF; padding-bottom: 5px;">等级保护测评</h2>-->
+        <h2 style="color: #409EFF; font-size: 18px; border-bottom: 2px solid #409EFF; padding-bottom: 5px;">
+          等级保护测评
+          ${asset.level3_check_time ? `<span style="float: right; font-size: 12px; color: #666; font-weight: normal;">检测时间：${asset.level3_check_time}</span>` : ''}
+        </h2>
         ${typeof asset.M !== 'undefined' ? `
           <div style="background: #f5f7fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
             <div style="display: flex; align-items: center;">
@@ -1849,11 +1869,23 @@ export default {
       `;
 
         this.pdfClassifyDetails.forEach(item => {
-          const statusColor = item.IsComply === 'true' ? '#67C23A' :
-              item.IsComply === 'pending' ? '#E6A23C' : '#F56C6C';
-          const statusText = item.IsComply === 'true' ? '通过' :
-              item.IsComply === 'pending' ? '待检查' : '不通过';
-          const suggestion = item.IsComply === 'true' ? '-' : (item.recommend || '-');
+          // const statusColor = item.IsComply === 'true' ? '#67C23A' :
+          //     item.IsComply === 'pending' ? '#E6A23C' : '#F56C6C';
+          const statusColor = item.tmp_IsComply === 'true' ? '#67C23A' :
+              item.tmp_IsComply === 'false' ? '#F56C6C' :
+                  item.tmp_IsComply === 'half_true' ? '#409EFF' :
+                      item.tmp_IsComply === 'pending' ? '#E6A23C' :
+                          '#909399'; // 默认颜色（可选）
+
+          // const statusText = item.IsComply === 'true' ? '通过' :
+          //     item.IsComply === 'pending' ? '待检查' : '不通过';
+          const statusText = item.tmp_IsComply === 'true' ? '合规' :
+              item.tmp_IsComply === 'false' ? '不合规' :
+                  item.tmp_IsComply === 'half_true' ? '部分合规' :
+                      item.tmp_IsComply === 'pending' ? '待检查' :
+                          '未知状态';
+
+          const suggestion = item.tmp_IsComply === 'true' ? '-' : (item.recommend || '-');
 
           html += `
           <tr>
@@ -2771,6 +2803,13 @@ export default {
 </script>
 
 <style scoped>
+.check-time {
+  font-size: 12px;
+  color: #909399;
+  font-weight: normal;
+  margin-left: 15px;
+  display: inline-block;
+}
 .vulnerability-container {
   display: flex;
   height: 100%;
