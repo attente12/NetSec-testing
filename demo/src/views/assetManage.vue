@@ -454,7 +454,14 @@
           <el-table-column prop="port" label="端口" width="80"></el-table-column>
           <el-table-column prop="protocol" label="协议" width="80"></el-table-column>
           <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>
-          <el-table-column prop="software_type" label="软件类型" width="120"></el-table-column>
+          <el-table-column prop="software_type" label="软件类型" width="120">
+            <template slot-scope="scope">
+              <span v-if="scope.software_type">
+                {{ scope.row.software_type }}
+              </span>
+              <span v-else>未识别</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="weak_username" label="账号" width="120">
             <template slot-scope="scope">
               <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.weak_username }}</span>
@@ -2025,7 +2032,7 @@ export default {
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.port}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.protocol}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.service_name}</td>
-          <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.software_type}</td>
+          <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.software_type|| '未识别'}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center; color: #F56C6C; font-weight: bold;">${port.weak_username}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center; color: #F56C6C; font-weight: bold;">存在弱密码</td>
           <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${port.verify_time}</td>
