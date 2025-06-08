@@ -107,6 +107,19 @@
                 </el-button>
               </div>
             </div>
+
+            <div class="manual-item">
+              <div class="manual-item-icon">
+                <i class="el-icon-document"></i>
+              </div>
+              <div class="manual-item-content">
+                <h4>三级等保说明</h4>
+                <p>介绍三级等保各检测项的内容和建议</p>
+                <el-button type="primary" size="small" icon="el-icon-download" @click="downloadFile('/level3_protection_description.pdf')">
+                  下载手册
+                </el-button>
+              </div>
+            </div>
           </div>
         </div>
       </el-card>
