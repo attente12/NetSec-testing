@@ -403,7 +403,7 @@ export default {
     // 获取活跃IP列表 - 修改为从localStorage获取
     fetchAliveHosts() {
       try {
-        const storedHosts = localStorage.getItem('hostdiscovery');
+        const storedHosts = sessionStorage.getItem('hostdiscovery');
         if (storedHosts) {
           this.aliveHosts = JSON.parse(storedHosts);
           if (!this.scanTarget && this.aliveHosts.length > 0) {
@@ -415,7 +415,7 @@ export default {
           this.$message.warning('未找到存活主机列表，请先进行主机发现');
         }
       } catch (error) {
-        console.error('解析localStorage数据失败:', error);
+        console.error('解析sessionStorage数据失败:', error);
         this.aliveHosts = [];
         this.$message.error('获取存活主机列表失败');
       }
@@ -464,14 +464,26 @@ export default {
             throw error;
           });
     },
-    // 打印所有主机弱口令报告
+
+    // 打印所有主机弱口令报告 - 修改后只打印在存活主机列表中的
     async printAllHostsReport() {
       try {
         await this.fetchAllHostsWeakPasswords();
-        if (this.allHostsWeakPasswords.length === 0) {
-          this.$message.warning('没有发现弱口令数据');
+
+        // 筛选只包含aliveHosts中IP的数据
+        const filteredData = this.allHostsWeakPasswords.filter(host =>
+            this.aliveHosts.includes(host.ip)
+        );
+
+        if (filteredData.length === 0) {
+          this.$message.warning('在存活主机列表中没有发现弱口令数据');
           return;
         }
+
+        // 临时保存原始数据
+        const originalData = this.allHostsWeakPasswords;
+        // 将过滤后的数据赋值给allHostsWeakPasswords用于打印
+        this.allHostsWeakPasswords = filteredData;
 
         // 执行打印操作
         const printContents = document.getElementById('printableAllHosts').innerHTML;
@@ -479,11 +491,34 @@ export default {
         document.body.innerHTML = printContents;
         window.print();
         document.body.innerHTML = originalContents;
+
+        // 恢复原始数据
+        this.allHostsWeakPasswords = originalData;
         window.location.reload();
       } catch (error) {
         console.error('打印所有主机报告失败:', error);
       }
     },
+    // 打印所有主机弱口令报告
+    // async printAllHostsReport() {
+    //   try {
+    //     await this.fetchAllHostsWeakPasswords();
+    //     if (this.allHostsWeakPasswords.length === 0) {
+    //       this.$message.warning('没有发现弱口令数据');
+    //       return;
+    //     }
+    //
+    //     // 执行打印操作
+    //     const printContents = document.getElementById('printableAllHosts').innerHTML;
+    //     const originalContents = document.body.innerHTML;
+    //     document.body.innerHTML = printContents;
+    //     window.print();
+    //     document.body.innerHTML = originalContents;
+    //     window.location.reload();
+    //   } catch (error) {
+    //     console.error('打印所有主机报告失败:', error);
+    //   }
+    // },
 
     getServiceDetails(serviceName) {
       return this.services.find(service => service.name === serviceName) || {};
@@ -556,7 +591,7 @@ export default {
       }
 
       this.isScanning = true;
-      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      sessionStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
 
       try {
         const apiUrl = '/api/getNmapIp';
@@ -668,12 +703,12 @@ export default {
     },
 
     saveTableData() {
-      localStorage.setItem('tableData', JSON.stringify(this.tableData));
+      sessionStorage.setItem('tableData', JSON.stringify(this.tableData));
     },
 
     loadTableData() {
-      const data = localStorage.getItem('tableData');
-      const dataStorage = localStorage.getItem('scanTarget');
+      const data = sessionStorage.getItem('tableData');
+      const dataStorage = sessionStorage.getItem('scanTarget');
       if (data) {
         this.tableData = JSON.parse(data);
       }
@@ -683,7 +718,7 @@ export default {
     },
 
     clearLocalStorage() {
-      localStorage.removeItem('tableData');
+      sessionStorage.removeItem('tableData');
       this.tableData = [];
       this.$message.success('本地存储数据已清除');
     },

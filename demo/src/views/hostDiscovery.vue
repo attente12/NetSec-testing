@@ -110,9 +110,27 @@ export default {
     }
   },
   methods: {
+    // 加载之前保存的主机发现结果
+    loadPreviousResults() {
+      const savedData = sessionStorage.getItem('hostdiscoveryjson')
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData)
+          // 处理保存的分组数据
+          this.processGroupedData(parsedData.groups)
+          this.searched = true // 标记为已搜索状态
+          console.log('已加载之前的主机发现结果')
+        } catch (error) {
+          console.error('加载之前的结果失败:', error)
+          // 如果数据损坏，清除该项
+          sessionStorage.removeItem('hostdiscoveryjson')
+        }
+      }
+    },
     async handleSearch() {
       this.$refs.searchForm.validate(async (valid) => {
         if (valid) {
+
           this.loading = true
           this.searched = true
           try {
@@ -123,10 +141,26 @@ export default {
             // 处理返回的分组数据
             this.processGroupedData(response.data.groups)
 
+            // 保存完整的响应数据到sessionStorage
+            sessionStorage.setItem('hostdiscoveryjson', JSON.stringify(response.data))
+
+
+            const storedIps = sessionStorage.getItem('nmapIps');
+            if (storedIps) {
+              this.historyIps = JSON.parse(storedIps);
+              this.historyIps.forEach(ip => {
+                sessionStorage.removeItem(`nmapResults-${ip}`);
+              });
+            }
+
+            sessionStorage.removeItem(`nmapIps`);
+
+
             // 保存所有主机到localStorage
             this.saveHostsToLocalStorage()
 
             this.$message.success(`发现 ${this.totalHostsCount} 个存活主机`)
+
           } catch (error) {
             this.$message.error('扫描失败：' + (error.response?.data || error.message))
           } finally {
@@ -180,7 +214,7 @@ export default {
     // 保存主机数据到localStorage
     saveHostsToLocalStorage() {
       const hostIPs = this.allHosts.map(host => host.ip)
-      localStorage.setItem('hostdiscovery', JSON.stringify(hostIPs))
+      sessionStorage.setItem('hostdiscovery', JSON.stringify(hostIPs))
     },
 
     // 切换组展开状态
@@ -189,6 +223,8 @@ export default {
     },
   },
   mounted() {
+    // 检查sessionStorage中是否有之前的主机发现结果
+    this.loadPreviousResults()
     // 页面加载时不执行任何数据获取，保持空白状态
   }
 }

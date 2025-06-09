@@ -213,7 +213,7 @@ export default {
     // 获取活跃IP列表 - 修改为从localStorage获取
     fetchAliveHosts() {
       try {
-        const storedHosts = localStorage.getItem('hostdiscovery');
+        const storedHosts = sessionStorage.getItem('hostdiscovery');
         if (storedHosts) {
           this.aliveHosts = JSON.parse(storedHosts);
         } else {
@@ -221,7 +221,7 @@ export default {
           Message.warning('未找到存活主机列表，请先进行主机发现');
         }
       } catch (error) {
-        console.error('解析localStorage数据失败:', error);
+        console.error('解析sessionStorage数据失败:', error);
         this.aliveHosts = [];
         Message.error('获取存活主机列表失败');
       }

@@ -371,11 +371,11 @@ export default {
         if (index > -1) {
           this.historyIps.splice(index, 1);
           // 更新localStorage中的IP列表
-          localStorage.setItem('nmapIps', JSON.stringify(this.historyIps));
+          sessionStorage.setItem('nmapIps', JSON.stringify(this.historyIps));
         }
 
         // 删除该IP的扫描结果数据
-        localStorage.removeItem(`nmapResults-${ip}`);
+        sessionStorage.removeItem(`nmapResults-${ip}`);
 
         // 如果删除的是当前查看的IP，需要处理当前视图
         if (this.currentViewIp === ip) {
@@ -400,7 +400,7 @@ export default {
 
     // 初始化历史IP列表
     initHistoryIps() {
-      const storedIps = localStorage.getItem('nmapIps');
+      const storedIps = sessionStorage.getItem('nmapIps');
       if (storedIps) {
         this.historyIps = JSON.parse(storedIps);
       }
@@ -410,13 +410,13 @@ export default {
     saveIpToHistory(ip) {
       if (!this.historyIps.includes(ip)) {
         this.historyIps.push(ip);
-        localStorage.setItem('nmapIps', JSON.stringify(this.historyIps));
+        sessionStorage.setItem('nmapIps', JSON.stringify(this.historyIps));
       }
     },
 
     // 保存扫描结果
     saveScanResult(ip, result) {
-      localStorage.setItem(`nmapResults-${ip}`, JSON.stringify(result));
+      sessionStorage.setItem(`nmapResults-${ip}`, JSON.stringify(result));
     },
 
     // 处理标签页点击事件
@@ -430,7 +430,7 @@ export default {
       this.tableLoading = true;
       this.currentViewIp = ip;
 
-      const storedResults = localStorage.getItem(`nmapResults-${ip}`);
+      const storedResults = sessionStorage.getItem(`nmapResults-${ip}`);
       if (storedResults) {
         try {
           this.scanResults = JSON.parse(storedResults);
@@ -471,11 +471,11 @@ export default {
       }).then(() => {
         // 清除所有历史IP
         this.historyIps.forEach(ip => {
-          localStorage.removeItem(`nmapResults-${ip}`);
+          sessionStorage.removeItem(`nmapResults-${ip}`);
         });
 
         // 清除IP列表
-        localStorage.removeItem('nmapIps');
+        sessionStorage.removeItem('nmapIps');
         this.historyIps = [];
 
         // 清除当前视图
@@ -493,7 +493,7 @@ export default {
     // 获取活跃IP列表 - 修改为从localStorage获取
     fetchAliveHosts() {
       try {
-        const storedHosts = localStorage.getItem('hostdiscovery');
+        const storedHosts = sessionStorage.getItem('hostdiscovery');
         if (storedHosts) {
           this.aliveHosts = JSON.parse(storedHosts);
         } else {
@@ -501,7 +501,7 @@ export default {
           Message.warning('未找到存活主机列表，请先进行主机发现');
         }
       } catch (error) {
-        console.error('解析localStorage数据失败:', error);
+        console.error('解析sessionStorage数据失败:', error);
         this.aliveHosts = [];
         Message.error('获取存活主机列表失败');
       }
@@ -548,7 +548,7 @@ export default {
     // 获取扫描结果
     fetchScanResults() {
       this.tableLoading = true;
-      const dataStorage = localStorage.getItem('scanTarget');
+      const dataStorage = sessionStorage.getItem('scanTarget');
       if (dataStorage) {
         this.scanTarget = JSON.parse(dataStorage);
       }
@@ -594,7 +594,7 @@ export default {
       }
 
       this.detectState = true;
-      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      sessionStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       const target = { ip: this.scanTarget };
 
       axios.post('/api/getNmapIp', target)
@@ -637,7 +637,7 @@ export default {
       }
 
       this.detectAllState = true;
-      localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
+      sessionStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
 
       const target = {
         ip: this.scanTarget,
@@ -707,13 +707,18 @@ export default {
     // 初始化历史IP列表
     this.initHistoryIps();
 
-    // 如果有历史IP，加载第一个IP的结果
     if (this.historyIps.length > 0) {
       this.activeTabName = this.historyIps[0];
       this.loadHistoryResults(this.historyIps[0]);
-    } else {
-      this.fetchScanResults();
     }
+
+    // 如果有历史IP，加载第一个IP的结果
+    // if (this.historyIps.length > 0) {
+    //   this.activeTabName = this.historyIps[0];
+    //   this.loadHistoryResults(this.historyIps[0]);
+    // } else {
+    //   this.fetchScanResults();
+    // }
 
     this.fetchAliveHosts();
   }

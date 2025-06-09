@@ -383,7 +383,7 @@ export default {
         // 获取活跃IP列表
       fetchAliveHosts() {
         try {
-          const storedHosts = localStorage.getItem('hostdiscovery');
+          const storedHosts = sessionStorage.getItem('hostdiscovery');
           if (storedHosts) {
             this.aliveHosts = JSON.parse(storedHosts);
           } else {
