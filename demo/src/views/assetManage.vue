@@ -2741,8 +2741,8 @@ export default {
     getScoreGrade(score) {
       if (score >= 90) return '优秀';
       if (score >= 80) return '良好';
-      if (score >= 70) return '合格';
-      if (score >= 60) return '基本符合';
+      if (score >= 60) return '合格';
+      // if (score >= 60) return '基本符合';
       return '不符合';
     },
 

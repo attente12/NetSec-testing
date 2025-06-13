@@ -153,6 +153,18 @@ export default {
               });
             }
 
+            const a = sessionStorage.getItem('hostdiscovery');
+            if (a) {
+              this.b = JSON.parse(a);
+              this.b.forEach(ip => {
+                const resultKey = `weakpassword-${ip}`;
+                if (sessionStorage.getItem(resultKey) !== null) {
+                  sessionStorage.removeItem(resultKey);
+                }
+              });
+            }
+
+
             sessionStorage.removeItem(`nmapIps`);
 
 
