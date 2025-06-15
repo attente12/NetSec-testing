@@ -83,7 +83,7 @@
 
                 <span>检测项目选择</span>
                 <el-button v-if="flag" type="primary" :disabled="isChecked ? null : true"
-                    @click="isSelectAll ? checkAll : batchExecuteW" icon="el-icon-video-play" :loading="batchLoading">
+                    @click="isSelectAll ? checkAllW : batchExecuteW" icon="el-icon-video-play" :loading="batchLoading">
                     批量执行
                 </el-button>
             </div>
@@ -415,7 +415,7 @@ export default {
             };
             console.log("Submitting form...", payload);
 
-            fetch('/api/win_login', {
+            fetch('http://192.168.0.129:8081/win_login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -474,7 +474,7 @@ export default {
                         newres.push(element)
                     }
                 })
-                console.log(newres)
+                console.log("新的结果为", newres)
 
                 this.checkResult.Event_result = newres
                 this.$store.commit('updateMessage', this.checkResult)
@@ -575,7 +575,7 @@ export default {
                 this.viewResult()
                 return 0
             } else {
-                this.submitForm()
+                this.WindowsSubmitForm()
                 this.viewResult()
             }
         },
@@ -594,7 +594,6 @@ export default {
 
         handleCheckAllChangeW(val) {
             this.selectedItemsW = val ? this.checkItemsW.map(item => item.name) : [];
-            this.isIndeterminate = false; // 取消半选状态
         },
 
         handleCheckedItemsChangeW(value) {
@@ -603,15 +602,6 @@ export default {
             this.isIndeterminate =
                 checkedCount > 0 && checkedCount < this.checkItemsW.map(item => item.name).length;
         },
-
-        // closeModal() {
-        //     this.showModal = false;
-        //     this.progressBarWidth = 0;
-        //     this.showButton = false;
-        //     this.$nextTick(() => {
-        //         this.showPopup = true; // 显示当前ip检测内容
-        //     });
-        // },
 
         closePopup(event) {
             if (event.key === 'Escape') {
