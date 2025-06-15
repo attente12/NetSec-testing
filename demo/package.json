@@ -10,6 +10,7 @@
   "dependencies": {
     "@codemirror/lang-python": "^6.1.6",
     "@codemirror/theme-one-dark": "^6.1.2",
+    "axios": "^1.9.0",
     "codemirror": "^5.65.18",
     "core-js": "^3.6.5",
     "echarts": "^5.6.0",
@@ -21,6 +22,7 @@
     "lodash": "^4.17.21",
     "markdown-it": "^14.1.0",
     "marked": "^15.0.7",
+    "prismjs": "^1.30.0",
     "vue": "^2.6.11",
     "vue-codemirror": "^4.0.6",
     "vuex": "^3.6.2",
