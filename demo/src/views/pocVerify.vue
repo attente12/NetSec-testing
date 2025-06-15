@@ -246,7 +246,7 @@ export default {
 
         // 从localStorage获取现有结果
         const localStorageKey = `nmapResults-${this.currentIp}`;
-        let existingData = localStorage.getItem(localStorageKey);
+        let existingData = sessionStorage.getItem(localStorageKey);
         let scanResults = [];
 
         if (existingData) {
@@ -272,10 +272,10 @@ export default {
         }
 
         // 保存回localStorage
-        localStorage.setItem(localStorageKey, JSON.stringify(scanResults));
-        console.log(`已更新 ${this.currentIp} 的POC验证结果到localStorage`);
+        sessionStorage.setItem(localStorageKey, JSON.stringify(scanResults));
+        console.log(`已更新 ${this.currentIp} 的POC验证结果到sessionStorage`);
       } catch (error) {
-        console.error('更新localStorage中的POC验证结果失败:', error);
+        console.error('更新sessionStorage中的POC验证结果失败:', error);
       }
     },
 
@@ -286,7 +286,7 @@ export default {
       }
 
       // 从localStorage获取该IP的扫描结果
-      const storedResults = localStorage.getItem(`nmapResults-${this.currentIp}`);
+      const storedResults = sessionStorage.getItem(`nmapResults-${this.currentIp}`);
       if (storedResults) {
         try {
           this.scanResults = JSON.parse(storedResults);
@@ -312,7 +312,7 @@ export default {
             this.updateTotalTasks();  // 更新总任务数量
 
             // 将结果保存到localStorage
-            localStorage.setItem(`nmapResults-${this.currentIp}`, JSON.stringify(response.data));
+            sessionStorage.setItem(`nmapResults-${this.currentIp}`, JSON.stringify(response.data));
           })
           .catch(error => {
             console.error("获取扫描结果失败:", error.response || error);
