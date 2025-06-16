@@ -93,7 +93,7 @@ export default {
 
   },
   mounted() {
-    if (this.dataFromParent !== {}) {
+    if (this.dataFromParent.Event_result.length !== 0) {
       this.serverInfo = this.dataFromParent.ServerInfo
       this.checkresults = this.dataFromParent.Event_result
     } else {
