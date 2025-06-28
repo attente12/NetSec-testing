@@ -1,5 +1,3 @@
-
-
 <template>
   <div class="container">
     <div class="title">
@@ -10,18 +8,9 @@
       <el-col :span="8">
         <el-card class="box-card">
           <div slot="header">目标ip</div>
-          <el-select
-              v-model="scanTarget"
-              placeholder="请输入或选择要扫描的目标，例如：192.168.1.0"
-              filterable
-              allow-create
-              default-first-option
-              style="width: 100%; margin-bottom: 10px;">
-            <el-option
-                v-for="ip in aliveHosts"
-                :key="ip"
-                :label="ip"
-                :value="ip">
+          <el-select v-model="scanTarget" placeholder="请输入或选择要扫描的目标，例如：192.168.1.0" filterable allow-create
+            default-first-option style="width: 100%; margin-bottom: 10px;">
+            <el-option v-for="ip in aliveHosts" :key="ip" :label="ip" :value="ip">
             </el-option>
           </el-select>
           <div style="margin-bottom: 10px; color: #409EFF; font-size: 13px;">
@@ -29,12 +18,8 @@
           </div>
           <div class="scan-button">
             <!--            <el-button size="small" @click="debouncedDetect">扫描</el-button>-->
-            <el-button
-                @click="debouncedDetect"
-                :loading="debouncedDetectLoading"
-                icon="el-icon-search"
-                size="small"
-                type="primary">
+            <el-button @click="debouncedDetect" :loading="debouncedDetectLoading" icon="el-icon-search" size="small"
+              type="primary">
               扫描
             </el-button>
           </div>
@@ -65,16 +50,8 @@
           <div class="upload-container">
             <div class="upload-row">
               <div class="upload-item">
-                <el-upload
-                    class="upload"
-                    action="#"
-                    :auto-upload="false"
-                    :on-change="handleUsernameFileChange"
-                    :limit="1"
-                    :show-file-list="false"
-                    :file-list="[]"
-                    ref="usernameUpload"
-                    accept=".txt">
+                <el-upload class="upload" action="#" :auto-upload="false" :on-change="handleUsernameFileChange"
+                  :limit="1" :show-file-list="false" :file-list="[]" ref="usernameUpload" accept=".txt">
                   <el-button size="small" type="primary">上传用户名字典</el-button>
                 </el-upload>
                 <div v-if="usernameFile" class="file-info">{{ usernameFile.name }}
@@ -83,16 +60,8 @@
               </div>
 
               <div class="upload-item" style="margin-left: 10px;">
-                <el-upload
-                    class="upload"
-                    action="#"
-                    :auto-upload="false"
-                    :on-change="handlePasswordFileChange"
-                    :limit="1"
-                    :show-file-list="false"
-                    :file-list="[]"
-                    ref="passwordUpload"
-                    accept=".txt">
+                <el-upload class="upload" action="#" :auto-upload="false" :on-change="handlePasswordFileChange"
+                  :limit="1" :show-file-list="false" :file-list="[]" ref="passwordUpload" accept=".txt">
                   <el-button size="small" type="primary">上传密码字典</el-button>
                 </el-upload>
                 <div v-if="passwordFile" class="file-info">{{ passwordFile.name }}
@@ -104,12 +73,8 @@
 
           <div class="scan-button">
             <!--            <el-button size="small" @click="debouncedServiceDetect">检测</el-button>-->
-            <el-button
-                @click="debouncedServiceDetect"
-                :loading="debouncedServiceDetectLoading"
-                icon="el-icon-search"
-                type="primary"
-                size="small">
+            <el-button @click="debouncedServiceDetect" :loading="debouncedServiceDetectLoading" icon="el-icon-search"
+              type="primary" size="small">
               检测
             </el-button>
           </div>
@@ -139,8 +104,7 @@
       <el-col :span="24">
         <el-card class="box-card">
           <div slot="header">自测密码强度
-            <el-tooltip
-                content="
+            <el-tooltip content="
 
               密码规则：
               1.弱密码
@@ -152,35 +116,25 @@
               3.强密码：
               必须包含数字、小写字母、大写字母和特殊字符的组合（6-18位）。
 
-          "
-                placement="top"
-                :popper-class="'password-rule-tooltip'"
-            >
+          " placement="top" :popper-class="'password-rule-tooltip'">
               <i class="el-icon-question" style="font-size: 18px; cursor: pointer; margin-left: 10px;"></i>
-            </el-tooltip></div>
+            </el-tooltip>
+          </div>
           <div>
-            <el-input
-                v-model="secret"
-                :type="passwordVisible ? 'text' : 'password'"
-                placeholder="请输入密钥"
-                style="width: 200px; margin-right: 10px;">
+            <el-input v-model="secret" :type="passwordVisible ? 'text' : 'password'" placeholder="请输入密钥"
+              style="width: 200px; margin-right: 10px;">
               <template v-slot:suffix>
-                <i :class="passwordVisible ? 'el-icon-minus' : 'el-icon-view'"
-                   @click="togglePasswordVisibility"
-                   style="cursor: pointer; font-size: 24px;margin-top: 8px;"></i>
+                <i :class="passwordVisible ? 'el-icon-minus' : 'el-icon-view'" @click="togglePasswordVisibility"
+                  style="cursor: pointer; font-size: 24px;margin-top: 8px;"></i>
               </template>
             </el-input>
             <!--            <el-button size="small" @click="debouncedCheckPasswordStrength" style="margin-right: 20px;">检测</el-button>-->
-            <el-button
-                @click="debouncedCheckPasswordStrength"
-                :loading="PasswordStrengthLoading"
-                icon="el-icon-search"
-                type="small"
-                style="margin-right: 20px;">
+            <el-button @click="debouncedCheckPasswordStrength" :loading="PasswordStrengthLoading" icon="el-icon-search"
+              type="small" style="margin-right: 20px;">
               检测
             </el-button>
             <span>结果：</span>
-            <span :style="{ color: passwordStrengthColor, fontWeight: 'bold'  }">
+            <span :style="{ color: passwordStrengthColor, fontWeight: 'bold' }">
               {{ passwordStrength }}
             </span>
           </div>
@@ -194,20 +148,20 @@
       <p>检测主机IP: {{ scanTarget }}</p>
       <table class="print-table">
         <thead>
-        <tr>
-          <th>端口</th>
-          <th>服务</th>
-          <th>账号</th>
-          <th>密码</th>
-        </tr>
+          <tr>
+            <th>端口</th>
+            <th>服务</th>
+            <th>账号</th>
+            <th>密码</th>
+          </tr>
         </thead>
         <tbody>
-        <tr v-for="item in tableData" :key="item.port + item.service">
-          <td>{{ item.port }}</td>
-          <td>{{ item.service }}</td>
-          <td>{{ item.account }}</td>
-          <td>{{ item.password }}</td>
-        </tr>
+          <tr v-for="item in tableData" :key="item.port + item.service">
+            <td>{{ item.port }}</td>
+            <td>{{ item.service }}</td>
+            <td>{{ item.account }}</td>
+            <td>{{ item.password }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -260,11 +214,11 @@ export default {
       passwordStrength: '',
       passwordStrengthColor: 'black',
       isDetecting: false, // 新增：用于跟踪检测状态
-      isScanning: false , // 新增：用于跟踪扫描状态
+      isScanning: false, // 新增：用于跟踪扫描状态
       aliveHosts: [], // 新增：存储活跃IP列表
-      debouncedDetectLoading:false,
-      debouncedServiceDetectLoading:false,
-      PasswordStrengthLoading:false,
+      debouncedDetectLoading: false,
+      debouncedServiceDetectLoading: false,
+      PasswordStrengthLoading: false,
     };
   },
 
@@ -279,13 +233,13 @@ export default {
     // 新增：获取活跃IP列表的方法
     fetchAliveHosts() {
       axios.get('/api/getAliveHosts')
-          .then(response => {
-            this.aliveHosts = response.data.alive_hosts;
-          })
-          .catch(error => {
-            console.error('获取活跃IP列表失败:', error);
-            this.$message.error('获取活跃IP列表失败');
-          });
+        .then(response => {
+          this.aliveHosts = response.data.alive_hosts;
+        })
+        .catch(error => {
+          console.error('获取活跃IP列表失败:', error);
+          this.$message.error('获取活跃IP列表失败');
+        });
     },
     getServiceDetails(serviceName) {
       return this.services.find(service => service.name === serviceName) || {};
@@ -345,7 +299,7 @@ export default {
 
     // 修改后的detect方法
     async detect() {
-      this.debouncedDetectLoading=true;
+      this.debouncedDetectLoading = true;
       if (this.isScanning) {
         this.$message.warning('扫描正在进行中，请稍候...');
         return;
@@ -375,7 +329,7 @@ export default {
         console.error('Scan error:', error);
       } finally {
         this.isScanning = false;
-        this.debouncedDetectLoading=false;
+        this.debouncedDetectLoading = false;
       }
     },
 
@@ -401,7 +355,7 @@ export default {
         return;
       }
 
-      this.debouncedServiceDetectLoading=true;
+      this.debouncedServiceDetectLoading = true;
       this.isDetecting = true;
 
       try {
@@ -422,13 +376,13 @@ export default {
         });
 
         const responses = await Promise.all(
-            serviceRequests.map(formData =>
-                axios.post('/api/getWeakPassword', formData, {
-                  headers: {
-                    'Content-Type': 'multipart/form-data'
-                  }
-                })
-            )
+          serviceRequests.map(formData =>
+            axios.post('/api/getWeakPassword', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            })
+          )
         );
 
         let foundWeakPasswords = false;
@@ -462,7 +416,7 @@ export default {
         console.error('Service detect error:', error);
       } finally {
         this.isDetecting = false;
-        this.debouncedServiceDetectLoading=false;
+        this.debouncedServiceDetectLoading = false;
       }
     },
 
@@ -501,7 +455,7 @@ export default {
     },
 
     async checkPasswordStrength() {
-      this.PasswordStrengthLoading=true;
+      this.PasswordStrengthLoading = true;
       try {
         const response = await axios.post('/api/testWeakPassword', { pd: this.secret });
         switch (response.data.message) {
@@ -530,8 +484,8 @@ export default {
         console.error('Error checking password strength:', error);
         this.passwordStrength = '检测失败';
         this.passwordStrengthColor = 'black';
-      }finally {
-        this.PasswordStrengthLoading=false;
+      } finally {
+        this.PasswordStrengthLoading = false;
       }
     }
   },
@@ -571,7 +525,8 @@ export default {
 @media print {
   #printable {
     display: block;
-    font-size: 12px; /* 调整打印字体大小 */
+    font-size: 12px;
+    /* 调整打印字体大小 */
   }
 
   .print-title {
@@ -583,7 +538,8 @@ export default {
     border-collapse: collapse;
   }
 
-  .print-table th, .print-table td {
+  .print-table th,
+  .print-table td {
     border: 1px solid #000;
     padding: 8px;
     text-align: left;
@@ -610,9 +566,11 @@ export default {
 
 .upload-row {
   display: flex;
-  justify-content: flex-start; /* 改为左对齐 */
+  justify-content: flex-start;
+  /* 改为左对齐 */
   align-items: center;
-  gap: 40px; /* 减小间距 */
+  gap: 40px;
+  /* 减小间距 */
 }
 
 .upload-item {
@@ -650,5 +608,3 @@ export default {
   color: #f56c6c;
 }
 </style>
-
-

@@ -397,7 +397,7 @@ export default {
     },
     async loadDataNew() {
       try {
-        const response = await axios.get('http://192.168.0.129:8081/getPocTable')
+        const response = await axios.get('/api/getPocTable')
         this.pocs = response.data.map(poc => ({
           ...poc,
           showFullDescription: false
@@ -475,7 +475,7 @@ export default {
 
     handleLook(row) {
       // 发送请求获取POC内容
-      axios.get('http://192.168.0.129:8081/getPOCContent', {
+      axios.get('/api/getPOCContent', {
         params: {
           id: row.id
         }

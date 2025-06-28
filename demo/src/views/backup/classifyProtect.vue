@@ -2,9 +2,6 @@
   <div class="baseline-container">
     <!-- 头部区域 -->
     <div class="header-section">
-      <el-button @click="goBackToTest" type="primary" icon="el-icon-back" size="medium">
-        返回
-      </el-button>
       <h1 class="main-title">等级保护测评</h1>
       <div class="date-info">
       </div>
@@ -13,11 +10,17 @@
     <!-- 控制按钮区域 -->
     <div class="control-section">
       <div class="button-group">
+        <!-- 新增的IP选择下拉框 -->
         <div class="control-item">
-          <el-tag type="primary" size="medium">
-            当前IP: {{ selectedIP }}
-          </el-tag>
+          <el-select v-model="selectedIP" placeholder="选择服务器IP" @change="changeServer" size="medium">
+            <el-option v-for="ip in aliveHosts" :key="ip" :label="ip" :value="ip">
+            </el-option>
+          </el-select>
         </div>
+
+        <el-button @click="onExportToPDF" :loading="pdfLoading" icon="el-icon-document" type="primary" size="medium">
+          导出为 PDF
+        </el-button>
       </div>
 
       <div class="filter-group">
@@ -25,7 +28,6 @@
           <el-option label="全部" value="all"></el-option>
           <el-option label="通过" value="passed"></el-option>
           <el-option label="未通过" value="failed"></el-option>
-          <el-option label="待检查" value="pending"></el-option>
         </el-select>
 
         <el-input placeholder="输入检测项关键字..." v-model="searchTerm" @input="filterSearchResults"
@@ -33,9 +35,8 @@
         </el-input>
       </div>
 
-      <!-- 修改保存评分按钮 -->
-      <el-button type="success" icon="el-icon-check" @click="saveScores" :loading="saveLoading" :disabled="!canSave"
-        size="medium">
+      <!-- 新增保存评分按钮 -->
+      <el-button type="success" icon="el-icon-check" @click="saveScores" :loading="saveLoading" size="medium">
         保存人工判定结果
       </el-button>
       <el-button type="primary" icon="el-icon-data-analysis" @click="getProtectionLevelResult" :loading="resultLoading"
@@ -43,19 +44,6 @@
         获取等保结果
       </el-button>
     </div>
-
-    <!-- 人工判定提醒 -->
-    <el-alert v-if="unfinishedPendingCount > 0" title="" type="warning" effect="dark" show-icon :closable="false"
-      class="manual-review-alert">
-      <!--      <template slot="title">-->
-      <!--        <i class="el-icon-warning-outline"></i>-->
-      <!--        <strong>重要提醒：请完成人工判定</strong>-->
-      <!--      </template>-->
-      <div class="alert-content">
-        <p>检测到 <strong class="highlight-number">{{ unfinishedPendingCount }}</strong> 个项目需要进行人工判定，请仔细评估每个项目是否符合等保要求。</p>
-        <p>👉 只有完成所有人工判定后才能保存结果</p>
-      </div>
-    </el-alert>
 
     <!-- 得分显示部分，数字得分 -->
     <el-card class="score-card" v-if="showScoreResult" style="margin-bottom: 20px">
@@ -129,11 +117,7 @@
         <div class="summary">
           <el-tag type="success">通过: {{ passedCount }}</el-tag>
           <el-tag type="danger">未通过: {{ failedCount }}</el-tag>
-          <el-tag type="warning">待检查: {{ pendingCount }}</el-tag>
           <el-tag type="info">总计: {{ totalCount }}</el-tag>
-          <el-tag v-if="unfinishedPendingCount > 0" type="warning" effect="plain">
-            待人工判定: {{ unfinishedPendingCount }}
-          </el-tag>
         </div>
       </div>
 
@@ -154,8 +138,8 @@
         <el-table-column prop="result" label="检测结果" min-width="150"></el-table-column>
         <el-table-column label="是否通过检查" width="120">
           <template slot-scope="scope">
-            <el-tag :type="getStatusType(scope.row.IsComply)">
-              {{ getStatusText(scope.row.IsComply) }}
+            <el-tag :type="scope.row.IsComply === 'true' ? 'success' : 'danger'">
+              {{ scope.row.IsComply === 'true' ? '通过' : '未通过' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -167,28 +151,69 @@
         </el-table-column>
         <el-table-column label="是否符合等保要求（人工判定）" width="120">
           <template slot-scope="scope">
-            <el-select v-model="scope.row.score" :placeholder="scope.row.IsComply === 'pending' ? '请选择' : '请选择评分'"
-              size="mini" @change="onScoreChange(scope.row)"
-              :class="{ 'pending-select': scope.row.IsComply === 'pending' && !scope.row.score }">
+            <el-select v-model="scope.row.score" placeholder="请选择评分" size="mini">
               <el-option label="符合" value="1"></el-option>
               <el-option label="部分符合" value="0.5"></el-option>
               <el-option label="不符合" value="0"></el-option>
             </el-select>
-            <div v-if="scope.row.IsComply === 'pending' && !scope.row.score"
-              style="font-size: 10px; color: #E6A23C; margin-top: 2px;">
-              需人工判定
-            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
       </el-table>
     </el-card>
 
     <!-- PDF内容（隐藏） -->
     <div class="pdf-content" v-show="showContentForPDF">
+      <div class="server1">
+        <h1 id="linuxBaseline2">Linux基线检测报告</h1>
+        <!-- 检测时间 -->
+        <div style="text-align:right; margin-top:20px;">
+          <p style="font-size:18px;">检测时间：{{ new Date().toLocaleString() }}</p>
+        </div>
+        <el-row :gutter="20">
+          <el-col :span="24">
+            <p>主机名：{{ serverInfo.hostname }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机架构：{{ serverInfo.arch }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机CPU信息：{{ serverInfo.cpu }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机物理CPU个数：{{ serverInfo.cpuPhysical }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机物理CPU核心数：{{ serverInfo.cpuCore }}</p>
+          </el-col>
+          <el-col :span="12">
+            <p>主机空闲内存：{{ serverInfo.free }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>硬件型号：{{ serverInfo.ProductName }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>主机版本信息：{{ serverInfo.version }}</p>
+          </el-col>
+          <el-col :span="24">
+            <p>服务器IP：{{ selectedIP }}</p>
+          </el-col>
+        </el-row>
+        <!-- 空白分隔 -->
+        <div style="height:200px;"></div>
+        <!-- 检测人员签名 -->
+        <div style="text-align:right; margin-top:20px;">
+          <span style="font-size:20px;">检测人员签名：</span>
+          <span style="display: inline-block; width: 200px; border-bottom: 2px solid #000; margin-left: 10px;"></span>
+        </div>
+        <!-- 页码 -->
+        <div class="page-number">
+          <span>1/{{ totalPages }}</span>
+        </div>
+      </div>
+
       <!-- 测试正文标题 -->
       <div class="report-content-title">
-        <h2>等级保护测评报告</h2>
+        <h2>测试正文</h2>
       </div>
 
       <el-table :data="filteredCheckresults" style="width: 100%">
@@ -233,17 +258,9 @@
                     ? 'orange'
                     : 'red'
             }">
-              {{
-                scope.row.score == 1
-                  ? '符合'
-                  : scope.row.score == 0.5
-                    ? '部分符合'
-                    : '不符合'
-              }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="check_time" label="检测时间" min-width="150"></el-table-column>
 
       </el-table>
       <!-- 页码容器 - PDF生成时会添加 -->
@@ -256,7 +273,7 @@
 <script>
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import axios from 'axios'; // 引入axios
+import axios from 'axios';
 
 export default {
   name: "baseCheck",
@@ -269,10 +286,10 @@ export default {
       showContentForPDF: false,
       pdfLoading: false,
       tableLoading: false,
-      totalPages: 2, // 默认至少两页
-      selectedIP: '', // 选中的IP
-      saveLoading: false, // 保存按钮的加载状态
-      // 等保评分相关计算属性
+      totalPages: 2,
+      aliveHosts: [],
+      selectedIP: '',
+      saveLoading: false,
       resultLoading: false,
       showScoreResult: false,
       levelResult: {
@@ -288,8 +305,7 @@ export default {
       return this.checkresults.filter(result => {
         const matchesStatus = this.selectedStatus === 'all' ||
           (this.selectedStatus === 'passed' && result.IsComply === 'true') ||
-          (this.selectedStatus === 'failed' && result.IsComply === 'false') ||
-          (this.selectedStatus === 'pending' && result.IsComply === 'pending');
+          (this.selectedStatus === 'failed' && result.IsComply === 'false');
         const matchesSearch = !this.searchTerm ||
           result.description.toLowerCase().includes(this.searchTerm.toLowerCase());
         return matchesStatus && matchesSearch;
@@ -301,60 +317,49 @@ export default {
     failedCount() {
       return this.checkresults.filter(item => item.IsComply === 'false').length;
     },
-    pendingCount() {
-      return this.checkresults.filter(item => item.IsComply === 'pending').length;
-    },
     totalCount() {
       return this.checkresults.length;
     },
-
-    // 新增：检查是否所有pending项都已选择
-    canSave() {
-      const pendingItems = this.checkresults.filter(item => item.IsComply === 'pending');
-      return pendingItems.every(item => item.score && item.score !== '');
-    },
-
-    // 新增：获取未完成选择的pending项数量
-    unfinishedPendingCount() {
-      const pendingItems = this.checkresults.filter(item => item.IsComply === 'pending');
-      return pendingItems.filter(item => !item.score || item.score === '').length;
-    },
-
     formattedScore() {
       return this.levelResult.score ? this.levelResult.score.toFixed(2) : '0.00';
     }
   },
   methods: {
-    goBackToTest() {
-      this.$router.push('/assetManage');
+    fetchAliveHosts() {
+      axios.get('/api/getAliveHosts')
+        .then(response => {
+          this.aliveHosts = response.data.alive_hosts;
+          if (this.aliveHosts && this.aliveHosts.length > 0) {
+            this.selectedIP = this.aliveHosts[0];
+            this.fetchAndDisplayChenckResults();
+          }
+        })
+        .catch(error => {
+          console.error('获取活跃IP列表失败:', error);
+          this.$message.error('获取活跃IP列表失败');
+        });
     },
-
-    // 新增：选择变化监听方法
-    onScoreChange() {
-      // 当用户改变选择时，强制更新视图以重新计算canSave
-      this.$forceUpdate();
+    changeServer() {
+      if (this.selectedIP) {
+        this.fetchAndDisplayChenckResults();
+      }
     },
-
-    // 修改后的获取检测结果函数
     fetchAndDisplayChenckResults() {
+      if (!this.selectedIP) {
+        this.$message.warning('请先选择服务器IP');
+        return;
+      }
+
       this.tableLoading = true;
       axios.get(`/api/level3Userinfo?ip=${this.selectedIP}`)
         .then(response => {
           this.checkresults = response.data.checkResults.map(item => {
-            // 根据 tmp_IsComply 的值来设置 score
-            let score = '';
-
-            // 根据不同状态设置初始score值
+            let score = '0';
             if (item.tmp_IsComply === 'true') {
               score = '1';
             } else if (item.tmp_IsComply === 'half_true') {
               score = '0.5';
-            } else if (item.tmp_IsComply === 'false') {
-              score = '0';
-            } else if (item.tmp_IsComply === 'pending') {
-              score = ''; // pending状态默认为空，需要用户选择
             }
-
             return {
               ...item,
               score: score,
@@ -362,7 +367,6 @@ export default {
             };
           });
           this.tableLoading = false;
-          // 根据数据量预估页数
           this.estimatePageCount();
         })
         .catch(error => {
@@ -371,33 +375,10 @@ export default {
           this.$message.error('获取检测结果失败，请重试');
         });
     },
-
-    // 获取状态对应的类型（用于el-tag的type属性）
-    getStatusType(status) {
-      switch (status) {
-        case 'true': return 'success';
-        case 'false': return 'danger';
-        case 'pending': return 'warning';
-        default: return 'info';
-      }
-    },
-
-    // 获取状态对应的文本
-    getStatusText(status) {
-      switch (status) {
-        case 'true': return '通过';
-        case 'false': return '未通过';
-        case 'pending': return '待检查';
-        default: return '未知';
-      }
-    },
-
     estimatePageCount() {
-      // 粗略估算页数：第一页为封面，剩余按每页约10条记录计算
       const recordsPerPage = 10;
       this.totalPages = Math.ceil(this.checkresults.length / recordsPerPage) + 1;
     },
-
     onExportToPDF() {
       this.pdfLoading = true;
       this.showContentForPDF = true;
@@ -408,26 +389,15 @@ export default {
         duration: 5000
       });
 
-      // 延迟执行，确保DOM已完全渲染
       setTimeout(() => {
-        // 创建PDF对象
         const pdf = new jsPDF({
           orientation: 'p',
           unit: 'mm',
           format: 'a4'
         });
 
-        // 关键点：采用两遍渲染策略
-        // 第一遍：只渲染，不保存，仅记录最终页码
-        // 第二遍：用记录的正确页码重新渲染并保存
-
-        // 第一阶段：模拟渲染，计算总页数
         this.simulatePdfRendering(pdf).then(actualPageCount => {
-          // 保存实际总页数
           this.totalPages = actualPageCount;
-          console.log('确定的总页数:', this.totalPages);
-
-          // 第二阶段：使用确定的总页数重新生成PDF
           this.renderFinalPdf(pdf, this.totalPages);
         }).catch(err => {
           console.error('PDF生成过程出错:', err);
@@ -437,28 +407,21 @@ export default {
         });
       }, 1000);
     },
-
-    // 模拟渲染，确定实际总页数
     async simulatePdfRendering(pdf) {
       try {
-        // 保存PDF状态
         const originalPage = pdf.internal.getCurrentPageInfo().pageNumber;
 
         let pageCount = 0;
 
-        // 模拟渲染封面页
         const coverPage = this.$el.querySelector('.pdf-content .server1');
         await html2canvas(coverPage, { scale: 2, useCORS: true });
-        pageCount = 1;  // 封面算第一页
+        pageCount = 1;
 
-        // 模拟渲染内容页
         pdf.addPage();
         pageCount++;
 
-        // 页面参数
         const pageHeight = pdf.internal.pageSize.getHeight() - 20;
 
-        // 模拟渲染标题
         const titleElement = this.$el.querySelector('.pdf-content .report-content-title');
         const titleCanvas = await html2canvas(titleElement, { scale: 2, useCORS: true });
         const titleWidth = 190;
@@ -466,7 +429,6 @@ export default {
 
         let yPosition = 10 + titleHeight + 5;
 
-        // 模拟渲染表头
         const headerElement = this.$el.querySelector('.pdf-content .el-table__header-wrapper');
         const headerCanvas = await html2canvas(headerElement, { scale: 2, useCORS: true });
         const headerWidth = 190;
@@ -474,7 +436,6 @@ export default {
 
         yPosition += headerHeight + 2;
 
-        // 模拟渲染每一行并计算页码
         const tableRows = this.$el.querySelectorAll('.pdf-content .el-table__body-wrapper table tr');
 
         for (let i = 0; i < tableRows.length; i++) {
@@ -483,20 +444,17 @@ export default {
           const rowWidth = 190;
           const rowHeight = rowCanvas.height * rowWidth / rowCanvas.width;
 
-          // 如果当前行放不下，需要新页面
           if (yPosition + rowHeight > pageHeight) {
-            // 新页面
-            if (i < tableRows.length - 1) { // 不是最后一行才需要新页面
+            if (i < tableRows.length - 1) {
               pdf.addPage();
               pageCount++;
-              yPosition = 10; // 重置Y位置
+              yPosition = 10;
             }
           }
 
           yPosition += rowHeight + 2;
         }
 
-        // 恢复PDF状态
         while (pdf.internal.getCurrentPageInfo().pageNumber > originalPage) {
           pdf.deletePage(pdf.internal.getCurrentPageInfo().pageNumber);
         }
@@ -507,11 +465,8 @@ export default {
         throw error;
       }
     },
-
-    // 使用正确页码渲染最终PDF
     async renderFinalPdf(pdf, totalPageCount) {
       try {
-        // 渲染封面页
         const coverPage = this.$el.querySelector('.pdf-content .server1');
         const coverCanvas = await html2canvas(coverPage, { scale: 2, useCORS: true });
         const imgData = coverCanvas.toDataURL('image/jpeg', 0.8);
@@ -520,18 +475,14 @@ export default {
 
         pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
 
-        // 封面页页码
         pdf.setFontSize(10);
         pdf.text(`1/${totalPageCount}`, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 10);
 
-        // 添加内容页
         pdf.addPage();
 
-        // 页面参数
         const pageHeight = pdf.internal.pageSize.getHeight() - 20;
-        let currentPageNum = 2; // 从第二页开始
+        let currentPageNum = 2;
 
-        // 添加标题
         const titleElement = this.$el.querySelector('.pdf-content .report-content-title');
         const titleCanvas = await html2canvas(titleElement, { scale: 2, useCORS: true });
         const titleImgData = titleCanvas.toDataURL('image/jpeg', 0.8);
@@ -541,7 +492,6 @@ export default {
         pdf.addImage(titleImgData, 'JPEG', 10, 10, titleWidth, titleHeight);
         let yPosition = 10 + titleHeight + 5;
 
-        // 添加表头
         const headerElement = this.$el.querySelector('.pdf-content .el-table__header-wrapper');
         const headerCanvas = await html2canvas(headerElement, { scale: 2, useCORS: true });
         const headerImgData = headerCanvas.toDataURL('image/jpeg', 0.8);
@@ -551,7 +501,6 @@ export default {
         pdf.addImage(headerImgData, 'JPEG', 10, yPosition, headerWidth, headerHeight);
         yPosition += headerHeight + 2;
 
-        // 逐行添加表格内容
         const tableRows = this.$el.querySelectorAll('.pdf-content .el-table__body-wrapper table tr');
 
         for (let i = 0; i < tableRows.length; i++) {
@@ -561,35 +510,27 @@ export default {
           const rowWidth = 190;
           const rowHeight = rowCanvas.height * rowWidth / rowCanvas.width;
 
-          // 检查是否需要换页
           if (yPosition + rowHeight > pageHeight) {
-            // 添加当前页码
             pdf.setFontSize(10);
             pdf.text(`${currentPageNum}/${totalPageCount}`, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 10);
 
-            // 不是最后一行才需要新页面
             if (i < tableRows.length - 1) {
-              // 新页面
               pdf.addPage();
               currentPageNum++;
               yPosition = 10;
             }
           }
 
-          // 添加当前行
           pdf.addImage(rowImgData, 'JPEG', 10, yPosition, rowWidth, rowHeight);
           yPosition += rowHeight + 2;
         }
 
-        // 最后一页页码
         pdf.setFontSize(10);
         pdf.text(`${currentPageNum}/${totalPageCount}`, pdf.internal.pageSize.getWidth() - 25, pdf.internal.pageSize.getHeight() - 10);
 
-        // 保存PDF
         const filename = `Linux基线检测报告_${this.selectedIP}_${new Date().toISOString().slice(0, 10)}.pdf`;
         pdf.save(filename);
 
-        // 清理和完成
         this.showContentForPDF = false;
         this.pdfLoading = false;
         this.$message.success('PDF报告导出成功！');
@@ -601,55 +542,42 @@ export default {
         this.$message.error('PDF生成失败，请重试！');
       }
     },
-
     filterSearchResults() {
-      // 通过计算属性自动过滤，此方法保留用于可能的扩展
     },
-
     goToClassifyProtect() {
-      // 导航到等保测评页面
       this.$router.push('/classifyProtect');
     },
-
     saveScores() {
-      // 验证pending项是否都已选择
-      if (!this.canSave) {
-        this.$message.warning(`还有 ${this.unfinishedPendingCount} 个待检查项目需要人工判定，请完成后再保存`);
-        return;
-      }
-
-      // 显示保存中状态
       this.saveLoading = true;
 
-      // 准备请求数据
       const scoreMeasures = this.checkresults.map(item => ({
         item_id: item.item_id,
-        importantLevelJson: item.importantLevel, // 如果有importantLevel字段则使用，否则默认为"2"
-        IsComplyLevel: item.score // 使用选择的评分值
+        importantLevelJson: item.importantLevel,
+        IsComplyLevel: item.score
       }));
 
-      // 构建请求体
       const requestData = {
         ip: this.selectedIP,
         scoreMeasures: scoreMeasures
       };
 
-      // 发送POST请求
       axios.post('/api/updateLevel3Protect', requestData)
         .then(response => {
-          // 保存成功
           this.saveLoading = false;
           this.$message.success(`成功更新${response.data.itemsUpdated}项评分结果`);
         })
         .catch(error => {
-          // 保存失败
           this.saveLoading = false;
           console.error('保存评分失败:', error);
           this.$message.error('保存评分失败，请重试');
         });
     },
-    // 获取等保评分
     getProtectionLevelResult() {
+      if (!this.selectedIP) {
+        this.$message.warning('请先选择服务器IP');
+        return;
+      }
+
       this.resultLoading = true;
       axios.get(`/api/getlevel3ResultByIp?ip=${this.selectedIP}`)
         .then(response => {
@@ -657,7 +585,6 @@ export default {
           this.showScoreResult = true;
           this.resultLoading = false;
 
-          // 根据得分显示对应的消息提示
           const score = this.levelResult.score;
           let message = '';
 
@@ -681,7 +608,6 @@ export default {
           this.$message.error('获取等保结果失败，请重试');
         });
     },
-
     getScoreConclusion(score) {
       if (!score && score !== 0) return '未评估';
 
@@ -695,7 +621,6 @@ export default {
         return '未达标';
       }
     },
-
     getScoreClass(score) {
       if (!score && score !== 0) return '';
 
@@ -711,15 +636,7 @@ export default {
     }
   },
   mounted() {
-    // 从路由参数获取IP
-    const routeIP = this.$route.query.ip;
-
-    if (routeIP) {
-      this.selectedIP = routeIP;
-      this.fetchAndDisplayChenckResults();
-    } else {
-      this.$message.error('缺少IP参数，请从正确的入口访问此页面');
-    }
+    this.fetchAliveHosts();
   }
 }
 </script>
@@ -804,60 +721,6 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
-/* 人工判定提醒样式 */
-.manual-review-alert {
-  margin-bottom: 20px;
-  border-left: 4px solid #E6A23C;
-  background: linear-gradient(135deg, #fdf6ec 0%, #fef7ed 100%);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(230, 162, 60, 0.2);
-}
-
-.manual-review-alert .el-alert__title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #B8860B;
-}
-
-.alert-content {
-  margin-top: 8px;
-}
-
-.alert-content p {
-  margin: 5px 0;
-  color: #8B4513;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.highlight-number {
-  color: #E6A23C;
-  font-size: 18px;
-  font-weight: bold;
-  background: #fff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid #E6A23C;
-}
-
-/* pending状态的下拉框样式 */
-.pending-select {
-  border: 1px solid #E6A23C !important;
-  background-color: #fdf6ec !important;
-}
-
-.pending-select .el-input__inner {
-  border-color: #E6A23C !important;
-  background-color: #fdf6ec !important;
-}
-
-/* 禁用按钮样式 */
-.el-button:disabled {
-  background-color: #f5f7fa !important;
-  border-color: #e4e7ed !important;
-  color: #c0c4cc !important;
-}
-
 /* PDF内容样式 */
 .pdf-content {
   font-size: 10pt;
@@ -919,6 +782,7 @@ export default {
 }
 
 /* 计算评分显示评分部分样式 */
+/* 新增样式 */
 .score-card {
   margin-top: 20px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);

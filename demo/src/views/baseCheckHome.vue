@@ -117,24 +117,13 @@
                 <el-button type="primary" @click="viewResult">查看结果</el-button>
             </span>
         </el-dialog>
-
-        <!-- Popup遮罩层 -->
-        <div v-if="showPopup" class="overlay" @click="showPopup = false"></div>
-        <div v-if="showPopup" class="popup">
-            <Popup :dataFromParent="checkResult"></Popup>
-        </div>
     </div>
 </template>
 
 <script>
 import { Message } from "element-ui"
-import Popup from "../components/popup.vue";
-
 export default {
     name: "home",
-    components: {
-        Popup
-    },
     data() {
         return {
             formData: {
@@ -318,7 +307,6 @@ export default {
             isChecked: false,
             checkAll: false,//linux全选标记
             isSelectAll: true,//windows全选标记
-            showPopup: false
         };
     },
     watch: {
@@ -381,21 +369,21 @@ export default {
     },
     methods: {
         // 获取活跃IP列表
-      fetchAliveHosts() {
-        try {
-          const storedHosts = sessionStorage.getItem('hostdiscovery');
-          if (storedHosts) {
-            this.aliveHosts = JSON.parse(storedHosts);
-          } else {
-            this.aliveHosts = [];
-            Message.warning('未找到存活主机列表，请先进行主机发现');
-          }
-        } catch (error) {
-          console.error('解析localStorage数据失败:', error);
-          this.aliveHosts = [];
-          Message.error('获取存活主机列表失败');
-        }
-      },
+        fetchAliveHosts() {
+            try {
+                const storedHosts = sessionStorage.getItem('hostdiscovery');
+                if (storedHosts) {
+                    this.aliveHosts = JSON.parse(storedHosts);
+                } else {
+                    this.aliveHosts = [];
+                    Message.warning('未找到存活主机列表，请先进行主机发现');
+                }
+            } catch (error) {
+                console.error('解析localStorage数据失败:', error);
+                this.aliveHosts = [];
+                Message.error('获取存活主机列表失败');
+            }
+        },
         // fetchAliveHosts() {
         //     fetch('/api/getAliveHosts')
         //         .then(response => {
@@ -430,7 +418,7 @@ export default {
             };
             console.log("Submitting form...", payload);
 
-            fetch('http://192.168.0.129:8081/win_login', {
+            fetch('/api/win_login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -560,7 +548,11 @@ export default {
         viewResult() {
             this.dialogVisible = false;
             if (this.flag) {
-                this.showPopup = true; // 显示PDF相关内容
+                this.$nextTick(() => {
+                    this.$router.push({
+                        path: '/baseCheckW',  // 改为跳转到新页面
+                    });
+                });
             } else {
                 this.$nextTick(() => {
                     this.$router.push({

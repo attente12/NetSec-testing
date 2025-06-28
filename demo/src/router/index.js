@@ -23,6 +23,7 @@ import tempBaseCheck from "@/views/tempBaseCheck.vue";
 import classifyProtectHome from "@/views/classifyProtectHome.vue";
 import tempClassifyProtect from "@/views/tempClassifyProtect.vue";
 import vulTypeManage from "@/views/vulTypeManage.vue";
+import baseCheckW from '../views/baseCheckW.vue'
 
 
 export default new Router({
@@ -36,13 +37,13 @@ export default new Router({
             path: '/hostDiscovery',
             name: 'hostDiscovery',
             component: hostDiscovery,
-            meta:{title:'主机发现'}
+            meta: { title: '主机发现' }
         },
         {
             path: '/baseCheckHome',
             name: 'baseCheckHome',
             component: homeCheckHome,
-            meta:{title:'基线检测'}
+            meta: { title: '基线检测' }
         },
         {
             path: '/pagesOne',
@@ -58,92 +59,98 @@ export default new Router({
             path: '/baseCheck',
             name: 'baseCheck',
             component: baseCheck,
-            meta:{title:'基线检测结果'}
+            meta: { title: '基线检测结果' }
         },
         {
             path: '/pocManage',
             name: 'pocManage',
             component: pocManage,
-            meta:{title:'POC管理'}
+            meta: { title: 'POC管理' }
         },
         {
             path: '/pocScanner',
             name: 'pocScanner',
             component: pocScanner,
-            meta:{title:'漏洞扫描'}
+            meta: { title: '漏洞扫描' }
         },
         {
             path: '/pocScanner/pocVerify',
             name: 'pocVerify',
             component: pocVerify,
-            meta:{title:'POC验证'}
+            meta: { title: 'POC验证' }
         },
         {
             path: '/weakPasswordDetect',
             name: 'weakPasswordDetect',
             component: weakPasswordDetect,
-            meta:{title:'弱口令检测'}
+            meta: { title: '弱口令检测' }
         },
         {
             path: '/classifyProtect',
             name: 'classifyProtect',
             component: classifyProtect,
-            meta:{title:'测评历史'}
+            meta: { title: '测评历史' }
         },
         {
             path: '/CVELibrary',
             name: 'CVELibrary',
             component: CVELibrary,
-            meta:{title:'CVE库'}
+            meta: { title: 'CVE库' }
         },
         {
             path: '/toVerify',
             name: 'toVerify',
             component: toVerify,
-            meta:{title:'单个漏洞验证'}
+            meta: { title: '单个漏洞验证' }
         },
         {
             path: '/pluginScan',
             name: 'pluginScan',
             component: pluginScan,
-            meta:{title:'插件化扫描'}
+            meta: { title: '插件化扫描' }
         },
         {
             path: '/assetManage',
             name: 'assetManage',
             component: assetManage,
-            meta:{title:'资产管理'}
+            meta: { title: '资产管理' }
         },
         {
             path: '/test',
             name: 'test',
             component: test,
-            meta:{title:'测试'}
+            meta: { title: '测试' }
         },
         {
             path: '/tempBaseCheck',
             name: 'tempBaseCheck',
             component: tempBaseCheck,
-            meta:{title:'检测结果'}
+            meta: { title: '检测结果' }
         },
         {
             path: '/classifyProtectHome',
             name: 'classifyProtectHome',
             component: classifyProtectHome,
-            meta:{title:'等级保护测评'}
+            meta: { title: '等级保护测评' }
         },
         {
             path: '/tempClassifyProtect',
             name: 'tempClassifyProtect',
             component: tempClassifyProtect,
-            meta:{title:'等保测评结果'}
+            meta: { title: '等保测评结果' }
         },
         {
             path: '/vulTypeManage',
             name: 'vulTypeManage',
             component: vulTypeManage,
-            meta:{title:'漏洞类型管理'}
+            meta: { title: '漏洞类型管理' }
         },
+        {
+            path: '/baseCheckW',
+            name: 'baseCheckW',
+            component: baseCheckW,
+            meta: { title: 'Windows基线检测结果' }
+        }
 
     ]
 })

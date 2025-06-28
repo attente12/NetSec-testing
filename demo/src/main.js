@@ -14,7 +14,7 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/python/python.js';
 import 'codemirror/theme/material.css';
 
-import { store } from './store.js'; // 引入你创建的 Vuex store 文件
+import { store } from 'store/index.js'; // 引入 Vuex store
 
 Vue.use(ElementUI);
 Vue.use(Router);
