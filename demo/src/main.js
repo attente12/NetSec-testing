@@ -14,13 +14,16 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/python/python.js';
 import 'codemirror/theme/material.css';
 
-import { store } from 'store/index.js'; // 引入 Vuex store
+import { store } from './store/index.js'; // 引入 Vuex store
+import axios from './api/axios/index.js'; // 引入自定义 Axios 实例
 
 Vue.use(ElementUI);
 Vue.use(Router);
 Vue.use(VueCodemirror);
 
 Vue.config.productionTip = false
+Vue.prototype.$axios = axios
+
 
 new Vue({
   router,

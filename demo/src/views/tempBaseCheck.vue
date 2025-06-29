@@ -110,8 +110,6 @@
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
   name: "baseCheck",
   data() {
@@ -162,7 +160,7 @@ export default {
       }
 
       this.tableLoading = true;
-      axios.get(`/api/tmpUserinfo?ip=${ip}`)
+      $axios.get(`/api/tmpUserinfo?ip=${ip}`)
         .then(response => {
           this.checkresults = response.data.checkResults;
           this.serverInfo = response.data.serverInfo;

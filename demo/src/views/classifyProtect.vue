@@ -256,7 +256,6 @@
 <script>
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import axios from 'axios'; // 引入axios
 
 export default {
   name: "baseCheck",
@@ -338,7 +337,7 @@ export default {
     // 修改后的获取检测结果函数
     fetchAndDisplayChenckResults() {
       this.tableLoading = true;
-      axios.get(`/api/level3Userinfo?ip=${this.selectedIP}`)
+      this.this.$axios.get(`/api/level3Userinfo?ip=${this.selectedIP}`)
         .then(response => {
           this.checkresults = response.data.checkResults.map(item => {
             // 根据 tmp_IsComply 的值来设置 score
@@ -635,7 +634,7 @@ export default {
       };
 
       // 发送POST请求
-      axios.post('/api/updateLevel3Protect', requestData)
+      this.this.$axios.post('/api/updateLevel3Protect', requestData)
         .then(response => {
           // 保存成功
           this.saveLoading = false;
@@ -651,7 +650,7 @@ export default {
     // 获取等保评分
     getProtectionLevelResult() {
       this.resultLoading = true;
-      axios.get(`/api/getlevel3ResultByIp?ip=${this.selectedIP}`)
+      this.this.$axios.get(`/api/getlevel3ResultByIp?ip=${this.selectedIP}`)
         .then(response => {
           this.levelResult = response.data;
           this.showScoreResult = true;
