@@ -105,7 +105,7 @@
                     <span>是否全端口扫描: {{ { true: '是', false: '否' }[scanResults[0]?.allPorts] || '未知' }}</span>
                     <span v-if="scanResults[0]?.scan_time">
                       <i class="el-icon-time"></i>
-                      上次扫描时间：{{ scanResults[0].scan_time }}
+                      扫描时间：{{ scanResults[0].scan_time }}
                     </span>
                   </div>
                 </template>
