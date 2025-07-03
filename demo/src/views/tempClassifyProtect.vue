@@ -231,7 +231,7 @@ export default {
       }
 
       this.tableLoading = true;
-      $axios.get(`/api/level3TmpUserinfo?ip=${ip}`)
+      this.$axios.get(`/api/level3TmpUserinfo?ip=${ip}`)
         .then(response => {
           this.checkresults = response.data.checkResults.map(item => {
             let score = '';
@@ -265,7 +265,7 @@ export default {
     // 新增：获取等保得分
     async fetchProtectionScore() {
       try {
-        const response = await $axios.get(`/api/getLevel3Score?ip=${this.ip}`);
+        const response = await this.$axios.get(`/api/getLevel3Score?ip=${this.ip}`);
         this.protectionScore = response.data;
       } catch (error) {
         console.error('获取等保得分失败:', error);
@@ -299,7 +299,7 @@ export default {
         scoreMeasures: scoreMeasures
       };
 
-      $axios.post('/api/updateLevel3Protect', requestData)
+      this.$axios.post('/api/updateLevel3Protect', requestData)
         .then(response => {
           this.saveLoading = false;
           this.$message.success(`成功更新${response.data.itemsUpdated}项评分结果`);

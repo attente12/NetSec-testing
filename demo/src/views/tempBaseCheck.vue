@@ -160,7 +160,7 @@ export default {
       }
 
       this.tableLoading = true;
-      $axios.get(`/api/tmpUserinfo?ip=${ip}`)
+      this.$axios.get(`/api/tmpUserinfo?ip=${ip}`)
         .then(response => {
           this.checkresults = response.data.checkResults;
           this.serverInfo = response.data.serverInfo;

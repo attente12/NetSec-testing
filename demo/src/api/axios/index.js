@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// 创建 Axios 实例
 const instance = axios.create({
     timeout: 10000, // 请求超时时间（毫秒）
 });
@@ -8,8 +7,6 @@ const instance = axios.create({
 // 请求拦截器
 instance.interceptors.request.use(
     config => {
-        // 可在此添加请求前的处理，例如添加 token
-        // config.headers.Authorization = `Bearer ${token}`;
         return config;
     },
     error => Promise.reject(error)

@@ -1,6 +1,5 @@
 import Vue from 'vue'
-import Router from 'vue-router';
-import router from '@/router/index.js'
+import router from './router/index.js'
 import App from './App.vue'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
@@ -18,11 +17,21 @@ import { store } from './store/index.js'; // 引入 Vuex store
 import axios from './api/axios/index.js'; // 引入自定义 Axios 实例
 
 Vue.use(ElementUI);
-Vue.use(Router);
 Vue.use(VueCodemirror);
 
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios
+
+router.beforeEach((to, from, next) => {
+  // 如果路由有 meta.title，则设置为页面标题
+  if (to.meta.title) {
+    document.title = to.meta.title;
+  } else {
+    // 默认标题
+    document.title = '网络安全测试平台';
+  }
+  next();
+});
 
 
 new Vue({

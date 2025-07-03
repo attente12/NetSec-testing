@@ -4,12 +4,12 @@ module.exports = {
             //定义需要代理的请求路径，所有以 /api 开头的请求都会被代理
             '/api': {
                 // 代理的目标地址
-                target: 'http://172.20.10.4:8081',
+                target: 'http://192.168.0.129:8081',
                 changeOrigin: true,//代理服务器会把请求头中的Host字段改为目标地址
                 pathRewrite: { '^/api': '' }
             }
         }
-    },
+    }
     // 添加 chainWebpack 配置来处理字体文件
     // chainWebpack: config => {
     //     // 处理字体文件
@@ -24,18 +24,3 @@ module.exports = {
     //         });
     // }
 };
-
-
-// module.exports = {
-//     devServer: {
-//         proxy: {
-//             //定义需要代理的请求路径，所有以 /api 开头的请求都会被代理
-//             '/api': {
-//                 // 代理的目标地址
-//                 target: 'http://10.9.130.67:8081',
-//                 changeOrigin: true,//代理服务器会把请求头中的Host字段改为目标地址
-//                 pathRewrite: { '^/api': '' }
-//             }
-//         }
-//     }
-// };

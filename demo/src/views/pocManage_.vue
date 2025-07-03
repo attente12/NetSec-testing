@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 export default {
   name: 'PocManage',
   data() {
@@ -17,7 +16,7 @@ export default {
   methods: {
     async loadDataNew() {
       try {
-        const response = await axios.get('/api/getPocTable')
+        const response = await this.$axios.get('/api/getPocTable')
         console.log(response.data)
       } catch (error) {
         console.error('发生错误:', error);
