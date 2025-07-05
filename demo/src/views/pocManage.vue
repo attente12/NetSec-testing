@@ -215,7 +215,7 @@
       </el-dialog>
     </el-dialog>
 
-    <el-table :data="paginatedData" style="width: 100%" ref="table">
+    <el-table :data="bakPocs" style="width: 100%" ref="table">
       <el-table-column type="selection" width="50"></el-table-column>
       <!-- 新增：逻辑ID列，放在第一列 -->
       <el-table-column label="id" width="50" align="center">
@@ -223,8 +223,7 @@
           {{ (currentPage - 1) * pageSize + scope.$index + 1 }}
         </template>
       </el-table-column>
-      <!--      <el-table-column prop="id" label="ID" width="50"></el-table-column>-->
-      <el-table-column prop="cve_id" label="CVE编号" width="170"></el-table-column>
+      <el-table-column prop="vuln_id" label="CVE编号" width="170"></el-table-column>
       <el-table-column prop="vul_name" label="漏洞名称" width="130"></el-table-column>
       <el-table-column prop="type" label="漏洞类型" width="110"></el-table-column>
       <el-table-column prop="affected_infra" label="漏洞影响的范围" width="130"></el-table-column>
@@ -347,10 +346,6 @@ export default {
       editSubmitAttempted: false, // 编辑提交尝试标记
       suggestions: [], // 将文件内容读取后填充到此数组，格式为 { value: "文本" }
       filterValue: [], // 用于过滤的值
-      parameters: {
-        page: this.currentPage,
-        page_size: this.pageSize,
-      },
       pageButtonColor: '#409EFF', // 分页按钮颜色
     };
   },
@@ -386,26 +381,18 @@ export default {
       }
     }
   },
-  computed: {
-    paginatedData() {
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-
-      // return this.pocs.slice(start, end);
-      return this.filterValue.length ? this.pocs.filter((item) => this.filterValue.value.includes(item.poc_condition)) : this.pocs.slice(start, end);
-    }
-  },
   methods: {
     filterCondition(value, row) {
       console.log('Filtering by condition:', value, row);
       return row.poc_condition === value;
     },
-    async loadDataNew(isFirstload = false) {
+    async loadDataNew() {
       try {
-        const { data } = await this.$axios.get('/api/getPocTable', {
-          params: isFirstload ? { page: 1, page_size: 10 } : this.parameters
+        const data = await this.$axios.get('/getPocTable', {
+          params: { page: this.currentPage, page_size: this.pageSize }
         })
         this.pocs = data.records
+        console.log('加载数据:', data);
         this.bakPocs = [...this.pocs]; // 备份原始数据
         this.totalItems = data.total_records; // 更新总条目数
       } catch (error) {
@@ -479,7 +466,7 @@ export default {
 
     handleLook(row) {
       // 发送请求获取POC内容
-      this.$axios.get('/api/getPOCContent', {
+      this.$axios.get('/getPOCContent', {
         params: {
           id: row.id
         }
@@ -548,7 +535,7 @@ export default {
 
       this.editSubmitAttempted = false;
 
-      this.$axios.get('/api/getPOCContent', {
+      this.$axios.get('/getPOCContent', {
         params: {
           id: row.id
         }
@@ -865,7 +852,7 @@ export default {
       }
 
       try {
-        const response = await this.$axios.put('/api/updateDataById', formData, {
+        const response = await this.$axios.put('/updateDataById', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -978,7 +965,7 @@ export default {
   },
 
   created() {
-    this.loadDataNew(true);
+    this.loadDataNew();
     this.loadFile();
     this.loadVulTypes();
   }

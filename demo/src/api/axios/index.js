@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
+    baseURL: 'http://192.168.0.129:8081', // 基础URL
     timeout: 10000, // 请求超时时间（毫秒）
 });
 
