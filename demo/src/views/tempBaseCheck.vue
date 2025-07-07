@@ -98,7 +98,7 @@
         <el-table-column label="修改建议" min-width="250">
           <template slot-scope="scope">
             <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{ scope.row.recommend
-            }}</span>
+              }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -160,7 +160,7 @@ export default {
       }
 
       this.tableLoading = true;
-      this.$axios.get(`/api/tmpUserinfo?ip=${ip}`)
+      this.$axios.get(`/tmpUserinfo?ip=${ip}`)
         .then(response => {
           this.checkresults = response.data.checkResults;
           this.serverInfo = response.data.serverInfo;

@@ -52,7 +52,7 @@
                     </el-col>
                     <el-col :span="12">
                         <div class="info-item"><span class="info-label">主机物理CPU核心数：</span>{{ serverInfo.cpuCore || '未知'
-                        }}</div>
+                            }}</div>
                     </el-col>
                     <el-col :span="12">
                         <div class="info-item"><span class="info-label">硬件型号：</span>{{ serverInfo.ProductName || '未知' }}
@@ -94,7 +94,7 @@
                     <template slot-scope="scope">
                         <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{
                             scope.row.recommend
-                        }}</span>
+                            }}</span>
                         <span v-else>-</span>
                     </template>
                 </el-table-column>
@@ -241,7 +241,7 @@ export default {
             }
 
             this.tableLoading = true;
-            this.$axios.get(`/api/userinfo?ip=${this.selectedIP}`)
+            this.$axios.get(`/userinfo?ip=${this.selectedIP}`)
                 .then(response => {
                     this.checkresults = response.data.checkResults;
                     this.serverInfo = response.data.serverInfo;

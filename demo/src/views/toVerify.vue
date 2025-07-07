@@ -22,7 +22,7 @@
             <label class="label">CVE 名称:</label>
           </el-col>
           <el-col :span="22" class="row-content">
-<!--            <span>{{ cveData.CVEName }}</span>-->
+            <!--            <span>{{ cveData.CVEName }}</span>-->
             <el-input v-model="cveData.CVEName"></el-input>
           </el-col>
 
@@ -51,15 +51,10 @@
             <label class="label">漏洞影响范围:</label>
           </el-col>
           <el-col :span="22" class="row-content">
-<!--            <span>{{affected_infra}}</span>-->
-<!--            <el-input v-model="affected_infra"></el-input>-->
-            <el-autocomplete
-                v-model="affected_infra"
-                :fetch-suggestions="querySearch"
-                placeholder="请输入内容"
-                @select="handleSelect"
-                style="width: 300px;"
-            />
+            <!--            <span>{{affected_infra}}</span>-->
+            <!--            <el-input v-model="affected_infra"></el-input>-->
+            <el-autocomplete v-model="affected_infra" :fetch-suggestions="querySearch" placeholder="请输入内容"
+              @select="handleSelect" style="width: 300px;" />
           </el-col>
 
           <el-col :span="2">
@@ -75,30 +70,24 @@
             <label class="label">POC代码:</label>
           </el-col>
           <el-col :span="22" class="row-content2">
-<!--            <el-upload-->
-<!--                class="upload-demo"-->
-<!--                ref="upload"-->
-<!--                :http-request="handleFileUpload"-->
-<!--                :before-upload="beforeFileUpload"-->
-<!--                :on-remove="handleRemove"-->
-<!--                :file-list="fileList"-->
-<!--                :limit="1">-->
-<!--              <el-button>选择文件</el-button>（如需修改请上传）-->
-<!--            </el-upload>-->
-<!--            <el-button @click="submitUpload">上传文件</el-button>-->
-<!--            <span>文件名：</span>-->
-<!--            <el-input v-model="filename"></el-input>-->
-<!--            <el-button @click="submitCode">上传代码</el-button>-->
-<!--            <CodeEditor v-model="code"/>-->
+            <!--            <el-upload-->
+            <!--                class="upload-demo"-->
+            <!--                ref="upload"-->
+            <!--                :http-request="handleFileUpload"-->
+            <!--                :before-upload="beforeFileUpload"-->
+            <!--                :on-remove="handleRemove"-->
+            <!--                :file-list="fileList"-->
+            <!--                :limit="1">-->
+            <!--              <el-button>选择文件</el-button>（如需修改请上传）-->
+            <!--            </el-upload>-->
+            <!--            <el-button @click="submitUpload">上传文件</el-button>-->
+            <!--            <span>文件名：</span>-->
+            <!--            <el-input v-model="filename"></el-input>-->
+            <!--            <el-button @click="submitCode">上传代码</el-button>-->
+            <!--            <CodeEditor v-model="code"/>-->
             <div style="display: flex; align-items: center;">
-              <el-upload
-                  class="upload-demo"
-                  ref="upload"
-                  :http-request="handleFileUpload"
-                  :before-upload="beforeFileUpload"
-                  :on-remove="handleRemove"
-                  :file-list="fileList"
-                  :limit="1">
+              <el-upload class="upload-demo" ref="upload" :http-request="handleFileUpload"
+                :before-upload="beforeFileUpload" :on-remove="handleRemove" :file-list="fileList" :limit="1">
                 <el-button>选择文件</el-button>（如需修改请上传）
               </el-upload>
               <el-button @click="submitUpload" style="margin-left: 10px;">上传文件</el-button>
@@ -112,7 +101,7 @@
             </div>
 
             <!-- 代码编辑器 -->
-            <CodeEditor v-model="code"/>
+            <CodeEditor v-model="code" />
           </el-col>
 
           <div style="text-align: right;">
@@ -134,7 +123,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import CodeEditor from "@/components/CodeEditor.vue";
 
 export default {
@@ -160,28 +148,28 @@ export default {
     this.getPoc();
     this.loadFile();
   },
-  methods:{
+  methods: {
     lookDetails() {
-      axios
-          .post('/api/pocExcute', { CVE_id: this.cveData.CVE ,ip: this.cveData.ip})
-          .then((response) => {
-            this.details = response.data.message || '未提供详情';
-          })
-          .catch((error) => {
-            console.error('There was an error fetching the CVE details:', error);
-            //this.$message.error('获取漏洞详情失败，请稍后再试');
-          });
+      this.$axios
+        .post('/pocExcute', { CVE_id: this.cveData.CVE, ip: this.cveData.ip })
+        .then((response) => {
+          this.details = response.data.message || '未提供详情';
+        })
+        .catch((error) => {
+          console.error('There was an error fetching the CVE details:', error);
+          //this.$message.error('获取漏洞详情失败，请稍后再试');
+        });
     },
     getPoc() {
-      axios.get('/api/getPOCContent', {
+      this.$axios.get('/getPOCContent', {
         params: {
           vuln_id: this.cveData.CVE
         }
       })
-          .then(response => {
-            this.code = response.data.content;
-            this.affected_infra=response.data.affected_infra;
-          })
+        .then(response => {
+          this.code = response.data.content;
+          this.affected_infra = response.data.affected_infra;
+        })
     },
     beforeFileUpload(file) {
       const isPython = file.type === 'application/x-python-code' || file.name.endsWith('.py');
@@ -249,25 +237,25 @@ export default {
       formData.append('cve_id', this.cveData.CVE); // 添加CVE ID
       formData.append('vul_name', this.cveData.CVEName); // 添加CVE ID
       formData.append('affected_infra', '影响范围'); // 添加CVE ID
-      formData.append('mode','upload');
+      formData.append('mode', 'upload');
       formData.append('file', this.fileList[0]); // 添加文件
 
       // 发送POST请求
-      axios
-          .put('/api/updatePoc', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-          })
-          .then(response => {
-            // 使用后端返回的 message
-            this.$message.success(response.data.message || 'POC上传成功');
-            //window.location.reload();//刷新页面
-          })
-          .catch(error => {
-            // 使用后端返回的错误消息
-            const errorMessage = error.response?.data?.message || '上传失败，请稍后再试';
-            this.$message.error(errorMessage);
-            console.error('POC上传失败:', error);
-          });
+      this.$axios
+        .put('/updatePoc', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        .then(response => {
+          // 使用后端返回的 message
+          this.$message.success(response.data.message || 'POC上传成功');
+          //window.location.reload();//刷新页面
+        })
+        .catch(error => {
+          // 使用后端返回的错误消息
+          const errorMessage = error.response?.data?.message || '上传失败，请稍后再试';
+          this.$message.error(errorMessage);
+          console.error('POC上传失败:', error);
+        });
     },
     submitCode() {
       //需要先进行文件检查，代码正则表达式检查（还没写）
@@ -306,29 +294,29 @@ export default {
       formData.append('cve_id', this.cveData.CVE); // 添加CVE ID
       formData.append('vul_name', this.cveData.CVEName); // 添加CVE ID
       formData.append('affected_infra', '影响范围'); // 添加CVE ID
-      formData.append('mode','edit');
-      formData.append('edit_filename',this.filename);
-      formData.append('poc_content',this.code);
+      formData.append('mode', 'edit');
+      formData.append('edit_filename', this.filename);
+      formData.append('poc_content', this.code);
 
       // 发送POST请求
-      axios
-          .put('/api/updatePoc', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-          })
-          .then(response => {
-            // 使用后端返回的 message
-            this.$message.success(response.data.message || 'POC上传成功');
-            window.location.reload();//刷新页面
-          })
-          .catch(error => {
-            // 使用后端返回的错误消息
-            const errorMessage = error.response?.data?.message || '上传失败，请稍后再试';
-            this.$message.error(errorMessage);
-            console.error('POC上传失败:', error);
-          });
+      this.$axios
+        .put('/updatePoc', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        .then(response => {
+          // 使用后端返回的 message
+          this.$message.success(response.data.message || 'POC上传成功');
+          window.location.reload();//刷新页面
+        })
+        .catch(error => {
+          // 使用后端返回的错误消息
+          const errorMessage = error.response?.data?.message || '上传失败，请稍后再试';
+          this.$message.error(errorMessage);
+          console.error('POC上传失败:', error);
+        });
     },
     // startVerify() {
-    //   axios.post('/api/pocVerify', { cve_ids:[this.cveData.CVE] })
+    //   this.$axios.post('/pocVerify', { cve_ids:[this.cveData.CVE] })
     //       .then(() => {
     //         this.$message.success(`POC 执行成功`);
     //         this.getPoc(); // 刷新数据
@@ -340,19 +328,19 @@ export default {
     //       });
     // },
     startVerify() {
-      axios.post('/api/pocVerify', {
-        cve_ids:[this.cveData.CVE] ,
+      this.$axios.post('/pocVerify', {
+        cve_ids: [this.cveData.CVE],
         ip: this.cveData.ip
       })
-          .then(() => {
-            this.$message.success("操作成功");
-            this.getPoc(); // 刷新数据
-            window.location.reload();
-          })
-          .catch(error => {
-            console.error(`There was an error executing POC for ${this.cveData.CVE}:`, error);
-            //this.$message.error('执行POC失败，请稍后再试');
-          });
+        .then(() => {
+          this.$message.success("操作成功");
+          this.getPoc(); // 刷新数据
+          window.location.reload();
+        })
+        .catch(error => {
+          console.error(`There was an error executing POC for ${this.cveData.CVE}:`, error);
+          //this.$message.error('执行POC失败，请稍后再试');
+        });
     },
     returnFront() {
       this.$nextTick(() => {
@@ -391,7 +379,7 @@ export default {
       // 仅当输入字符数达到或超过3个并且为连续匹配时才执行匹配
       if (queryString.length >= 3) {
         const results = this.suggestions.filter(item =>
-            item.value.toLowerCase().includes(queryString.toLowerCase())
+          item.value.toLowerCase().includes(queryString.toLowerCase())
         );
         console.log("Filtered results:", results); // 调试信息
         callback(results);
@@ -418,9 +406,11 @@ export default {
 
 /* 卡片的样式 */
 .box-card {
-  width: 100%; /* 卡片宽度占屏幕的 80% */
+  width: 100%;
+  /* 卡片宽度占屏幕的 80% */
   /*height: 100%;*/
-  max-width: 2000px; /* 限制最大宽度 */
+  max-width: 2000px;
+  /* 限制最大宽度 */
   padding: 10px;
   border-radius: 8px;
   background-color: #ffffff;
@@ -439,10 +429,12 @@ export default {
 }
 
 .row-content {
-  margin-bottom: 12px; /* 增加行与行之间的间距 */
+  margin-bottom: 12px;
+  /* 增加行与行之间的间距 */
 }
 
 .row-content2 {
-  margin-bottom: 35px; /* 增加行与行之间的间距 */
+  margin-bottom: 35px;
+  /* 增加行与行之间的间距 */
 }
 </style>

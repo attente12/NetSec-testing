@@ -123,7 +123,7 @@ export default {
           this.searched = true
           try {
             const response = await this.$axios.post(
-              `/api/host_discovery?network=${this.searchForm.ipInput}`
+              `/host_discovery?network=${this.searchForm.ipInput}`
             )
 
             // 处理返回的分组数据

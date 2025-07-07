@@ -28,13 +28,8 @@
           </el-table-column>
           <el-table-column label="操作" width="120" align="center">
             <template slot-scope="scope">
-              <el-button
-                  size="mini"
-                  type="danger"
-                  @click="handleDelete(scope.row)"
-                  icon="el-icon-delete"
-                  circle
-              ></el-button>
+              <el-button size="mini" type="danger" @click="handleDelete(scope.row)" icon="el-icon-delete"
+                circle></el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -42,12 +37,7 @@
     </el-card>
 
     <!-- 新增漏洞类型对话框 -->
-    <el-dialog
-        title="新增漏洞类型"
-        :visible.sync="addDialogVisible"
-        width="30%"
-        :close-on-click-modal="false"
-    >
+    <el-dialog title="新增漏洞类型" :visible.sync="addDialogVisible" width="30%" :close-on-click-modal="false">
       <el-form :model="addForm" :rules="rules" ref="addForm" label-width="100px">
         <el-form-item label="漏洞类型" prop="type">
           <el-input v-model="addForm.type" placeholder="请输入漏洞类型名称"></el-input>
@@ -60,12 +50,7 @@
     </el-dialog>
 
     <!-- 删除确认对话框 -->
-    <el-dialog
-        title="删除确认"
-        :visible.sync="deleteDialogVisible"
-        width="30%"
-        :close-on-click-modal="false"
-    >
+    <el-dialog title="删除确认" :visible.sync="deleteDialogVisible" width="30%" :close-on-click-modal="false">
       <div class="delete-confirm-content">
         <i class="el-icon-warning warning-icon"></i>
         <span>确定要删除漏洞类型 "{{ typeToDelete }}" 吗？</span>
@@ -79,8 +64,6 @@
 </template>
 
 <script>
-// 导入axios
-import axios from 'axios';
 
 export default {
   name: 'VulnTypeManagement',
@@ -116,8 +99,7 @@ export default {
     async fetchVulnTypes() {
       this.loading = true
       try {
-        // 使用导入的axios
-        const response = await axios.get('/api/poc/getAllVulnTypes')
+        const response = await this.$axios.get('/poc/getAllVulnTypes')
         console.log('获取到的数据:', response.data) // 调试信息
         this.vulnTypes = response.data.types || []
       } catch (error) {
@@ -145,8 +127,8 @@ export default {
 
         this.submitLoading = true
         try {
-          // 使用导入的axios
-          const response = await axios.post('/api/poc/editVulnType', {
+          // 使用导入的this.$axios
+          const response = await this.$axios.post('/poc/editVulnType', {
             type: this.addForm.type,
             action: 'add'
           })
@@ -175,8 +157,8 @@ export default {
     async confirmDelete() {
       this.deleteLoading = true
       try {
-        // 使用导入的axios
-        const response = await axios.post('/api/poc/editVulnType', {
+        // 使用导入的this.$axios
+        const response = await this.$axios.post('/poc/editVulnType', {
           type: this.typeToDelete,
           action: 'delete'
         })

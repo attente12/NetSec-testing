@@ -125,7 +125,7 @@
           <template slot-scope="scope">
             <!--            <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>-->
             <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{ scope.row.recommend
-            }}</span>
+              }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -157,7 +157,7 @@
           <template slot-scope="scope">
             <!--            <span v-if="scope.row.IsComply === 'false'">{{ scope.row.recommend }}</span>-->
             <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{ scope.row.recommend
-            }}</span>
+              }}</span>
             <span v-else>-</span>
           </template>
         </el-table-column>
@@ -360,7 +360,7 @@ export default {
       // }
 
       this.tableLoading = true;
-      this.$axios.get(`/api/userinfo?ip=${this.selectedIP}`)
+      this.$axios.get(`/userinfo?ip=${this.selectedIP}`)
         .then(response => {
           // this.checkresults = response.data.Event_result;
           this.checkresults = response.data.checkResults;

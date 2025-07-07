@@ -1,11 +1,8 @@
 <!-- src/components/CodeEditor.vue -->
 <template>
   <div class="code-editor">
-    <codemirror
-        v-model="code"
-        :options="editorOptions"
-        style="height: 300px; width: 100%; border: 1px solid #dcdfe6; border-radius: 4px;"
-    />
+    <codemirror v-model="code" :options="editorOptions"
+      style="height: 300px; width: 100%; border: 1px solid #dcdfe6; border-radius: 4px;" />
   </div>
 </template>
 
@@ -56,7 +53,7 @@ export default {
   margin-top: 8px;
 }
 
-.code-editor >>> .CodeMirror {
+.code-editor>>>.CodeMirror {
   background-color: white !important;
   color: black;
   font-size: 14px;
@@ -64,21 +61,7 @@ export default {
   padding: 8px;
 }
 
-.code-editor >>> .CodeMirror-line {
+.code-editor>>>.CodeMirror-line {
   line-height: 1.5 !important;
 }
 </style>
-
-
-<!--<style scoped>-->
-<!--/* 自定义样式，可根据需求调整 */-->
-<!--.code-editor {-->
-<!--  margin-top: 8px;-->
-<!--}-->
-
-<!--/* 强制覆盖 CodeMirror 背景颜色为白色 */-->
-<!--.CodeMirror {-->
-<!--  background-color: white !important;-->
-<!--  color: black;-->
-<!--}-->
-<!--</style>-->

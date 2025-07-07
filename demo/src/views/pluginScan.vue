@@ -237,7 +237,7 @@ export default {
       this.detectState = true;
       // localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
       const target = { ip: this.scanTarget };
-      this.$axios.post('/api/getNmapIp', target)
+      this.$axios.post('/getNmapIp', target)
         .then(response => {
           console.log('Scan result:', response.data);
           Message.success('扫描完成');
@@ -262,7 +262,7 @@ export default {
         ip: this.scanTarget,
         all_ports: true // 默认发送 all_ports 为 true
       };
-      this.$axios.post('/api/getNmapIp', target)
+      this.$axios.post('/getNmapIp', target)
         .then(response => {
           console.log('Scan result:', response.data);
           Message.success('扫描完成');
@@ -300,7 +300,7 @@ export default {
     },
     // 新增：获取活跃IP列表的方法
     // fetchAliveHosts() {
-    //   this.$axios.get('/api/getAliveHosts')
+    //   this.$axios.get('/getAliveHosts')
     //       .then(response => {
     //         this.aliveHosts = response.data.alive_hosts;
     //         if (!this.scanTarget) {
@@ -314,10 +314,10 @@ export default {
     //       });
     // },
     // loadTableData(){
-    //   this.$axios.get('/api/getAllData').then(response => {
+    //   this.$axios.get('/getAllData').then(response => {
     //     this.pocList=response.data;
     //   })
-    //   this.$axios.post('/api/pocScan/mergeResults', { ip: this.scanTarget })
+    //   this.$axios.post('/pocScan/mergeResults', { ip: this.scanTarget })
     //       .then(response => {
     //         this.result = response.data;
     //         console.log(response.data);
@@ -327,7 +327,7 @@ export default {
     //       });
     // },
     loadTableData() {
-      this.$axios.get('/api/getAllData').then(response => {
+      this.$axios.get('/getVaildPOCData').then(response => {
         this.pocList = response.data;
       })
     },
@@ -356,7 +356,7 @@ export default {
         ids: this.selectedPoc
       };
 
-      this.$axios.post('/api/pocScan', postData)
+      this.$axios.post('/pocScan', postData)
         .then(response => {
           console.log(response.data);
           this.time = response.data.scan_time;
@@ -375,7 +375,7 @@ export default {
         return;
       }
 
-      this.$axios.post('/api/pocScan/autoSelectPoc', { ip: this.scanTarget })
+      this.$axios.post('/pocScan/autoSelectPoc', { ip: this.scanTarget })
         .then(response => {
           const autoSelectedIds = response.data.map(poc => poc.id);
           this.checkedPocs = this.pocList.filter(poc => autoSelectedIds.includes(poc.id));

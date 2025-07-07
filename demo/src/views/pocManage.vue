@@ -240,11 +240,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="cvss_score" label="CVSS评分" width="60"></el-table-column>
-      <el-table-column prop="poc_condition" label="POC状态" width="85" :filters="[
-        { text: '有', value: '有' },
-        { text: '无', value: '无' },
-        { text: '暂存', value: '暂存' }
-      ]" :filter-method="filterCondition"></el-table-column>
+      <el-table-column prop="poc_condition" label="POC状态" width="85"></el-table-column>
       <el-table-column prop="script_type" label="POC类型" width="80"></el-table-column>
 
       <el-table-column prop="script" label="POC代码" width="100">
@@ -267,10 +263,19 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination :hide-on-single-page=true :background="pageButtonColor" @size-change="handleSizeChange"
-      @current-change="handleCurrentChange" :current-page="currentPage" :page-size="pageSize" :total="totalItems"
-      layout="total, sizes, prev, pager, next, jumper">
-    </el-pagination>
+    <p class="pagination-container">
+      <el-pagination :hide-on-single-page=true :background="pageButtonColor" @size-change="handleSizeChange"
+        @current-change="handleCurrentChange" :current-page="currentPage" :page-size="pageSize" :total="totalItems"
+        layout="total, sizes, prev, pager, next, jumper">
+
+      </el-pagination>
+      <el-select v-model="POCConditionValue" placeholder="筛选POC状态" clearable="true">
+        <el-option v-for="option in options" :key="option.value" :label="option.label" :value="option.value">
+        </el-option>
+      </el-select>
+    </p>
+
+
   </div>
 </template>
 
@@ -345,8 +350,13 @@ export default {
       submitAttempted: false, // 提交尝试标记
       editSubmitAttempted: false, // 编辑提交尝试标记
       suggestions: [], // 将文件内容读取后填充到此数组，格式为 { value: "文本" }
-      filterValue: [], // 用于过滤的值
       pageButtonColor: '#409EFF', // 分页按钮颜色
+      options: [
+        { value: '0', label: '有' },
+        { value: '1', label: '无' },
+        { value: '2', label: '暂存' }
+      ],
+      POCConditionValue: '', // 用于存储POC状态的值
     };
   },
   watch: {
@@ -379,20 +389,40 @@ export default {
           Prism.highlightAll();  // 应用 Prism 高亮
         });
       }
+    },
+    POCConditionValue(newVal) {
+      this.currentPage = 1; // 重置当前页码
+      this.pageSize = 10; // 重置每页条目数
+      switch (newVal) {
+        case '0':
+          this.loadDataNew('0');
+          break;
+        case '1':
+          this.loadDataNew('1');
+          break;
+        case '2':
+          this.loadDataNew('2')
+          break;
+        default:
+          this.loadDataNew() // 恢复原始数据
+      }
     }
   },
   methods: {
-    filterCondition(value, row) {
-      console.log('Filtering by condition:', value, row);
-      return row.poc_condition === value;
-    },
-    async loadDataNew() {
+    async loadDataNew(flag) {
       try {
-        const data = await this.$axios.get('/getPocTable', {
+        let url = '/getPocTable';
+        if (flag === '0') {
+          url = '/getWithPocCondition';
+        } else if (flag === '1') {
+          url = '/getWithOutPocCondition';
+        } else if (flag === '2') {
+          url = '/getWithTranCondition';
+        }
+        const data = await this.$axios.get(url, {
           params: { page: this.currentPage, page_size: this.pageSize }
         })
         this.pocs = data.records
-        console.log('加载数据:', data);
         this.bakPocs = [...this.pocs]; // 备份原始数据
         this.totalItems = data.total_records; // 更新总条目数
       } catch (error) {
@@ -497,11 +527,11 @@ export default {
 
     handleSizeChange(newSize) {
       this.pageSize = newSize;
-      this.loadDataNew();
+      this.loadDataNew(this.POCConditionValue);
     },
     handleCurrentChange(newPage) {
       this.currentPage = newPage;
-      this.loadDataNew();
+      this.loadDataNew(this.POCConditionValue);
     },
     handleAdd() {
       this.addDialogVisible = true;
@@ -1009,5 +1039,17 @@ pre[class*="language-"] {
   -moz-hyphens: none;
   -ms-hyphens: none;
   hyphens: none;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination-container .el-select {
+  width: 150px;
+  min-width: 120px;
+  margin-right: 150px;
 }
 </style>
