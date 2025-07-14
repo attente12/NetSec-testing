@@ -6,11 +6,11 @@
           class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" background-color="#545c64"
           text-color="#fff" active-text-color="#ffd04b" style="height: 100%; width: 100%;">
           <div style="height: 60px; line-height: 60px; text-align: center">
-            <img src="../assets/logo.png" alt="" style="width: 20px; position: relative; top: 5px; right: 5px">
+
             <b style="color: white">网络安全测试平台</b>
           </div>
 
-          <el-menu-item index="/">
+          <el-menu-item index="/indexPage">
             <i class="el-icon-menu"></i>
             <span slot="title">首页</span>
           </el-menu-item>

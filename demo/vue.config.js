@@ -10,17 +10,4 @@ module.exports = {
             }
         }
     }
-    // 添加 chainWebpack 配置来处理字体文件
-    // chainWebpack: config => {
-    //     // 处理字体文件
-    //     config.module
-    //         .rule('fonts')
-    //         .test(/\.(woff2?|eot|ttf|otf)(\?.*)?$/)
-    //         .use('url-loader')
-    //         .loader('url-loader')
-    //         .options({
-    //             limit: 10240,
-    //             name: 'fonts/[name].[hash:8].[ext]'
-    //         });
-    // }
 };

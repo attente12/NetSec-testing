@@ -4,57 +4,30 @@
     <div class="ip-list">
       <div class="menu-header">
         <span class="title">资产</span>
-        <el-badge
-            :value="assets.length"
-            class="asset-count"
-            type="primary">
+        <el-badge :value="assets.length" class="asset-count" type="primary">
         </el-badge>
-        <el-button
-            type="primary"
-            icon="el-icon-plus"
-            size="mini"
-            circle
-            class="add-group-btn"
-            @click="addGroupDialogVisible = true"
-            title="新增资产组">
+        <el-button type="primary" icon="el-icon-plus" size="mini" circle class="add-group-btn"
+          @click="addGroupDialogVisible = true" title="新增资产组">
         </el-button>
       </div>
 
       <div class="group-container">
         <el-collapse v-model="expandedGroups">
           <!-- 渲染每个资产组 -->
-          <el-collapse-item
-              v-for="group in assetGroups"
-              :key="group.id"
-              :name="group.id"
-              class="group-item">
+          <el-collapse-item v-for="group in assetGroups" :key="group.id" :name="group.id" class="group-item">
             <template slot="title">
               <div class="group-title">
                 <span class="group-name" :title="group.name">{{ group.name }}</span>
                 <span class="group-count">({{ groupedAssets[group.id]?.assets.length || 0 }})</span>
                 <div class="group-actions" @click.stop>
-                  <el-button
-                      type="text"
-                      icon="el-icon-edit"
-                      size="mini"
-                      @click="showEditGroupDialog(group)"
-                      title="修改组名">
+                  <el-button type="text" icon="el-icon-edit" size="mini" @click="showEditGroupDialog(group)"
+                    title="修改组名">
                   </el-button>
-                  <el-button
-                      type="text"
-                      icon="el-icon-plus"
-                      size="mini"
-                      @click="showMoveAssetDialog(group)"
-                      title="添加资产到此组"
-                      v-if="ungroupedAssets.length > 0">
+                  <el-button type="text" icon="el-icon-plus" size="mini" @click="showMoveAssetDialog(group)"
+                    title="添加资产到此组" v-if="ungroupedAssets.length > 0">
                   </el-button>
-                  <el-button
-                      type="text"
-                      icon="el-icon-delete"
-                      size="mini"
-                      @click="handleDeleteGroup(group)"
-                      title="删除资产组"
-                      v-if="group.id !== null">
+                  <el-button type="text" icon="el-icon-delete" size="mini" @click="handleDeleteGroup(group)"
+                    title="删除资产组" v-if="group.id !== null">
                   </el-button>
                 </div>
               </div>
@@ -62,31 +35,27 @@
 
             <!-- 资产列表 -->
             <div class="assets-list">
-              <div
-                  v-for="asset in groupedAssets[group.id]?.assets || []"
-                  :key="asset.ip"
-                  :class="['asset-item', { active: currentIp === asset.ip }]"
-                  @click="handleSelect(asset.ip)">
+              <div v-for="asset in groupedAssets[group.id]?.assets || []" :key="asset.ip"
+                :class="['asset-item', { active: currentIp === asset.ip }]" @click="handleSelect(asset.ip)">
                 <div class="asset-info">
                   <i class="el-icon-monitor"></i>
                   <span class="asset-ip" :title="asset.ip">{{ asset.ip }}</span>
-<!--                  <div class="asset-status">-->
-<!--                    <el-tag-->
-<!--                        :type="asset.alive ? 'success' : 'danger'"-->
-<!--                        size="mini"-->
-<!--                        style="width: 30px; display: inline-block; text-align: center; margin-left: 0px;margin-right: 0px;">-->
-<!--                      {{ asset.alive ? '在线' : '离线' }}-->
-<!--                    </el-tag>-->
-<!--                  </div>-->
+                  <!--                  <div class="asset-status">-->
+                  <!--                    <el-tag-->
+                  <!--                        :type="asset.alive ? 'success' : 'danger'"-->
+                  <!--                        size="mini"-->
+                  <!--                        style="width: 30px; display: inline-block; text-align: center; margin-left: 0px;margin-right: 0px;">-->
+                  <!--                      {{ asset.alive ? '在线' : '离线' }}-->
+                  <!--                    </el-tag>-->
+                  <!--                  </div>-->
                 </div>
                 <div class="asset-actions" @click.stop>
-                  <el-dropdown @command="(groupId) => moveAssetToGroup(asset.ip, groupId)" v-if="assetGroups.filter(g => g.id !== group.id).length > 0">
+                  <el-dropdown @command="(groupId) => moveAssetToGroup(asset.ip, groupId)"
+                    v-if="assetGroups.filter(g => g.id !== group.id).length > 0">
                     <el-button type="text" icon="el-icon-rank" size="mini" title="移动到其他组"></el-button>
                     <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item
-                          v-for="targetGroup in assetGroups.filter(g => g.id !== group.id)"
-                          :key="targetGroup.id"
-                          :command="targetGroup.id">
+                      <el-dropdown-item v-for="targetGroup in assetGroups.filter(g => g.id !== group.id)"
+                        :key="targetGroup.id" :command="targetGroup.id">
                         {{ targetGroup.name }}
                       </el-dropdown-item>
                     </el-dropdown-menu>
@@ -108,12 +77,7 @@
     <div class="content-area" v-if="currentAsset">
       <!-- 添加打印按钮 -->
       <div class="export-section" style="margin-bottom: 20px; text-align: right;">
-        <el-button
-            type="primary"
-            icon="el-icon-printer"
-            @click="exportPdf"
-            :loading="pdfExporting"
-            size="medium">
+        <el-button type="primary" icon="el-icon-printer" @click="exportPdf" :loading="pdfExporting" size="medium">
           {{ pdfExporting ? '导出中...' : '导出PDF报告' }}
         </el-button>
       </div>
@@ -166,12 +130,12 @@
 
       <!-- 基线检测信息 -->
       <div class="baseline-section" v-if="currentAsset.baseline_summary">
-<!--        <h2>-->
-<!--          基线检测-->
-<!--          <el-tooltip content="查看详细信息" placement="top">-->
-<!--            <i class="el-icon-view baseline-info-icon" @click="showBaselineDetails"></i>-->
-<!--          </el-tooltip>-->
-<!--        </h2>-->
+        <!--        <h2>-->
+        <!--          基线检测-->
+        <!--          <el-tooltip content="查看详细信息" placement="top">-->
+        <!--            <i class="el-icon-view baseline-info-icon" @click="showBaselineDetails"></i>-->
+        <!--          </el-tooltip>-->
+        <!--        </h2>-->
         <h2>
           基线检测
           <el-tooltip content="查看详细信息" placement="top">
@@ -184,8 +148,10 @@
         <div class="baseline-info">
           <div class="baseline-summary">
             <div class="compliance-dashboard" style="margin-right: 30px">
-              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/已检测项数</div>
-              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.non_compliance_rate" :color="'#F56C6C'" :stroke-width="10">
+              <div class="compliance-label"
+                style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/已检测项数</div>
+              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.non_compliance_rate"
+                :color="'#F56C6C'" :stroke-width="10">
                 <template v-slot:default>
                   <div class="progress-content">
                     <span class="rate">{{ currentAsset.baseline_summary.non_compliance_rate }}%</span>
@@ -195,8 +161,11 @@
             </div>
 
             <div class="compliance-dashboard">
-              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/总项数</div>
-              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.non_compliance_rate_to_initial_checks" :color="'#F56C6C'" :stroke-width="10">
+              <div class="compliance-label"
+                style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/总项数</div>
+              <el-progress type="dashboard"
+                :percentage="currentAsset.baseline_summary.non_compliance_rate_to_initial_checks" :color="'#F56C6C'"
+                :stroke-width="10">
                 <template v-slot:default>
                   <div class="progress-content">
                     <span class="rate">{{ currentAsset.baseline_summary.non_compliance_rate_to_initial_checks }}%</span>
@@ -212,7 +181,8 @@
               </div>
               <div class="stat-item">
                 <div class="item-header">合格项数</div>
-                <div class="item-value" style="color: #67C23A;">{{ currentAsset.baseline_summary.compliant_items }}</div>
+                <div class="item-value" style="color: #67C23A;">{{ currentAsset.baseline_summary.compliant_items }}
+                </div>
               </div>
               <div class="stat-item">
                 <div class="item-header">待检测项数</div>
@@ -220,7 +190,8 @@
               </div>
               <div class="stat-item">
                 <div class="item-header">不合格项数</div>
-                <div class="item-value" style="color: #F56C6C;">{{ currentAsset.baseline_summary.non_compliant_items }}</div>
+                <div class="item-value" style="color: #F56C6C;">{{ currentAsset.baseline_summary.non_compliant_items }}
+                </div>
               </div>
             </div>
           </div>
@@ -229,17 +200,14 @@
             <el-collapse v-model="activeBaselineUndoItems" accordion>
               <el-collapse-item name="undo">
                 <template slot="title">
-        <span class="undo-title">
-          <i class="el-icon-warning-outline"></i>
-          未检查项 ({{ currentAsset.undo_baseline.length }}项)
-        </span>
+                  <span class="undo-title">
+                    <i class="el-icon-warning-outline"></i>
+                    未检查项 ({{ currentAsset.undo_baseline.length }}项)
+                  </span>
                 </template>
                 <div class="undo-content">
-                  <el-table
-                      :data="currentAsset.undo_baseline"
-                      border
-                      stripe
-                      :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+                  <el-table :data="currentAsset.undo_baseline" border stripe
+                    :header-cell-style="{ backgroundColor: '#f5f7fa' }">
                     <el-table-column prop="item_id" label="项目ID" width="80"></el-table-column>
                     <el-table-column prop="description" label="检查项" width="200"></el-table-column>
                     <el-table-column prop="basis" label="检查依据"></el-table-column>
@@ -303,11 +271,8 @@
                   {{ getScoreGrade(currentAsset.M) }}
                 </el-tag>
                 <div class="score-progress-inline">
-                  <el-progress
-                      :percentage="currentAsset.M"
-                      :color="getScoreProgressColor(currentAsset.M)"
-                      :stroke-width="8"
-                      :show-text="false">
+                  <el-progress :percentage="currentAsset.M" :color="getScoreProgressColor(currentAsset.M)"
+                    :stroke-width="8" :show-text="false">
                   </el-progress>
                 </div>
               </div>
@@ -315,8 +280,10 @@
           </div>
           <div class="baseline-summary">
             <div class="compliance-dashboard" style="margin-right: 30px">
-              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/已检测项数</div>
-              <el-progress type="dashboard" :percentage="currentAsset.level3_baseline_summary.non_compliance_rate" :color="getLevel3ComplianceColor" :stroke-width="10">
+              <div class="compliance-label"
+                style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/已检测项数</div>
+              <el-progress type="dashboard" :percentage="currentAsset.level3_baseline_summary.non_compliance_rate"
+                :color="getLevel3ComplianceColor" :stroke-width="10">
                 <template v-slot:default>
                   <div class="progress-content">
                     <span class="rate">{{ currentAsset.level3_baseline_summary.non_compliance_rate }}%</span>
@@ -325,11 +292,15 @@
               </el-progress>
             </div>
             <div class="compliance-dashboard">
-              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/总项数</div>
-              <el-progress type="dashboard" :percentage="currentAsset.level3_baseline_summary.non_compliance_rate_to_initial_checks" :color="getLevel3ComplianceColor" :stroke-width="10">
+              <div class="compliance-label"
+                style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">不合格/总项数</div>
+              <el-progress type="dashboard"
+                :percentage="currentAsset.level3_baseline_summary.non_compliance_rate_to_initial_checks"
+                :color="getLevel3ComplianceColor" :stroke-width="10">
                 <template v-slot:default>
                   <div class="progress-content">
-                    <span class="rate">{{ currentAsset.level3_baseline_summary.non_compliance_rate_to_initial_checks }}%</span>
+                    <span class="rate">{{ currentAsset.level3_baseline_summary.non_compliance_rate_to_initial_checks
+                    }}%</span>
                   </div>
                 </template>
               </el-progress>
@@ -338,44 +309,49 @@
             <div class="baseline-stats">
               <div class="stat-item">
                 <div class="item-header">总检测项数</div>
-                <div class="item-value" style="color: #303133;">{{ currentAsset.level3_baseline_summary.total_checks }}</div>
+                <div class="item-value" style="color: #303133;">{{ currentAsset.level3_baseline_summary.total_checks }}
+                </div>
               </div>
               <div class="stat-item">
                 <div class="item-header">合格项数</div>
-                <div class="item-value" style="color: #67C23A;">{{ currentAsset.level3_baseline_summary.compliant_items }}</div>
+                <div class="item-value" style="color: #67C23A;">{{ currentAsset.level3_baseline_summary.compliant_items
+                }}
+                </div>
               </div>
               <div class="stat-item">
                 <div class="item-header">部分合格项数</div>
-                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.level3_baseline_summary.half_compliant_items }}</div>
+                <div class="item-value" style="color: #E6A23C;">{{
+                  currentAsset.level3_baseline_summary.half_compliant_items
+                }}</div>
               </div>
 
               <div class="stat-item">
                 <div class="item-header">不合格项数</div>
-                <div class="item-value" style="color: #F56C6C;">{{ currentAsset.level3_baseline_summary.non_compliant_items }}</div>
+                <div class="item-value" style="color: #F56C6C;">{{
+                  currentAsset.level3_baseline_summary.non_compliant_items
+                }}</div>
               </div>
-<!--              <div class="stat-item">-->
-<!--                <div class="item-header">待人工检查项数</div>-->
-<!--                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.level3_baseline_summary.pending_items }}</div>-->
-<!--              </div>-->
+              <!--              <div class="stat-item">-->
+              <!--                <div class="item-header">待人工检查项数</div>-->
+              <!--                <div class="item-value" style="color: #E6A23C;">{{ currentAsset.level3_baseline_summary.pending_items }}</div>-->
+              <!--              </div>-->
             </div>
           </div>
 
           <!-- 未检查项展示 -->
-          <div class="undo-items-section" v-if="currentAsset.undo_level3_baseline && currentAsset.undo_level3_baseline.length > 0">
+          <div class="undo-items-section"
+            v-if="currentAsset.undo_level3_baseline && currentAsset.undo_level3_baseline.length > 0">
             <el-collapse v-model="activeUndoItems" accordion>
               <el-collapse-item name="undo">
                 <template slot="title">
-            <span class="undo-title">
-              <i class="el-icon-warning-outline"></i>
-              未检查项 ({{ currentAsset.undo_level3_baseline.length }}项)
-            </span>
+                  <span class="undo-title">
+                    <i class="el-icon-warning-outline"></i>
+                    未检查项 ({{ currentAsset.undo_level3_baseline.length }}项)
+                  </span>
                 </template>
                 <div class="undo-content">
-                  <el-table
-                      :data="currentAsset.undo_level3_baseline"
-                      border
-                      stripe
-                      :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+                  <el-table :data="currentAsset.undo_level3_baseline" border stripe
+                    :header-cell-style="{ backgroundColor: '#f5f7fa' }">
                     <el-table-column prop="item_id" label="项目ID" width="80"></el-table-column>
                     <el-table-column prop="description" label="检查项" width="200"></el-table-column>
                     <!--                    <el-table-column prop="important_level" label="重要级别" width="100">-->
@@ -399,11 +375,7 @@
         <h2>软件资产</h2>
         <div v-for="(ports, type) in groupedPorts" :key="type" class="port-group">
           <h3 class="group-title">{{ type }}</h3>
-          <el-table
-              :data="ports"
-              border
-              stripe
-              :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+          <el-table :data="ports" border stripe :header-cell-style="{ backgroundColor: '#f5f7fa' }">
             <el-table-column prop="port" label="端口" width="80"></el-table-column>
             <el-table-column prop="protocol" label="协议" width="80"></el-table-column>
             <el-table-column prop="service_name" label="服务名称" width="120"></el-table-column>
@@ -433,11 +405,7 @@
       <!-- 风险部分 -->
       <div class="weak-password-section" v-if="weakPasswordPorts.length > 0">
         <h2>风险</h2>
-        <el-table
-            :data="weakPasswordPorts"
-            border
-            stripe
-            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+        <el-table :data="weakPasswordPorts" border stripe :header-cell-style="{ backgroundColor: '#f5f7fa' }">
           <!--          <el-table-column prop="product" label="产品" width="150">-->
           <!--            <template slot-scope="scope">-->
           <!--              <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.product }}</span>-->
@@ -502,14 +470,11 @@
         </el-card>
 
         <!-- 主机漏洞表格 -->
-        <div class="table-section" v-if="currentAsset.host_vulnerabilities && currentAsset.host_vulnerabilities.length > 0">
+        <div class="table-section"
+          v-if="currentAsset.host_vulnerabilities && currentAsset.host_vulnerabilities.length > 0">
           <h3><strong>系统漏洞</strong></h3>
-          <el-table
-              :data="currentAsset.host_vulnerabilities"
-              border
-              stripe
-              :header-cell-style="{ backgroundColor: '#f5f7fa' }"
-          >
+          <el-table :data="currentAsset.host_vulnerabilities" border stripe
+            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
             <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>
             <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>
             <el-table-column prop="vulType" label="漏洞类型" width="150"></el-table-column>
@@ -533,16 +498,9 @@
         <!-- 端口漏洞分组表格 -->
         <div class="table-section" v-if="Object.keys(groupedPortVulnerabilities).length > 0">
           <h3><strong>软件资产漏洞</strong></h3>
-          <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities"
-               :key="type"
-               class="vulnerability-group">
+          <div v-for="(vulnerabilities, type) in groupedPortVulnerabilities" :key="type" class="vulnerability-group">
             <h4 class="group-title">{{ type }}</h4>
-            <el-table
-                :data="vulnerabilities"
-                border
-                stripe
-                :header-cell-style="{ backgroundColor: '#f5f7fa' }"
-            >
+            <el-table :data="vulnerabilities" border stripe :header-cell-style="{ backgroundColor: '#f5f7fa' }">
               <el-table-column prop="port_id" label="端口" width="70"></el-table-column>
               <el-table-column prop="service_name" label="服务名称" width="100"></el-table-column>
               <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>
@@ -612,16 +570,9 @@
         <!--        </div>-->
         <div class="table-section" v-if="Object.keys(groupedVulTypeVulnerabilities).length > 0">
           <h3><strong>漏洞详情</strong></h3>
-          <div v-for="(vulnerabilities, type) in groupedVulTypeVulnerabilities"
-               :key="type"
-               class="vulnerability-group">
+          <div v-for="(vulnerabilities, type) in groupedVulTypeVulnerabilities" :key="type" class="vulnerability-group">
             <h4 class="group-title">{{ type }}</h4>
-            <el-table
-                :data="vulnerabilities"
-                border
-                stripe
-                :header-cell-style="{ backgroundColor: '#f5f7fa' }"
-            >
+            <el-table :data="vulnerabilities" border stripe :header-cell-style="{ backgroundColor: '#f5f7fa' }">
               <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>
               <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>
               <el-table-column prop="vulType" label="漏洞类型" width="150"></el-table-column>
@@ -646,17 +597,10 @@
         </div>
       </template>
     </div>
-    <el-dialog
-        title="基线检测详细信息"
-        :visible.sync="baselineDialogVisible"
-        width="70%"
-        :before-close="handleBaselineDialogClose">
+    <el-dialog title="基线检测详细信息" :visible.sync="baselineDialogVisible" width="70%"
+      :before-close="handleBaselineDialogClose">
       <div v-if="baselineDetails.length" class="baseline-details-content">
-        <el-table
-            :data="baselineDetails"
-            border
-            stripe
-            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+        <el-table :data="baselineDetails" border stripe :header-cell-style="{ backgroundColor: '#f5f7fa' }">
           <el-table-column label="合规状态" width="100">
             <template slot-scope="scope">
               <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>
@@ -690,23 +634,16 @@
       </div>
     </el-dialog>
 
-    <el-dialog
-        title="等保测评详细信息"
-        :visible.sync="classifyDialogVisible"
-        width="70%"
-        :before-close="handleClassifyDialogClose">
+    <el-dialog title="等保测评详细信息" :visible.sync="classifyDialogVisible" width="70%"
+      :before-close="handleClassifyDialogClose">
       <div v-if="classifyDetails.length" class="baseline-details-content">
-        <el-table
-            :data="classifyDetails"
-            border
-            stripe
-            :header-cell-style="{ backgroundColor: '#f5f7fa' }">
+        <el-table :data="classifyDetails" border stripe :header-cell-style="{ backgroundColor: '#f5f7fa' }">
           <el-table-column label="合规状态" width="100">
-<!--            <template slot-scope="scope">-->
-<!--              <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>-->
-<!--              <el-tag v-else-if="scope.row.IsComply === 'pending'" type="warning">待检查</el-tag>-->
-<!--              <el-tag v-else type="danger">不通过</el-tag>-->
-<!--            </template>-->
+            <!--            <template slot-scope="scope">-->
+            <!--              <el-tag v-if="scope.row.IsComply === 'true'" type="success">通过</el-tag>-->
+            <!--              <el-tag v-else-if="scope.row.IsComply === 'pending'" type="warning">待检查</el-tag>-->
+            <!--              <el-tag v-else type="danger">不通过</el-tag>-->
+            <!--            </template>-->
             <template slot-scope="scope">
               <el-tag v-if="scope.row.tmp_IsComply === 'true'" type="success">合规</el-tag>
               <el-tag v-else-if="scope.row.tmp_IsComply === 'pending'" type="warning">待检查</el-tag>
@@ -741,23 +678,15 @@
     </el-dialog>
 
     <!-- 新增资产组对话框 -->
-    <el-dialog
-        title="新增资产组"
-        :visible.sync="addGroupDialogVisible"
-        width="400px"
-        :before-close="handleAddGroupDialogClose">
+    <el-dialog title="新增资产组" :visible.sync="addGroupDialogVisible" width="400px"
+      :before-close="handleAddGroupDialogClose">
       <el-form :model="newGroupForm" :rules="addGroupRules" ref="addGroupForm" label-width="80px">
         <el-form-item label="组名称" prop="group_name">
           <el-input v-model="newGroupForm.group_name" placeholder="请输入资产组名称" maxlength="50" show-word-limit></el-input>
         </el-form-item>
         <el-form-item label="描述">
-          <el-input
-              v-model="newGroupForm.description"
-              type="textarea"
-              placeholder="请输入描述（可选）"
-              maxlength="200"
-              show-word-limit
-              :rows="3">
+          <el-input v-model="newGroupForm.description" type="textarea" placeholder="请输入描述（可选）" maxlength="200"
+            show-word-limit :rows="3">
           </el-input>
         </el-form-item>
       </el-form>
@@ -768,11 +697,8 @@
     </el-dialog>
 
     <!-- 修改资产组名称对话框 -->
-    <el-dialog
-        title="修改资产组名称"
-        :visible.sync="editGroupDialogVisible"
-        width="400px"
-        :before-close="handleEditGroupDialogClose">
+    <el-dialog title="修改资产组名称" :visible.sync="editGroupDialogVisible" width="400px"
+      :before-close="handleEditGroupDialogClose">
       <el-form :model="editGroupForm" :rules="editGroupRules" ref="editGroupForm" label-width="80px">
         <el-form-item label="新名称" prop="new_name">
           <el-input v-model="editGroupForm.new_name" placeholder="请输入新的资产组名称" maxlength="50" show-word-limit></el-input>
@@ -785,11 +711,8 @@
     </el-dialog>
 
     <!-- 批量移动资产对话框 -->
-    <el-dialog
-        :title="`添加资产到 ${currentOperatingGroup?.name}`"
-        :visible.sync="moveAssetDialogVisible"
-        width="500px"
-        :before-close="handleMoveAssetDialogClose">
+    <el-dialog :title="`添加资产到 ${currentOperatingGroup?.name}`" :visible.sync="moveAssetDialogVisible" width="500px"
+      :before-close="handleMoveAssetDialogClose">
       <div class="move-asset-content">
         <div class="selection-header">
           <span>选择要添加到该组的未分组资产：</span>
@@ -802,10 +725,7 @@
           <div v-for="asset in ungroupedAssets" :key="asset.ip" class="asset-checkbox">
             <el-checkbox :label="asset.ip">
               <span class="asset-ip">{{ asset.ip }}</span>
-              <el-tag
-                  :type="asset.alive ? 'success' : 'danger'"
-                  size="mini"
-                  class="asset-status-tag">
+              <el-tag :type="asset.alive ? 'success' : 'danger'" size="mini" class="asset-status-tag">
                 {{ asset.alive ? '在线' : '离线' }}
               </el-tag>
             </el-checkbox>
@@ -817,11 +737,8 @@
       </div>
       <div slot="footer">
         <el-button @click="moveAssetDialogVisible = false">取消</el-button>
-        <el-button
-            type="primary"
-            @click="handleMoveAssets"
-            :loading="moveAssetLoading"
-            :disabled="moveAssetForm.selectedAssets.length === 0">
+        <el-button type="primary" @click="handleMoveAssets" :loading="moveAssetLoading"
+          :disabled="moveAssetForm.selectedAssets.length === 0">
           确定移动 ({{ moveAssetForm.selectedAssets.length }})
         </el-button>
       </div>
@@ -993,7 +910,7 @@ export default {
 
       // 过滤掉空数组，只返回有数据的分组
       return Object.fromEntries(
-          Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
+        Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
       );
     },
     vulnerabilityTypeStats() {
@@ -1067,11 +984,11 @@ export default {
 
       // 只返回数量大于0的类型
       return Object.fromEntries(
-          Object.entries(stats).filter(([, count]) => count > 0)
+        Object.entries(stats).filter(([, count]) => count > 0)
       );
     },
 
-// 更新 groupedVulTypeVulnerabilities 计算属性
+    // 更新 groupedVulTypeVulnerabilities 计算属性
     groupedVulTypeVulnerabilities() {
       // 创建一个按指定顺序的空对象
       const orderedGroups = {};
@@ -1101,7 +1018,7 @@ export default {
 
       // 过滤掉空数组，只返回有数据的分组
       return Object.fromEntries(
-          Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
+        Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
       );
     },
 
@@ -1111,9 +1028,9 @@ export default {
         return '无';
       }
       return this.currentAsset.ports
-          .filter(port => port.status === 'open')
-          .map(port => `${port.port}`)
-          .join(', ');
+        .filter(port => port.status === 'open')
+        .map(port => `${port.port}`)
+        .join(', ');
     },
     // 新增：按软件类型分组端口信息
     groupedPorts() {
@@ -1140,7 +1057,7 @@ export default {
 
       // 过滤掉空数组，只返回有数据的分组
       return Object.fromEntries(
-          Object.entries(orderedGroups).filter(([, ports]) => ports.length > 0)
+        Object.entries(orderedGroups).filter(([, ports]) => ports.length > 0)
       );
     },
     weakPasswordPorts() {
@@ -1148,7 +1065,7 @@ export default {
         return [];
       }
       return this.currentAsset.ports.filter(port =>
-          port.weak_username && port.weak_password && port.verify_time
+        port.weak_username && port.weak_password && port.verify_time
       );
     },
     // 新增：获取合规率颜色
@@ -1174,7 +1091,7 @@ export default {
     }
   },
   methods: {
-    showClassifyProtectDetails2(){
+    showClassifyProtectDetails2() {
       this.$nextTick(() => {
         // 传递当前查看的IP到POC验证页面
         this.$router.push({
@@ -1183,7 +1100,7 @@ export default {
         });
       });
     },
-    showBaselineDetails2(){
+    showBaselineDetails2() {
       this.$nextTick(() => {
         // 传递当前查看的IP到POC验证页面
         this.$router.push({
@@ -1238,7 +1155,7 @@ export default {
       return Math.floor(maxHeight * 0.9);
     },
 
-// 检测是否为表格行边界
+    // 检测是否为表格行边界
     isTableRowBoundary(imageData, rowIndex, width, maxHeight) {
       // 检查当前行和上下几行的特征
       const checkRange = 3;
@@ -1272,11 +1189,11 @@ export default {
 
       // 如果当前行有明显的水平边框，且上下行的边框较少，认为是表格行边界
       return currentRowBorderPixels > width * 0.15 &&
-          aboveBorderCount <= 1 &&
-          belowBorderCount <= 1;
+        aboveBorderCount <= 1 &&
+        belowBorderCount <= 1;
     },
 
-// 计算行中边框像素的数量
+    // 计算行中边框像素的数量
     countBorderPixels(imageData, rowIndex, width) {
       const rowStart = rowIndex * width * 4;
       const rowEnd = rowStart + width * 4;
@@ -1289,7 +1206,7 @@ export default {
 
         // 检测边框颜色（深灰色或黑色）
         if ((r < 100 && g < 100 && b < 100) || // 深色边框
-            (Math.abs(r - 221) < 10 && Math.abs(g - 221) < 10 && Math.abs(b - 221) < 10)) { // 浅灰色边框 (#ddd)
+          (Math.abs(r - 221) < 10 && Math.abs(g - 221) < 10 && Math.abs(b - 221) < 10)) { // 浅灰色边框 (#ddd)
           borderPixels++;
         }
       }
@@ -1297,7 +1214,7 @@ export default {
       return borderPixels;
     },
 
-// 检查是否为安全的分页点
+    // 检查是否为安全的分页点
     isSafeBreakPoint(imageData, rowIndex, width, maxHeight) {
       // 检查当前行及周围行的内容密度
       const checkRange = 5;
@@ -1305,7 +1222,7 @@ export default {
       let totalPixels = 0;
 
       for (let y = Math.max(0, rowIndex - checkRange);
-           y <= Math.min(maxHeight - 1, rowIndex + checkRange); y++) {
+        y <= Math.min(maxHeight - 1, rowIndex + checkRange); y++) {
         const rowStart = y * width * 4;
         const rowEnd = rowStart + width * 4;
 
@@ -1328,7 +1245,7 @@ export default {
       return contentDensity < 0.05;
     },
 
-// 检查是否为空白行（保持原有逻辑）
+    // 检查是否为空白行（保持原有逻辑）
     isRowEmpty(imageData, rowIndex, width) {
       const rowStart = rowIndex * width * 4;
       const rowEnd = rowStart + width * 4;
@@ -1376,10 +1293,10 @@ export default {
         // 如果不是最后一页，需要寻找合适的分页点
         if (remainingHeight > pageHeightInPixels) {
           const optimalHeight = this.findOptimalBreakPoint(
-              canvas,
-              currentY,
-              currentPageContentHeight,
-              imgWidth
+            canvas,
+            currentY,
+            currentPageContentHeight,
+            imgWidth
           );
 
           // 确保分页点不会太小
@@ -1400,9 +1317,9 @@ export default {
         pageCtx.fillRect(0, 0, imgWidth, currentPageContentHeight);
 
         pageCtx.drawImage(
-            canvas,
-            0, currentY, imgWidth, currentPageContentHeight,
-            0, 0, imgWidth, currentPageContentHeight
+          canvas,
+          0, currentY, imgWidth, currentPageContentHeight,
+          0, 0, imgWidth, currentPageContentHeight
         );
 
         // 转换为图片并添加到PDF
@@ -1410,12 +1327,12 @@ export default {
         const pageScaledHeight = currentPageContentHeight * pixelRatio;
 
         pdf.addImage(
-            pageImgData,
-            'PNG',
-            0,
-            25, // 顶部留出更多边距
-            scaledWidth,
-            pageScaledHeight
+          pageImgData,
+          'PNG',
+          0,
+          25, // 顶部留出更多边距
+          scaledWidth,
+          pageScaledHeight
         );
 
         // 存储页面信息
@@ -1743,9 +1660,9 @@ export default {
 
         this.pdfBaselineDetails.forEach(item => {
           const statusColor = item.IsComply === 'true' ? '#67C23A' :
-              item.IsComply === 'pending' ? '#E6A23C' : '#F56C6C';
+            item.IsComply === 'pending' ? '#E6A23C' : '#F56C6C';
           const statusText = item.IsComply === 'true' ? '通过' :
-              item.IsComply === 'pending' ? '待检查' : '不通过';
+            item.IsComply === 'pending' ? '待检查' : '不通过';
           const suggestion = item.IsComply === 'true' ? '-' : (item.recommend || '-');
 
           html += `
@@ -1879,18 +1796,18 @@ export default {
           // const statusColor = item.IsComply === 'true' ? '#67C23A' :
           //     item.IsComply === 'pending' ? '#E6A23C' : '#F56C6C';
           const statusColor = item.tmp_IsComply === 'true' ? '#67C23A' :
-              item.tmp_IsComply === 'false' ? '#F56C6C' :
-                  item.tmp_IsComply === 'half_true' ? '#409EFF' :
-                      item.tmp_IsComply === 'pending' ? '#E6A23C' :
-                          '#909399'; // 默认颜色（可选）
+            item.tmp_IsComply === 'false' ? '#F56C6C' :
+              item.tmp_IsComply === 'half_true' ? '#409EFF' :
+                item.tmp_IsComply === 'pending' ? '#E6A23C' :
+                  '#909399'; // 默认颜色（可选）
 
           // const statusText = item.IsComply === 'true' ? '通过' :
           //     item.IsComply === 'pending' ? '待检查' : '不通过';
           const statusText = item.tmp_IsComply === 'true' ? '合规' :
-              item.tmp_IsComply === 'false' ? '不合规' :
-                  item.tmp_IsComply === 'half_true' ? '部分合规' :
-                      item.tmp_IsComply === 'pending' ? '待检查' :
-                          '未知状态';
+            item.tmp_IsComply === 'false' ? '不合规' :
+              item.tmp_IsComply === 'half_true' ? '部分合规' :
+                item.tmp_IsComply === 'pending' ? '待检查' :
+                  '未知状态';
 
           const suggestion = item.tmp_IsComply === 'true' ? '-' : (item.recommend || '-');
 
@@ -2032,7 +1949,7 @@ export default {
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.port}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.protocol}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.service_name}</td>
-          <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.software_type|| '未识别'}</td>
+          <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">${port.software_type || '未识别'}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center; color: #F56C6C; font-weight: bold;">${port.weak_username}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center; color: #F56C6C; font-weight: bold;">存在弱密码</td>
           <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${port.verify_time}</td>
@@ -2079,7 +1996,7 @@ export default {
 
         asset.host_vulnerabilities.forEach(vuln => {
           const riskColor = this.getCvssType(vuln.cvss) === 'danger' ? '#F56C6C' :
-              this.getCvssType(vuln.cvss) === 'warning' ? '#E6A23C' : '#67C23A';
+            this.getCvssType(vuln.cvss) === 'warning' ? '#E6A23C' : '#67C23A';
           const existColor = vuln.vulExist === '存在' ? '#F56C6C' : '#67C23A';
 
           html += `
@@ -2128,7 +2045,7 @@ export default {
 
           vulns.forEach(vuln => {
             const riskColor = this.getCvssType(vuln.cvss) === 'danger' ? '#F56C6C' :
-                this.getCvssType(vuln.cvss) === 'warning' ? '#E6A23C' : '#67C23A';
+              this.getCvssType(vuln.cvss) === 'warning' ? '#E6A23C' : '#67C23A';
             const existColor = vuln.vulExist === '存在' ? '#F56C6C' : '#67C23A';
 
             html += `
@@ -2173,18 +2090,18 @@ export default {
 
     getResults() {
       fetch('/api//assets/full_info')
-          .then(response => response.json())
-          .then(data => {
-            this.assets = data;
-            // 如果当前选中的IP不在新数据中，重置选择
-            if (this.currentIp && !this.assets.find(asset => asset.ip === this.currentIp)) {
-              this.currentIp = this.assets.length > 0 ? this.assets[0].ip : '';
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            this.$message.error('获取资产信息失败');
-          });
+        .then(response => response.json())
+        .then(data => {
+          this.assets = data;
+          // 如果当前选中的IP不在新数据中，重置选择
+          if (this.currentIp && !this.assets.find(asset => asset.ip === this.currentIp)) {
+            this.currentIp = this.assets.length > 0 ? this.assets[0].ip : '';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          this.$message.error('获取资产信息失败');
+        });
     },
 
     // 获取资产组列表
@@ -2319,18 +2236,18 @@ export default {
       if (hasAssets) {
         try {
           await this.$confirm(
-              `资产组 "${group.name}" 下还有 ${this.groupedAssets[group.id].assets.length} 个资产，是否一并删除这些资产？`,
-              '删除确认',
-              {
-                type: 'warning',
-                distinguishCancelAndClose: true,
-                confirmButtonText: '删除组和资产',
-                cancelButtonText: '仅删除组',
-                showClose: true,  // 显示关闭按钮
-                closeOnClickModal: false,  // 点击遮罩不关闭
-                closeOnPressEscape: true,  // 按ESC键关闭
-                showCancelButton: true,  // 确保显示取消按钮
-              }
+            `资产组 "${group.name}" 下还有 ${this.groupedAssets[group.id].assets.length} 个资产，是否一并删除这些资产？`,
+            '删除确认',
+            {
+              type: 'warning',
+              distinguishCancelAndClose: true,
+              confirmButtonText: '删除组和资产',
+              cancelButtonText: '仅删除组',
+              showClose: true,  // 显示关闭按钮
+              closeOnClickModal: false,  // 点击遮罩不关闭
+              closeOnPressEscape: true,  // 按ESC键关闭
+              showCancelButton: true,  // 确保显示取消按钮
+            }
           );
 
           await this.deleteGroup(group.id, true);
@@ -2342,16 +2259,16 @@ export default {
       } else {
         try {
           await this.$confirm(`确定要删除资产组 "${group.name}" 吗？`,
-              '删除确认',
-              {
-                type: 'warning',
-                confirmButtonText: '确定删除',
-                cancelButtonText: '取消',
-                showClose: true,  // 显示关闭按钮
-                closeOnClickModal: false,  // 点击遮罩不关闭
-                closeOnPressEscape: true,  // 按ESC键关闭
-                showCancelButton: true,  // 确保显示取消按钮
-              }
+            '删除确认',
+            {
+              type: 'warning',
+              confirmButtonText: '确定删除',
+              cancelButtonText: '取消',
+              showClose: true,  // 显示关闭按钮
+              closeOnClickModal: false,  // 点击遮罩不关闭
+              closeOnPressEscape: true,  // 按ESC键关闭
+              showCancelButton: true,  // 确保显示取消按钮
+            }
           );
           await this.deleteGroup(group.id, false);
         } catch {
@@ -2363,8 +2280,8 @@ export default {
     async deleteGroup(groupId, deleteAssets) {
       try {
         const url = deleteAssets
-            ? `/api/asset_group/${groupId}?delete_assets=true`
-            : `/api/asset_group/${groupId}`;
+          ? `/api/asset_group/${groupId}?delete_assets=true`
+          : `/api/asset_group/${groupId}`;
 
         const response = await fetch(url, {
           method: 'DELETE'
@@ -2417,13 +2334,13 @@ export default {
 
       try {
         const promises = this.moveAssetForm.selectedAssets.map(assetIp =>
-            fetch(`/api/asset/${assetIp}/group`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ group_id: this.moveAssetForm.targetGroupId })
-            })
+          fetch(`/api/asset/${assetIp}/group`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ group_id: this.moveAssetForm.targetGroupId })
+          })
         );
 
         const results = await Promise.all(promises);
@@ -2541,11 +2458,11 @@ export default {
 
       const stats = this.vulnerabilityTypeStats;
       const data = Object.entries(stats)
-          .filter(([, value]) => value > 0)
-          .map(([name, value]) => ({
-            name,
-            value
-          }));
+        .filter(([, value]) => value > 0)
+        .map(([name, value]) => ({
+          name,
+          value
+        }));
 
       const option = {
         tooltip: {
@@ -2596,10 +2513,10 @@ export default {
 
       const stats = this.vulTypeStats;
       const data = Object.entries(stats)
-          .map(([name, value]) => ({
-            name,
-            value
-          }));
+        .map(([name, value]) => ({
+          name,
+          value
+        }));
 
       const option = {
         tooltip: {
@@ -2653,17 +2570,17 @@ export default {
 
       // 调用API获取详细信息
       fetch(`/api/userinfo?ip=${this.currentAsset.ip}`)
-          .then(response => response.json())
-          .then(data => {
-            if (data && data.checkResults) {
-              this.baselineDetails = data.checkResults;
-            }
-            this.baselineDetailsLoading = false;
-          })
-          .catch(error => {
-            console.error('获取基线检测详细信息失败:', error);
-            this.baselineDetailsLoading = false;
-          });
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.checkResults) {
+            this.baselineDetails = data.checkResults;
+          }
+          this.baselineDetailsLoading = false;
+        })
+        .catch(error => {
+          console.error('获取基线检测详细信息失败:', error);
+          this.baselineDetailsLoading = false;
+        });
     },
 
     // 关闭基线检测详细信息对话框
@@ -2680,17 +2597,17 @@ export default {
 
       // 调用API获取详细信息
       fetch(`/api/level3Userinfo?ip=${this.currentAsset.ip}`)
-          .then(response => response.json())
-          .then(data => {
-            if (data && data.checkResults) {
-              this.classifyDetails = data.checkResults;
-            }
-            this.classifyDetailsLoading = false;
-          })
-          .catch(error => {
-            console.error('获取基线检测详细信息失败:', error);
-            this.classifyDetailsLoading = false;
-          });
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.checkResults) {
+            this.classifyDetails = data.checkResults;
+          }
+          this.classifyDetailsLoading = false;
+        })
+        .catch(error => {
+          console.error('获取基线检测详细信息失败:', error);
+          this.classifyDetailsLoading = false;
+        });
     },
     // 关闭基线检测详细信息对话框
     handleClassifyDialogClose() {
@@ -2727,7 +2644,7 @@ export default {
       }
     },
 
-// 获取等保重要级别对应的文本
+    // 获取等保重要级别对应的文本
     getLevel3ImportanceLevel(level) {
       level = parseInt(level, 10);
       switch (level) {
@@ -2746,7 +2663,7 @@ export default {
       return '不符合';
     },
 
-// 获取得分标签类型
+    // 获取得分标签类型
     getScoreTagType(score) {
       if (score >= 60) return 'success';
       // if (score >= 80) return 'primary';
@@ -2755,7 +2672,7 @@ export default {
       return 'danger';
     },
 
-// 获取得分圆圈样式类名
+    // 获取得分圆圈样式类名
     getScoreGradeClass(score) {
       if (score >= 60) return 'excellent';
       // if (score >= 80) return 'good';
@@ -2764,7 +2681,7 @@ export default {
       return 'unqualified';
     },
 
-// 获取进度条颜色
+    // 获取进度条颜色
     getScoreProgressColor(score) {
       if (score >= 60) return '#67C23A';
       // if (score >= 80) return '#409EFF';
@@ -2817,6 +2734,7 @@ export default {
   margin-left: 15px;
   display: inline-block;
 }
+
 .vulnerability-container {
   display: flex;
   height: 100%;
@@ -2967,10 +2885,6 @@ export default {
   color: #909399 !important;
 }
 
-.asset-item.active .asset-status .el-tag {
-
-}
-
 .asset-info {
   display: flex;
   align-items: center;
@@ -2992,7 +2906,8 @@ export default {
   /* 使用网格布局，每行两列 */
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 20px; /* 行间距10px，列间距20px */
+  gap: 10px 20px;
+  /* 行间距10px，列间距20px */
 }
 
 .asset-item.active .asset-info i {
@@ -3008,23 +2923,13 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: inline-block;  /*  新增：确保文本能省略 */
-  max-width: 200px;        /*  新增：限制最大宽度 */
-  vertical-align: middle;  /* （可选）对齐优化 */
+  display: inline-block;
+  /*  新增：确保文本能省略 */
+  max-width: 200px;
+  /*  新增：限制最大宽度 */
+  vertical-align: middle;
+  /* （可选）对齐优化 */
 }
-
-/*
-.asset-ip {
-  margin-right: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
- */
 
 .asset-status {
   margin-left: auto;
@@ -3097,7 +3002,7 @@ export default {
   padding: 0;
   background-color: #fff;
   border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .pie-chart {
@@ -3179,7 +3084,8 @@ export default {
   margin-bottom: 30px;
 }
 
-.ports-section h2, .baseline-section h2 {
+.ports-section h2,
+.baseline-section h2 {
   color: #303133;
   font-size: 18px;
   font-weight: 600;
@@ -3611,5 +3517,4 @@ export default {
 .content-area::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
-
 </style>

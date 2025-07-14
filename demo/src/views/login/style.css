@@ -1,0 +1,61 @@
+.auth-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.particles-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #a7b0b6, #22252a); /* 深蓝到浅蓝渐变 */
+  z-index: 1;
+}
+
+.auth-box {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.95); /* 半透明白色背景 */
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.auth-box h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 24px;
+}
+
+.auth-form {
+  margin-top: 20px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+}
+
+.toggle-link {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.toggle-link span {
+  color: #409eff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.toggle-link span:hover {
+  text-decoration: underline;
+}
