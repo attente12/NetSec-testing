@@ -8,6 +8,7 @@ module.exports = {
                 changeOrigin: true,//代理服务器会把请求头中的Host字段改为目标地址
                 pathRewrite: { '^/api': '' }
             }
-        }
+        },
+        hot: true
     }
 };

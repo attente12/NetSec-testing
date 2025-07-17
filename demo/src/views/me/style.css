@@ -1,0 +1,57 @@
+.main_container {
+    margin: 40px auto;
+    width: 40vw;
+    min-width: 300px;
+}
+
+.main_container p:first-child {
+    font-size: 14px;
+
+}
+
+.info_container {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.info_container div {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.info_container div p {
+    margin: 0;
+}
+
+.info_container .basic_info {
+    display: flex;
+    align-items: center;
+    border: 0;
+}
+
+.info_container .basic_info .avatar {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    margin-right: 25px;
+    border: 1px solid #ccc;
+}
+
+.info_container div:last-child:hover {
+    border-radius: 0 0 8px 8px;
+}
+
+.my_button {
+    height: 30px;
+    line-height: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.my_button:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}

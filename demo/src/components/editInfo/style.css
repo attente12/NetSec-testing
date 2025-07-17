@@ -1,0 +1,33 @@
+.edit_info_container {
+    z-index: 1000;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    top: 0;
+    left: 0;
+}
+
+.user_profile_form {
+    position: relative;
+    background-color: #fff;
+    max-width: 600px;
+    margin: 150px auto;
+    padding: 20px;
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+}
+
+.user_profile_form h3 {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.user_profile_form .close_icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    font-size: 20px;
+    color: rgb(236, 109, 122);
+}
