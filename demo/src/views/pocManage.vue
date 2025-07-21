@@ -269,10 +269,11 @@
         layout="total, sizes, prev, pager, next, jumper">
 
       </el-pagination>
-      <el-select v-model="POCConditionValue" placeholder="筛选POC状态" clearable="true">
+      <!-- 暂时用不到的poc状态筛选功能 -->
+      <!-- <el-select v-model="POCConditionValue" placeholder="筛选POC状态" clearable="true">
         <el-option v-for="option in options" :key="option.value" :label="option.label" :value="option.value">
         </el-option>
-      </el-select>
+      </el-select> -->
     </p>
 
 

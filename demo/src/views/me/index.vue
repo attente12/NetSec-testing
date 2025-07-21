@@ -8,43 +8,70 @@
                     <span>
                         <p>用户名：{{ username }}</p>
                         <p>邮箱：{{ email }}</p>
-                        <p>用户类型：{{ userType }}</p>
+                        <p>用户类型：{{ isAdmin ? '管理员' : '普通用户' }}</p>
                     </span>
                 </div>
 
                 <div class="my_button" @click="showAndCloseEditInfo"><span>编辑个人信息</span><span>></span></div>
-                <div class="my_button" v-if="isAdmin"><span>管理其他用户</span><span>></span></div>
-                <div class="my_button"><span>反馈</span><span>></span></div>
-                <div class="my_button"><span>退出登录</span><span>...</span></div>
+                <div class="my_button" v-if="isAdmin" @click="showAndCloseUserManager">
+                    <span>管理其他用户</span><span>{{ showUserManager ? '-' : '+' }}</span>
+                </div>
+                <div class="my_button"><span>反馈</span><span>?</span></div>
+                <div class="my_button" @click="exit"><span>退出登录</span><span>..</span></div>
             </div>
         </main>
-
-        <edit-info v-if="showEditInfo" @IClose="showAndCloseEditInfo"></edit-info>
+        <user-table v-if="showUserManager" @adminAdd="showAdminAdd"></user-table>
+        <edit-info v-if="showEditInfo" :isAdmin="editAdminFlag" @iClose="showAndCloseEditInfo"></edit-info>
     </div>
 </template>
 <script>
 import EditInfo from '../../components/editInfo/index.vue';
+import UserTable from '../../components/userTable/index.vue';
+import { deleteAllCookies, getCookie } from '@/utils/cookie.js';
 
 export default {
     name: "MeIndex",
     components: {
-        EditInfo
+        EditInfo,
+        UserTable
     },
     data() {
         return {
-            username: "Joe",
-            email: "joeyes@1100.com",
-            userType: "普通用户",
-            isAdmin: false,
-            showEditInfo: false
+            username: "",
+            email: "",
+            isAdmin: true,
+            showEditInfo: false,
+            showUserManager: false,
+            editAdminFlag: false
         };
     },
     methods: {
         showAndCloseEditInfo() {
             // 触发编辑信息组件的显示
             this.showEditInfo = !this.showEditInfo;
+            this.editAdminFlag = false; // 重置管理员编辑标志
+        },
+        showAndCloseUserManager() {
+            // 触发编辑信息组件的显示
+            this.showUserManager = !this.showUserManager;
+        },
+        showAdminAdd() {
+            this.editAdminFlag = true;
+            this.showEditInfo = true;
+        },
+        getInfo() {
+            this.username = getCookie('username') || 'Joe';
+            this.email = getCookie('email') || 'okjoe@qq.com';
+            this.isAdmin = getCookie('role') === 'admin';
+        },
+        exit() {
+            deleteAllCookies();
+            this.$router.push({ name: 'login' });
         }
     },
+    mounted() {
+        this.getInfo();
+    }
 }
 </script>
 <style scoped>

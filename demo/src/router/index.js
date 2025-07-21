@@ -29,7 +29,7 @@ import indexPage from '../views/indexPage'
 import me from '../views/me'
 
 
-// import { getCookie } from '@/utils/cookie'
+import { getCookie } from '@/utils/cookie'
 
 const routes = [
 
@@ -182,29 +182,38 @@ const router = new Router({
     routes
 })
 
-// 全局前置守卫
-// router.beforeEach((to, from, next) => {
-//     const userToken = getCookie('userToken')
+//全局前置守卫
+router.beforeEach((to, from, next) => {
+    const userToken = getCookie('userToken')
 
-//     // 如果访问登录页面
-//     if (to.path === '/login') {
-//         // 有token跳转到indexPage
-//         if (userToken) {
-//             next('/indexPage')
-//         } else {
-//             next()
-//         }
-//     }
-//     // 访问其他页面
-//     else {
-//         // 没有token跳转到login
-//         if (!userToken) {
-//             next('/login')
-//         } else {
-//             next()
-//         }
-//     }
-// })
+    // 如果访问登录页面
+    if (to.path === '/login') {
+        // 有token跳转到indexPage
+        if (userToken) {
+            next('/indexPage')
+        } else {
+            next()
+        }
+    }
+    // 访问其他页面
+    else if (to.path === '/') {
+        // 有token直接放行
+        if (userToken) {
+            next('/indexPage')
+        } else {
+            // 没有token跳转到login
+            next('/login')
+        }
+    }
+    else {
+        // 没有token跳转到login
+        if (!userToken) {
+            next('/login')
+        } else {
+            next()
+        }
+    }
+})
 
 
 export default router

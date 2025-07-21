@@ -33,6 +33,8 @@
 
 <script>
 import 'particles.js';
+import { setCookie } from '@/utils/cookie';
+
 export default {
     data() {
         const validatePass = (rule, value, callback) => {
@@ -91,6 +93,76 @@ export default {
             },
         };
     },
+
+    methods: {
+        toggleAuthMode() {
+            this.isLogin = !this.isLogin;
+            this.$refs.authForm.resetFields();
+        },
+        async userLogin() {
+            this.loading = true;
+            try {
+                const res = await this.$axios.post('/userLogin', {
+                    username: this.form.username,
+                    password: this.form.password,
+                });
+                setCookie('userToken', res.token, 1);
+                setCookie('username', this.form.username, 1);
+                setCookie('email', res.email, 1);
+                setCookie('role', res.role, 1);
+                this.$router.push({ path: '/indexPage' });
+            } catch (error) {
+                this.loading = false;
+                console.error(error);
+                alert('登录失败，请检查用户名和密码是否正确');
+            }
+        },
+        async userRegister() {
+            this.loading = true;
+            try {
+                const res = await this.$axios.post('/register', {
+                    username: this.form.username,
+                    email: this.form.email,
+                    password: this.form.password,
+                });
+                const code = prompt('验证码已发送至您的邮箱，请输入验证码');
+                try {
+                    await this.$axios.post('/verify', {
+                        email: this.form.email,
+                        username: this.form.username,
+                        password: this.form.password,
+                        code: code,
+                    });
+                    if (res.status !== '200') return alert('验证码错误或已过期，请重新注册');
+                    alert('注册成功，请登录');
+                    this.loading = false;
+                    this.isLogin = true;
+
+                } catch (error) {
+                    this.loading = false;
+                    console.error(error);
+                    alert(error.response.data.message || '验证码错误或已过期，请重新注册');
+                }
+            } catch (error) {
+                this.loading = false;
+                console.error(error);
+                alert(error.response.data.message || '注册失败，请稍后再试');
+            }
+        },
+        handleSubmit() {
+            this.$refs.authForm.validate((valid) => {
+                if (valid) {
+                    if (this.isLogin) {
+                        this.userLogin();
+                    } else {
+                        this.userRegister();
+                    }
+                } else {
+                    this.$message.error('请检查表单填写是否正确');
+                }
+            });
+        },
+    },
     mounted() {
         // 初始化 particles.js
         window.particlesJS('particles-js', {
@@ -131,23 +203,6 @@ export default {
             },
             retina_detect: true,
         });
-    },
-    methods: {
-        toggleAuthMode() {
-            this.isLogin = !this.isLogin;
-            this.$refs.authForm.resetFields();
-        },
-        handleSubmit() {
-            this.$refs.authForm.validate((valid) => {
-                if (valid) {
-                    this.loading = true;
-                    setTimeout(() => {
-                        this.loading = false;
-                        this.$message.success(this.isLogin ? '登录成功' : '注册成功');
-                    }, 1000);
-                }
-            });
-        },
     },
 };
 </script>

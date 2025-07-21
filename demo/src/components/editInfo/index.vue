@@ -6,18 +6,20 @@
             <h3>请输入新的个人信息</h3>
 
             <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" @submit.prevent="handleSubmit">
-
+                <el-form-item v-if="isAdmin" label="用户名" prop="username">
+                    <el-input v-model="form.username" placeholder="请输入用户名" clearable />
+                </el-form-item>
                 <el-form-item label="邮箱" prop="email">
-                    <el-input v-model="form.email" placeholder="请输入邮箱（留空不修改）" clearable />
+                    <el-input v-model="form.email" :placeholder="isAdmin ? '请输入邮箱' : '请输入邮箱（留空不修改）'" clearable />
                 </el-form-item>
 
-                <el-form-item label="新密码" prop="password">
-                    <el-input v-model="form.password" type="password" placeholder="请输入新密码（留空不修改）" show-password
-                        clearable />
+                <el-form-item :label="isAdmin ? '密码' : '新密码'" prop="password">
+                    <el-input v-model="form.password" type="password"
+                        :placeholder="isAdmin ? '请输入新密码' : '请输入新密码（留空不修改）'" show-password clearable />
                 </el-form-item>
 
                 <el-form-item label="确认密码" prop="confirmPassword">
-                    <el-input v-model="form.confirmPassword" type="password" placeholder="请再次输入新密码" show-password
+                    <el-input v-model="form.confirmPassword" type="password" placeholder="请再次输入密码" show-password
                         clearable />
                 </el-form-item>
 
@@ -34,6 +36,13 @@
 <script>
 export default {
     name: "EditInfo",
+    props: {
+        // 关闭编辑信息组件的事件
+        isAdmin: {
+            type: Boolean,
+            default: false
+        }
+    },
     data() {
         const validateConfirmPassword = (rule, value, callback) => {
             if (value && value !== this.form.password) {
@@ -44,6 +53,7 @@ export default {
         };
         return {
             form: {
+                username: "",
                 email: "",
                 password: "",
                 confirmPassword: ""
@@ -64,7 +74,6 @@ export default {
     },
     methods: {
         submitForm() {
-            // 提交表单逻辑
             console.log("提交的表单数据：", this.$refs.formRef.model);
         },
         resetForm() {
@@ -74,7 +83,7 @@ export default {
         },
         closeEditInfo() {
             // 关闭编辑信息组件
-            this.$emit('IClose');
+            this.$emit('iClose');
         }
     }
 }
