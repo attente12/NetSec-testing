@@ -70,21 +70,7 @@
             <label class="label">POC代码:</label>
           </el-col>
           <el-col :span="22" class="row-content2">
-            <!--            <el-upload-->
-            <!--                class="upload-demo"-->
-            <!--                ref="upload"-->
-            <!--                :http-request="handleFileUpload"-->
-            <!--                :before-upload="beforeFileUpload"-->
-            <!--                :on-remove="handleRemove"-->
-            <!--                :file-list="fileList"-->
-            <!--                :limit="1">-->
-            <!--              <el-button>选择文件</el-button>（如需修改请上传）-->
-            <!--            </el-upload>-->
-            <!--            <el-button @click="submitUpload">上传文件</el-button>-->
-            <!--            <span>文件名：</span>-->
-            <!--            <el-input v-model="filename"></el-input>-->
-            <!--            <el-button @click="submitCode">上传代码</el-button>-->
-            <!--            <CodeEditor v-model="code"/>-->
+
             <div style="display: flex; align-items: center;">
               <el-upload class="upload-demo" ref="upload" :http-request="handleFileUpload"
                 :before-upload="beforeFileUpload" :on-remove="handleRemove" :file-list="fileList" :limit="1">

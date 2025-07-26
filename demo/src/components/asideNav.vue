@@ -25,17 +25,6 @@
             <span slot="title">安全基线检测</span>
           </el-menu-item>
 
-          <!--                    <el-submenu index="1">-->
-          <!--                        <template slot="title">-->
-          <!--                            <i class="el-icon-location"></i>-->
-          <!--                            <span>安全基线检测</span>-->
-          <!--                        </template>-->
-          <!--                        <el-menu-item-group>-->
-          <!--                            <el-menu-item index="/baseCheckHome">基线检测</el-menu-item>-->
-          <!--                            <el-menu-item index="/baseCheck">基线检测报告</el-menu-item>-->
-          <!--                        </el-menu-item-group>-->
-          <!--                    </el-submenu>-->
-
           <el-submenu index="2">
             <template slot="title">
               <i class="el-icon-bangzhu"></i>

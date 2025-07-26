@@ -40,7 +40,6 @@ const routes = [
     },
     {
         path: '/indexPage',
-        name: 'indexPage',
         component: indexPage,
         children: [
             {

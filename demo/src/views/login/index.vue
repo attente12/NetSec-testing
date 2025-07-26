@@ -16,9 +16,16 @@
                 <el-form-item v-if="!isLogin" label="确认密码" prop="confirmPassword">
                     <el-input v-model="form.confirmPassword" type="password" placeholder="请再次输入密码"></el-input>
                 </el-form-item>
+                <el-form-item v-if="!isLogin && isVerify" label="验证码" prop="code">
+                    <el-input v-model="form.code" placeholder="请输入验证码"></el-input>
+                </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="handleSubmit" :loading="loading" class="submit-btn">
-                        {{ isLogin ? '登录' : '注册' }}
+                    <el-button v-if="!isVerify" type="primary" @click="handleSubmit" :loading="loading"
+                        class="submit-btn">
+                        {{ isLogin ? '登录' : '获取验证码' }}
+                    </el-button>
+                    <el-button v-else type="primary" @click="codeVerify" :loading="loading" class="submit-btn">
+                        注册
                     </el-button>
                 </el-form-item>
             </el-form>
@@ -68,12 +75,14 @@ export default {
         };
         return {
             isLogin: true,
+            isVerify: false,
             loading: false,
             form: {
                 username: '',
                 email: '',
                 password: '',
                 confirmPassword: '',
+                code: '',
             },
             rules: {
                 username: [
@@ -117,6 +126,27 @@ export default {
                 alert('登录失败，请检查用户名和密码是否正确');
             }
         },
+        async codeVerify() {
+            try {
+                const res = await this.$axios.post('/verify', {
+                    email: this.form.email,
+                    username: this.form.username,
+                    password: this.form.password,
+                    code: this.form.code,
+                });
+                if (res.status !== '200') return alert('验证码错误或已过期，请重新注册');
+                alert('注册成功，请登录');
+                this.loading = false;
+                this.isLogin = true;
+
+            } catch (error) {
+                this.loading = false;
+                console.error(error);
+                alert(error.response.data.message || '验证码错误或已过期，请重新注册');
+                this.isVerify = false;
+                this.form.code = '';
+            }
+        },
         async userRegister() {
             this.loading = true;
             try {
@@ -125,24 +155,8 @@ export default {
                     email: this.form.email,
                     password: this.form.password,
                 });
-                const code = prompt('验证码已发送至您的邮箱，请输入验证码');
-                try {
-                    await this.$axios.post('/verify', {
-                        email: this.form.email,
-                        username: this.form.username,
-                        password: this.form.password,
-                        code: code,
-                    });
-                    if (res.status !== '200') return alert('验证码错误或已过期，请重新注册');
-                    alert('注册成功，请登录');
-                    this.loading = false;
-                    this.isLogin = true;
-
-                } catch (error) {
-                    this.loading = false;
-                    console.error(error);
-                    alert(error.response.data.message || '验证码错误或已过期，请重新注册');
-                }
+                console.log(res);
+                this.isVerify = true;
             } catch (error) {
                 this.loading = false;
                 console.error(error);
