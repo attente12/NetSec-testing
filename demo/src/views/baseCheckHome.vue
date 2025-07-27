@@ -122,6 +122,7 @@
 
 <script>
 import { Message } from "element-ui"
+import { neoFetch } from "@/utils/fetch.js"
 export default {
     name: "home",
     data() {
@@ -384,22 +385,6 @@ export default {
                 Message.error('获取存活主机列表失败');
             }
         },
-        // fetchAliveHosts() {
-        //     fetch('/api/getAliveHosts')
-        //         .then(response => {
-        //             if (!response.ok) {
-        //                 throw new Error(`HTTP status ${response.status}`);
-        //             }
-        //             return response.json();
-        //         })
-        //         .then(data => {
-        //             this.aliveHosts = data.alive_hosts;
-        //         })
-        //         .catch(error => {
-        //             Message.error('获取活跃IP列表失败：' + error.message);
-        //         });
-        // },
-        //切换Windows或Linux方法，同时初始化其他指示值
         turnFlag() {
             this.flag = !this.flag
             this.versionFlag = false
@@ -418,11 +403,8 @@ export default {
             };
             console.log("Submitting form...", payload);
 
-            fetch('/api/win_login', {
+            neoFetch('/api/win_login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(payload),
             })
                 .then(response => {
@@ -517,11 +499,8 @@ export default {
                     ids: this.selectedItems
                 };
 
-                fetch('/api/login', {
+                neoFetch('/api/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
                     body: JSON.stringify(payload),
                 })
                     .then(response => {

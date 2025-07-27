@@ -1,0 +1,44 @@
+/*设置窗口内容自动换行*/
+pre {
+    white-space: pre-wrap;
+    /* CSS3 的换行方式，保持格式的同时允许自动换行 */
+    word-wrap: break-word;
+    /* 较旧的浏览器也可以理解这种方式 */
+    overflow-wrap: break-word;
+    /* 标准的换行方式 */
+    overflow-y: auto;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    /* 代码文字颜色 */
+    background: none;
+    /* 背景色 */
+    text-shadow: 0 1px white;
+    /* 文字阴影 */
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+.status_selector {
+    margin-left: 20px;
+    width: 150px;
+    min-width: 120px;
+    margin-right: 10px;
+}

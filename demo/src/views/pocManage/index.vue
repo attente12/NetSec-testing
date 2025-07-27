@@ -6,6 +6,10 @@
         suffix-icon="el-icon-search" v-model="searchKeyword"></el-input>
       <el-button class="ml-5" type="primary" @click="load">搜索</el-button>
       <el-button type="warning" @click="reset">重置</el-button>
+      <el-select class="status_selector" v-model="POCConditionValue" placeholder="筛选POC状态" clearable="true">
+        <el-option v-for="option in options" :key="option.value" :label="option.label" :value="option.value">
+        </el-option>
+      </el-select>
     </div>
 
     <div style="margin: 10px 0">
@@ -263,27 +267,18 @@
         </template>
       </el-table-column>
     </el-table>
-    <p class="pagination-container">
-      <el-pagination :hide-on-single-page=true :background="pageButtonColor" @size-change="handleSizeChange"
-        @current-change="handleCurrentChange" :current-page="currentPage" :page-size="pageSize" :total="totalItems"
-        layout="total, sizes, prev, pager, next, jumper">
-
-      </el-pagination>
-      <!-- 暂时用不到的poc状态筛选功能 -->
-      <!-- <el-select v-model="POCConditionValue" placeholder="筛选POC状态" clearable="true">
-        <el-option v-for="option in options" :key="option.value" :label="option.label" :value="option.value">
-        </el-option>
-      </el-select> -->
-    </p>
-
+    <el-pagination :hide-on-single-page=true :background="pageButtonColor" @size-change="handleSizeChange"
+      @current-change="handleCurrentChange" :current-page="currentPage" :page-size="pageSize" :total="totalItems"
+      layout="total, sizes, prev, pager, next, jumper">
+    </el-pagination>
 
   </div>
 </template>
 
 <script>
 import Prism from 'prismjs';
-import 'prismjs/themes/prism.css';
 import CodeEditor from '@/components/CodeEditor.vue'; // 引入 CodeEditor 组件
+import { neoFetch } from '@/utils/fetch.js'; // 引入自定义的 fetch 函数
 
 export default {
   name: "pocManage",
@@ -303,7 +298,7 @@ export default {
         description: '',
         script_type: '',
         affected_infra: '',
-        //script: ''
+
       },
       // 搜索时使用的输入值（不会被提交）
       searchAffectedInfra: '',
@@ -431,7 +426,7 @@ export default {
       }
     },
     loadVulTypes() {
-      fetch('/api/poc/getAllVulnTypes')
+      neoFetch('/api/poc/getAllVulnTypes')
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -467,7 +462,7 @@ export default {
     //搜索的实现
     load() {
       let query = new URLSearchParams({ keyword: this.searchKeyword.trim() }).toString();
-      fetch(`/api/searchData?${query}`)
+      neoFetch(`/api/searchData?${query}`)
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -578,11 +573,8 @@ export default {
     },
 
     del(id) {
-      fetch(`/api/deleteDataById`, {
+      neoFetch(`/api/deleteDataById`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ ids: id })
       })
         .then(response => {
@@ -601,11 +593,8 @@ export default {
 
     delBatch() {
       const idsToDelete = this.$refs.table.selection.map(row => row.id);
-      fetch(`/api/deleteDataById`, {
+      neoFetch(`/api/deleteDataById`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ ids: idsToDelete })
       })
         .then(response => {
@@ -835,7 +824,7 @@ export default {
       }
 
       try {
-        const response = await fetch('/api/insertData', {
+        const response = await neoFetch('/api/insertData', {
           method: 'POST',
           body: formData,
         });
@@ -919,7 +908,7 @@ export default {
       filename += '.py';
 
       // 加载文件内容，从`public`目录下读取
-      fetch(`/${filename}`)
+      neoFetch(`/${filename}`)
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -936,7 +925,7 @@ export default {
     },
     async loadFile() {
       try {
-        const response = await fetch("/nmap_infrastructure_list_grouped_multiline.txt");
+        const response = await neoFetch("/nmap_infrastructure_list_grouped_multiline.txt");
         if (!response.ok) throw new Error("Network response was not ok");
         const text = await response.text();
         // 将每一行内容处理为 { value: "文本" } 格式
@@ -1004,53 +993,5 @@ export default {
 </script>
 
 <style scoped>
-/*设置窗口内容自动换行*/
-pre {
-  white-space: pre-wrap;
-  /* CSS3 的换行方式，保持格式的同时允许自动换行 */
-  word-wrap: break-word;
-  /* 较旧的浏览器也可以理解这种方式 */
-  overflow-wrap: break-word;
-  /* 标准的换行方式 */
-  overflow-y: auto;
-}
-
-code[class*="language-"],
-pre[class*="language-"] {
-  color: black;
-  /* 代码文字颜色 */
-  background: none;
-  /* 背景色 */
-  text-shadow: 0 1px white;
-  /* 文字阴影 */
-  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-  font-size: 1em;
-  text-align: left;
-  white-space: pre;
-  word-spacing: normal;
-  word-break: normal;
-  word-wrap: normal;
-  line-height: 1.5;
-
-  -moz-tab-size: 4;
-  -o-tab-size: 4;
-  tab-size: 4;
-
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  -ms-hyphens: none;
-  hyphens: none;
-}
-
-.pagination-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pagination-container .el-select {
-  width: 150px;
-  min-width: 120px;
-  margin-right: 150px;
-}
+@import url(./style.css);
 </style>

@@ -165,26 +165,26 @@
           <div class="table-container">
             <table class="detail-table">
               <thead>
-              <tr>
-                <th class="col-status">状态</th>
-                <th class="col-item">检查项</th>
-                <th class="col-basis">检查依据</th>
-                <th class="col-result">检查结果</th>
-                <th class="col-suggest">建议</th>
-              </tr>
+                <tr>
+                  <th class="col-status">状态</th>
+                  <th class="col-item">检查项</th>
+                  <th class="col-basis">检查依据</th>
+                  <th class="col-result">检查结果</th>
+                  <th class="col-suggest">建议</th>
+                </tr>
               </thead>
               <tbody>
-              <tr v-for="(item, index) in baselineDetails" :key="index" :class="getRowClass(item.IsComply)">
-                <td class="status-cell">
+                <tr v-for="(item, index) in baselineDetails" :key="index" :class="getRowClass(item.IsComply)">
+                  <td class="status-cell">
                     <span :class="getStatusBadgeClass(item.IsComply)">
                       {{ getComplianceText(item.IsComply) }}
                     </span>
-                </td>
-                <td class="item-cell">{{ item.description }}</td>
-                <td class="basis-cell">{{ item.basis }}</td>
-                <td class="result-cell">{{ item.result }}</td>
-                <td class="suggest-cell">{{ item.IsComply === 'true' ? '-' : item.recommend }}</td>
-              </tr>
+                  </td>
+                  <td class="item-cell">{{ item.description }}</td>
+                  <td class="basis-cell">{{ item.basis }}</td>
+                  <td class="result-cell">{{ item.result }}</td>
+                  <td class="suggest-cell">{{ item.IsComply === 'true' ? '-' : item.recommend }}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -267,26 +267,26 @@
           <div class="table-container">
             <table class="detail-table">
               <thead>
-              <tr>
-                <th class="col-status">状态</th>
-                <th class="col-item">检查项</th>
-                <th class="col-basis">检查依据</th>
-                <th class="col-result">检查结果</th>
-                <th class="col-suggest">建议</th>
-              </tr>
+                <tr>
+                  <th class="col-status">状态</th>
+                  <th class="col-item">检查项</th>
+                  <th class="col-basis">检查依据</th>
+                  <th class="col-result">检查结果</th>
+                  <th class="col-suggest">建议</th>
+                </tr>
               </thead>
               <tbody>
-              <tr v-for="(item, index) in classifyDetails" :key="index" :class="getRowClass(item.IsComply)">
-                <td class="status-cell">
+                <tr v-for="(item, index) in classifyDetails" :key="index" :class="getRowClass(item.IsComply)">
+                  <td class="status-cell">
                     <span :class="getStatusBadgeClass(item.IsComply)">
                       {{ getComplianceText(item.IsComply) }}
                     </span>
-                </td>
-                <td class="item-cell">{{ item.description }}</td>
-                <td class="basis-cell">{{ item.basis }}</td>
-                <td class="result-cell">{{ item.result }}</td>
-                <td class="suggest-cell">{{ item.IsComply === 'true' ? '-' : item.recommend }}</td>
-              </tr>
+                  </td>
+                  <td class="item-cell">{{ item.description }}</td>
+                  <td class="basis-cell">{{ item.basis }}</td>
+                  <td class="result-cell">{{ item.result }}</td>
+                  <td class="suggest-cell">{{ item.IsComply === 'true' ? '-' : item.recommend }}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -298,24 +298,24 @@
           <div class="table-container">
             <table class="detail-table">
               <thead>
-              <tr>
-                <th class="col-id">项目ID</th>
-                <th class="col-item">检查项</th>
-                <th class="col-level">重要级别</th>
-                <th class="col-basis">检查依据</th>
-              </tr>
+                <tr>
+                  <th class="col-id">项目ID</th>
+                  <th class="col-item">检查项</th>
+                  <th class="col-level">重要级别</th>
+                  <th class="col-basis">检查依据</th>
+                </tr>
               </thead>
               <tbody>
-              <tr v-for="(item, index) in assetData.undo_level3_baseline" :key="index">
-                <td>{{ item.item_id }}</td>
-                <td>{{ item.description }}</td>
-                <td>
+                <tr v-for="(item, index) in assetData.undo_level3_baseline" :key="index">
+                  <td>{{ item.item_id }}</td>
+                  <td>{{ item.description }}</td>
+                  <td>
                     <span :class="getImportanceBadgeClass(item.important_level)">
                       {{ getLevel3ImportanceLevel(item.important_level) }}
                     </span>
-                </td>
-                <td>{{ item.basis }}</td>
-              </tr>
+                  </td>
+                  <td>{{ item.basis }}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -331,28 +331,28 @@
           <div class="table-container">
             <table class="detail-table">
               <thead>
-              <tr>
-                <th class="col-port">端口</th>
-                <th class="col-protocol">协议</th>
-                <th class="col-service">服务名称</th>
-                <th class="col-product">产品</th>
-                <th class="col-version">版本</th>
-                <th class="col-status">状态</th>
-              </tr>
+                <tr>
+                  <th class="col-port">端口</th>
+                  <th class="col-protocol">协议</th>
+                  <th class="col-service">服务名称</th>
+                  <th class="col-product">产品</th>
+                  <th class="col-version">版本</th>
+                  <th class="col-status">状态</th>
+                </tr>
               </thead>
               <tbody>
-              <tr v-for="(port, portIndex) in ports" :key="portIndex">
-                <td>{{ port.port }}</td>
-                <td>{{ port.protocol }}</td>
-                <td>{{ port.service_name }}</td>
-                <td>{{ port.product || '未识别' }}</td>
-                <td>{{ port.version || '未识别' }}</td>
-                <td>
+                <tr v-for="(port, portIndex) in ports" :key="portIndex">
+                  <td>{{ port.port }}</td>
+                  <td>{{ port.protocol }}</td>
+                  <td>{{ port.service_name }}</td>
+                  <td>{{ port.product || '未识别' }}</td>
+                  <td>{{ port.version || '未识别' }}</td>
+                  <td>
                     <span :class="getPortStatusClass(port.status)">
                       {{ port.status }}
                     </span>
-                </td>
-              </tr>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -374,26 +374,26 @@
         <div class="table-container">
           <table class="detail-table risk-table">
             <thead>
-            <tr>
-              <th class="col-product">产品</th>
-              <th class="col-port">端口</th>
-              <th class="col-protocol">协议</th>
-              <th class="col-service">服务名称</th>
-              <th class="col-type">软件类型</th>
-              <th class="col-account">账号</th>
-              <th class="col-result">结果</th>
-            </tr>
+              <tr>
+                <th class="col-product">产品</th>
+                <th class="col-port">端口</th>
+                <th class="col-protocol">协议</th>
+                <th class="col-service">服务名称</th>
+                <th class="col-type">软件类型</th>
+                <th class="col-account">账号</th>
+                <th class="col-result">结果</th>
+              </tr>
             </thead>
             <tbody>
-            <tr v-for="(port, index) in weakPasswordPorts" :key="index" class="risk-row">
-              <td class="risk-text">{{ port.product || '未识别' }}</td>
-              <td>{{ port.port }}</td>
-              <td>{{ port.protocol }}</td>
-              <td>{{ port.service_name }}</td>
-              <td>{{ port.software_type }}</td>
-              <td class="risk-text">{{ port.weak_username }}</td>
-              <td class="risk-result">存在弱密码</td>
-            </tr>
+              <tr v-for="(port, index) in weakPasswordPorts" :key="index" class="risk-row">
+                <td class="risk-text">{{ port.product || '未识别' }}</td>
+                <td>{{ port.port }}</td>
+                <td>{{ port.protocol }}</td>
+                <td>{{ port.service_name }}</td>
+                <td>{{ port.software_type }}</td>
+                <td class="risk-text">{{ port.weak_username }}</td>
+                <td class="risk-result">存在弱密码</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -410,48 +410,7 @@
           <div class="table-container">
             <table class="detail-table vuln-table">
               <thead>
-              <tr>
-                <th class="col-vuln-id">漏洞ID</th>
-                <th class="col-vuln-name">漏洞名称</th>
-                <th class="col-vuln-type">漏洞类型</th>
-                <th class="col-risk-level">风险等级</th>
-                <th class="col-description">漏洞描述</th>
-                <th class="col-exist">是否存在</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="(vuln, index) in assetData.host_vulnerabilities" :key="index" :class="getVulnRowClass(vuln.vulExist)">
-                <td>{{ vuln.vuln_id }}</td>
-                <td>{{ vuln.vuln_name }}</td>
-                <td>{{ vuln.vulType }}</td>
-                <td>
-                    <span :class="getRiskLevelClass(vuln.cvss)">
-                      {{ getRiskLevel(vuln.cvss) }}
-                    </span>
-                </td>
-                <td class="description-cell">{{ vuln.summary }}</td>
-                <td>
-                    <span :class="getExistStatusClass(vuln.vulExist)">
-                      {{ vuln.vulExist }}
-                    </span>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 软件资产漏洞 -->
-        <div v-if="groupedPortVulnerabilities && Object.keys(groupedPortVulnerabilities).length > 0" class="vuln-subsection">
-          <h3 class="subsection-title">{{ getVulnSectionNumber() }}.2 软件资产漏洞</h3>
-          <div v-for="(vulnerabilities, type, index) in groupedPortVulnerabilities" :key="type" class="vuln-group">
-            <h4 class="group-title">{{ getVulnSectionNumber() }}.2.{{ index + 1 }} {{ type }}</h4>
-            <div class="table-container">
-              <table class="detail-table vuln-table">
-                <thead>
                 <tr>
-                  <th class="col-port">端口</th>
-                  <th class="col-service">服务</th>
                   <th class="col-vuln-id">漏洞ID</th>
                   <th class="col-vuln-name">漏洞名称</th>
                   <th class="col-vuln-type">漏洞类型</th>
@@ -459,26 +418,70 @@
                   <th class="col-description">漏洞描述</th>
                   <th class="col-exist">是否存在</th>
                 </tr>
-                </thead>
-                <tbody>
-                <tr v-for="(vuln, vulnIndex) in vulnerabilities" :key="vulnIndex" :class="getVulnRowClass(vuln.vulExist)">
-                  <td>{{ vuln.port_id }}</td>
-                  <td>{{ vuln.service_name }}</td>
+              </thead>
+              <tbody>
+                <tr v-for="(vuln, index) in assetData.host_vulnerabilities" :key="index"
+                  :class="getVulnRowClass(vuln.vulExist)">
                   <td>{{ vuln.vuln_id }}</td>
                   <td>{{ vuln.vuln_name }}</td>
                   <td>{{ vuln.vulType }}</td>
                   <td>
-                      <span :class="getRiskLevelClass(vuln.cvss)">
-                        {{ getRiskLevel(vuln.cvss) }}
-                      </span>
+                    <span :class="getRiskLevelClass(vuln.cvss)">
+                      {{ getRiskLevel(vuln.cvss) }}
+                    </span>
                   </td>
                   <td class="description-cell">{{ vuln.summary }}</td>
                   <td>
+                    <span :class="getExistStatusClass(vuln.vulExist)">
+                      {{ vuln.vulExist }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 软件资产漏洞 -->
+        <div v-if="groupedPortVulnerabilities && Object.keys(groupedPortVulnerabilities).length > 0"
+          class="vuln-subsection">
+          <h3 class="subsection-title">{{ getVulnSectionNumber() }}.2 软件资产漏洞</h3>
+          <div v-for="(vulnerabilities, type, index) in groupedPortVulnerabilities" :key="type" class="vuln-group">
+            <h4 class="group-title">{{ getVulnSectionNumber() }}.2.{{ index + 1 }} {{ type }}</h4>
+            <div class="table-container">
+              <table class="detail-table vuln-table">
+                <thead>
+                  <tr>
+                    <th class="col-port">端口</th>
+                    <th class="col-service">服务</th>
+                    <th class="col-vuln-id">漏洞ID</th>
+                    <th class="col-vuln-name">漏洞名称</th>
+                    <th class="col-vuln-type">漏洞类型</th>
+                    <th class="col-risk-level">风险等级</th>
+                    <th class="col-description">漏洞描述</th>
+                    <th class="col-exist">是否存在</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(vuln, vulnIndex) in vulnerabilities" :key="vulnIndex"
+                    :class="getVulnRowClass(vuln.vulExist)">
+                    <td>{{ vuln.port_id }}</td>
+                    <td>{{ vuln.service_name }}</td>
+                    <td>{{ vuln.vuln_id }}</td>
+                    <td>{{ vuln.vuln_name }}</td>
+                    <td>{{ vuln.vulType }}</td>
+                    <td>
+                      <span :class="getRiskLevelClass(vuln.cvss)">
+                        {{ getRiskLevel(vuln.cvss) }}
+                      </span>
+                    </td>
+                    <td class="description-cell">{{ vuln.summary }}</td>
+                    <td>
                       <span :class="getExistStatusClass(vuln.vulExist)">
                         {{ vuln.vulExist }}
                       </span>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -534,9 +537,9 @@ export default {
         return '无';
       }
       return this.assetData.ports
-          .filter(port => port.status === 'open')
-          .map(port => `${port.port}`)
-          .join(', ');
+        .filter(port => port.status === 'open')
+        .map(port => `${port.port}`)
+        .join(', ');
     },
     groupedPorts() {
       if (!this.assetData || !this.assetData.ports) {
@@ -560,7 +563,7 @@ export default {
       });
 
       return Object.fromEntries(
-          Object.entries(orderedGroups).filter(([, ports]) => ports.length > 0)
+        Object.entries(orderedGroups).filter(([, ports]) => ports.length > 0)
       );
     },
     groupedPortVulnerabilities() {
@@ -585,7 +588,7 @@ export default {
       });
 
       return Object.fromEntries(
-          Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
+        Object.entries(orderedGroups).filter(([, vulns]) => vulns.length > 0)
       );
     },
     weakPasswordPorts() {
@@ -593,7 +596,7 @@ export default {
         return [];
       }
       return this.assetData.ports.filter(port =>
-          port.weak_username && port.weak_password && port.verify_time
+        port.weak_username && port.weak_password && port.verify_time
       );
     }
   },
@@ -632,7 +635,7 @@ export default {
 
     async fetchBaselineDetails() {
       try {
-        const response = await fetch(`/api/userinfo?ip=${this.assetData.ip}`);
+        const response = await neoFetch(`/api/userinfo?ip=${this.assetData.ip}`);
         const data = await response.json();
         if (data && data.checkResults) {
           this.baselineDetails = data.checkResults;
@@ -644,7 +647,7 @@ export default {
 
     async fetchClassifyDetails() {
       try {
-        const response = await fetch(`/api/level3Userinfo?ip=${this.assetData.ip}`);
+        const response = await neoFetch(`/api/level3Userinfo?ip=${this.assetData.ip}`);
         const data = await response.json();
         if (data && data.checkResults) {
           this.classifyDetails = data.checkResults;
@@ -848,7 +851,7 @@ export default {
   font-size: 48px;
   font-weight: bold;
   margin-bottom: 80px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .cover-info {
@@ -859,7 +862,7 @@ export default {
 .cover-item {
   margin: 20px 0;
   padding: 15px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   backdrop-filter: blur(10px);
 }
@@ -976,7 +979,7 @@ export default {
   border: 2px solid #E6E6E6;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -1025,7 +1028,7 @@ export default {
   align-items: center;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   min-height: 80px;
 }
 
@@ -1092,7 +1095,7 @@ export default {
   justify-content: center;
   margin-right: 40px;
   position: relative;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .score-circle-pass {
@@ -1177,7 +1180,7 @@ export default {
   margin: 20px 0;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .detail-table {
@@ -1213,27 +1216,89 @@ export default {
 }
 
 /* 表格列宽 */
-.col-status { width: 80px; }
-.col-item { width: 200px; }
-.col-basis { width: 150px; }
-.col-result { width: 180px; }
-.col-suggest { width: auto; }
-.col-id { width: 80px; }
-.col-level { width: 80px; }
-.col-port { width: 60px; }
-.col-protocol { width: 60px; }
-.col-service { width: 100px; }
-.col-product { width: 120px; }
-.col-version { width: 120px; }
-.col-type { width: 100px; }
-.col-account { width: 100px; }
-.col-result { width: 100px; }
-.col-vuln-id { width: 120px; }
-.col-vuln-name { width: 150px; }
-.col-vuln-type { width: 120px; }
-.col-risk-level { width: 80px; }
-.col-description { width: auto; }
-.col-exist { width: 80px; }
+.col-status {
+  width: 80px;
+}
+
+.col-item {
+  width: 200px;
+}
+
+.col-basis {
+  width: 150px;
+}
+
+.col-result {
+  width: 180px;
+}
+
+.col-suggest {
+  width: auto;
+}
+
+.col-id {
+  width: 80px;
+}
+
+.col-level {
+  width: 80px;
+}
+
+.col-port {
+  width: 60px;
+}
+
+.col-protocol {
+  width: 60px;
+}
+
+.col-service {
+  width: 100px;
+}
+
+.col-product {
+  width: 120px;
+}
+
+.col-version {
+  width: 120px;
+}
+
+.col-type {
+  width: 100px;
+}
+
+.col-account {
+  width: 100px;
+}
+
+.col-result {
+  width: 100px;
+}
+
+.col-vuln-id {
+  width: 120px;
+}
+
+.col-vuln-name {
+  width: 150px;
+}
+
+.col-vuln-type {
+  width: 120px;
+}
+
+.col-risk-level {
+  width: 80px;
+}
+
+.col-description {
+  width: auto;
+}
+
+.col-exist {
+  width: 80px;
+}
 
 /* 状态标签 */
 .status-pass {

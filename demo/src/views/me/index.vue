@@ -20,8 +20,9 @@
                 <div class="my_button" @click="exit"><span>退出登录</span><span>..</span></div>
             </div>
         </main>
-        <user-table v-if="showUserManager" @adminAdd="showAdminAdd"></user-table>
-        <edit-info v-if="showEditInfo" :isAdmin="editAdminFlag" @iClose="showAndCloseEditInfo"></edit-info>
+        <user-table v-if="showUserManager" @adminAdd="showAdminAdd" @editting="getEdittingUser"></user-table>
+        <edit-info v-if="showEditInfo" :isAdmin="editAdminFlag" :currentInfo="whoIsEditted"
+            @iClose="showAndCloseEditInfo"></edit-info>
     </div>
 </template>
 <script>
@@ -42,12 +43,14 @@ export default {
             isAdmin: true,
             showEditInfo: false,
             showUserManager: false,
-            editAdminFlag: false
+            editAdminFlag: false,
+            whoIsEditted: {}
         };
     },
     methods: {
         showAndCloseEditInfo() {
             // 触发编辑信息组件的显示
+            this.whoIsEditted = {};
             this.showEditInfo = !this.showEditInfo;
             this.editAdminFlag = false; // 重置管理员编辑标志
         },
@@ -63,6 +66,11 @@ export default {
             this.username = getCookie('username') || 'Joe';
             this.email = getCookie('email') || 'okjoe@qq.com';
             this.isAdmin = getCookie('role') === 'admin';
+        },
+        getEdittingUser(user) {
+            this.whoIsEditted = user;
+            this.showEditInfo = true;
+            this.editAdminFlag = true; // 设置为管理员编辑状态
         },
         exit() {
             deleteAllCookies();

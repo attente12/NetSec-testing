@@ -8,7 +8,7 @@
             <el-table-column prop="account_status" label="用户状态" width="120" />
             <el-table-column fixed="right" label="操作" min-width="180">
                 <template #default="{ row }">
-                    <el-button link type="primary" size="small" @click="handleClick(row)">
+                    <el-button link type="primary" size="small" @click="handleEdit(row)">
                         编辑
                     </el-button>
                     <el-button v-if="row.account_status === 'deleted'" link type="success" size="small"
@@ -81,10 +81,14 @@ export default {
             }
             return {};
         },
-        handleClick() {
-            this.$message({
-                message: 'Detail clicked!',
-                type: 'info'
+        handleEdit(row) {
+            console.log('编辑用户:', row);
+            this.$emit('editting', {
+                id: row.userid,
+                username: row.username,
+                email: row.email,
+                role: row.role,
+                account_status: row.account_status
             });
         },
         async getUsers() {
@@ -119,6 +123,24 @@ export default {
                 alert('已取消删除');
             });
         },
+        handleRestore(row) {
+            this.$confirm(`确定恢复用户 ${row.username} 吗？`, '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(async () => {
+                try {
+                    const res = await this.$axios.put('/recoverUser', { username: row.username });
+                    alert(res.message || '用户恢复成功');
+                    this.getUsers();
+                } catch (error) {
+                    console.error('恢复用户失败:', error);
+                    alert('恢复用户失败，请稍后再试');
+                }
+            }).catch(() => {
+                alert('已取消恢复');
+            });
+        }
     },
     mounted() {
         this.getUsers();

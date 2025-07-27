@@ -6,16 +6,18 @@
             <h3>请输入新的个人信息</h3>
 
             <el-form ref="formRef" :model="form" :rules="rules" label-width="120px" @submit.prevent="handleSubmit">
-                <el-form-item v-if="isAdmin" label="用户名" prop="username">
+                <el-form-item v-if="isAdmin && !currentInfo.username" label="用户名" prop="username">
                     <el-input v-model="form.username" placeholder="请输入用户名" clearable />
                 </el-form-item>
                 <el-form-item label="邮箱" prop="email">
-                    <el-input v-model="form.email" :placeholder="isAdmin ? '请输入邮箱' : '请输入邮箱（留空不修改）'" clearable />
+                    <el-input v-model="form.email"
+                        :placeholder="isAdmin && !currentInfo.username ? '请输入邮箱' : '请输入邮箱（留空不修改）'" clearable />
                 </el-form-item>
 
-                <el-form-item :label="isAdmin ? '密码' : '新密码'" prop="password">
+                <el-form-item :label="isAdmin && !currentInfo.username ? '密码' : '新密码'" prop="password">
                     <el-input v-model="form.password" type="password"
-                        :placeholder="isAdmin ? '请输入新密码' : '请输入新密码（留空不修改）'" show-password clearable />
+                        :placeholder="isAdmin && !currentInfo.username ? '请输入新密码' : '请输入新密码（留空不修改）'" show-password
+                        clearable />
                 </el-form-item>
 
                 <el-form-item label="确认密码" prop="confirmPassword">
@@ -34,6 +36,8 @@
 
 </template>
 <script>
+
+
 export default {
     name: "EditInfo",
     props: {
@@ -41,6 +45,10 @@ export default {
         isAdmin: {
             type: Boolean,
             default: false
+        },
+        currentInfo: {
+            type: Object,
+            default: () => ({})
         }
     },
     data() {
@@ -53,6 +61,7 @@ export default {
         };
         return {
             form: {
+                userid: '',
                 username: "",
                 email: "",
                 password: "",
@@ -73,8 +82,44 @@ export default {
         };
     },
     methods: {
+        initForm() {
+            this.form.userid = this.currentInfo.userid || '';
+            this.form.username = this.currentInfo.username || '';
+            this.form.email = this.currentInfo.email || '';
+        },
+        async editCurrentUser() {
+            if (!this.form.email && !this.form.password) {
+                return alert("请至少修改邮箱或密码");
+            }
+            try {
+                const res = await this.$axios.put('/updateUser', {
+                    userid: this.form.userid,
+                    email: this.form.email,
+                    password: this.form.password,
+                });
+                alert(res.message || '用户信息更新成功');
+            } catch (error) {
+                return alert("更新用户信息失败，请稍后再试");
+            }
+        },
+        async addUser() {
+            try {
+                const res = await this.$axios.post('/createUser', {
+                    username: this.form.username,
+                    email: this.form.email,
+                    password: this.form.password,
+                });
+                alert(res.message || '用户添加成功');
+            } catch (error) {
+                return alert("添加用户失败，请稍后再试");
+            }
+        },
         submitForm() {
-            console.log("提交的表单数据：", this.$refs.formRef.model);
+            if (this.isAdmin && !this.currentInfo.username) {
+                this.addUser()
+            } else {
+                this.editCurrentUser();
+            }
         },
         resetForm() {
             this.$refs.formRef.resetFields();
@@ -85,6 +130,9 @@ export default {
             // 关闭编辑信息组件
             this.$emit('iClose');
         }
+    },
+    mounted() {
+        this.initForm();
     }
 }
 

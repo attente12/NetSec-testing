@@ -30,6 +30,7 @@ import me from '../views/me'
 
 
 import { getCookie } from '@/utils/cookie'
+import { setCookie } from '../utils/cookie'
 
 const routes = [
 
@@ -184,13 +185,16 @@ const router = new Router({
 //全局前置守卫
 router.beforeEach((to, from, next) => {
     const userToken = getCookie('userToken')
-
+    if (!userToken) [
+        setCookie('username', '-1') // 清除过期的token
+    ]
     // 如果访问登录页面
     if (to.path === '/login') {
         // 有token跳转到indexPage
         if (userToken) {
             next('/indexPage')
         } else {
+
             next()
         }
     }
