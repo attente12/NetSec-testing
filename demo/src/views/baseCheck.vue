@@ -16,14 +16,6 @@
     <!-- 控制按钮区域 -->
     <div class="control-section">
       <div class="button-group">
-        <!-- 新增的IP选择下拉框 -->
-        <!--        <div class="control-item">-->
-        <!--          <el-select v-show="!isWindows" v-model="selectedIP" placeholder="选择服务器IP" @change="changeServer"-->
-        <!--            size="medium">-->
-        <!--            <el-option v-for="ip in aliveHosts" :key="ip" :label="ip" :value="ip">-->
-        <!--            </el-option>-->
-        <!--          </el-select>-->
-        <!--        </div>-->
         <div class="control-item">
           <el-tag v-show="!isWindows" type="primary" size="medium">
             当前IP: {{ selectedIP }}
@@ -324,33 +316,6 @@ export default {
         this.serverInfo = []
       }
     },
-
-
-    // 获取活跃IP列表
-    // fetchAliveHosts() {
-    //   $axios.get('/api/getAliveHosts')
-    //     .then(response => {
-    //       this.aliveHosts = response.data.alive_hosts;
-    //       // 如果有IP，默认选择第一个
-    //       if (this.aliveHosts && this.aliveHosts.length > 0) {
-    //         this.selectedIP = this.aliveHosts[0];
-    //         this.fetchAndDisplayChenckResults();
-    //       }
-    //     })
-    //     .catch(error => {
-    //       if (!this.isWindows) {
-    //         console.error('获取活跃IP列表失败:', error);
-    //         this.$message.error('获取活跃IP列表失败');
-    //       }
-    //     });
-    // },
-
-    // 切换服务器
-    // changeServer() {
-    //   if (this.selectedIP) {
-    //     this.fetchAndDisplayChenckResults();
-    //   }
-    // },
 
     // 修改后的获取检测结果函数
     fetchAndDisplayChenckResults() {

@@ -169,7 +169,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import _ from 'lodash';
 
 export default {
@@ -232,7 +231,7 @@ export default {
   methods: {
     // 新增：获取活跃IP列表的方法
     fetchAliveHosts() {
-      axios.get('/api/getAliveHosts')
+      this.$axios.get('/getAliveHosts')
         .then(response => {
           this.aliveHosts = response.data.alive_hosts;
         })
@@ -314,8 +313,8 @@ export default {
       localStorage.setItem('scanTarget', JSON.stringify(this.scanTarget));
 
       try {
-        const apiUrl = '/api/getNmapIp';
-        const response = await axios.post(apiUrl, {
+        const apiUrl = '/getNmapIp';
+        const response = await this.$axios.post(apiUrl, {
           ip: this.scanTarget
         });
 
@@ -377,7 +376,7 @@ export default {
 
         const responses = await Promise.all(
           serviceRequests.map(formData =>
-            axios.post('/api/getWeakPassword', formData, {
+            this.$axios.post('/getWeakPassword', formData, {
               headers: {
                 'Content-Type': 'multipart/form-data'
               }
@@ -457,7 +456,7 @@ export default {
     async checkPasswordStrength() {
       this.PasswordStrengthLoading = true;
       try {
-        const response = await axios.post('/api/testWeakPassword', { pd: this.secret });
+        const response = await this.$axios.post('/testWeakPassword', { pd: this.secret });
         switch (response.data.message) {
           case 'Weak':
             this.passwordStrength = '弱';

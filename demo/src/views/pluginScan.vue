@@ -239,7 +239,7 @@ export default {
       const target = { ip: this.scanTarget };
       this.$axios.post('/getNmapIp', target)
         .then(response => {
-          console.log('Scan result:', response.data);
+          console.log('Scan result:', response);
           Message.success('扫描完成');
           setTimeout(() => {
             this.detectState = false;
@@ -264,7 +264,7 @@ export default {
       };
       this.$axios.post('/getNmapIp', target)
         .then(response => {
-          console.log('Scan result:', response.data);
+          console.log('Scan result:', response);
           Message.success('扫描完成');
           setTimeout(() => {
             this.detectState = false;//关闭检测中状态
@@ -328,7 +328,7 @@ export default {
     // },
     loadTableData() {
       this.$axios.get('/getVaildPOCData').then(response => {
-        this.pocList = response.data;
+        this.pocList = response;
       })
     },
 
@@ -358,9 +358,9 @@ export default {
 
       this.$axios.post('/pocScan', postData)
         .then(response => {
-          console.log(response.data);
-          this.time = response.data.scan_time;
-          this.result = response.data;
+          console.log(response);
+          this.time = response.scan_time;
+          this.result = response;
           this.runPocState = false;
           this.$message.success('检测完成，结果已更新');
         })
@@ -377,7 +377,7 @@ export default {
 
       this.$axios.post('/pocScan/autoSelectPoc', { ip: this.scanTarget })
         .then(response => {
-          const autoSelectedIds = response.data.map(poc => poc.id);
+          const autoSelectedIds = response.map(poc => poc.id);
           this.checkedPocs = this.pocList.filter(poc => autoSelectedIds.includes(poc.id));
         })
         .catch(error => {

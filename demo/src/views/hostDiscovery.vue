@@ -45,11 +45,6 @@
                     <el-tag type="success" size="small">存活</el-tag>
                   </template>
                 </el-table-column>
-                <!--                <el-table-column prop="lastSeen" label="发现时间">-->
-                <!--                  <template slot-scope="scope">-->
-                <!--                    {{ scope.row.lastSeen }}-->
-                <!--                  </template>-->
-                <!--                </el-table-column>-->
               </el-table>
             </el-collapse-transition>
           </div>
@@ -97,6 +92,18 @@ export default {
       allHosts: [] // 用于导出PDF和存储到localStorage
     }
   },
+  watch: {
+    groupedHosts: {
+
+      handler(newObj) {
+        Object.keys(newObj).forEach(groupName => {
+          this.groupedHosts[groupName] = [...new Set(newObj[groupName])];
+        })
+        console.log('分组数据已更新:', this.groupedHosts)
+      },
+      deep: true,
+    },
+  },
   methods: {
     // 加载之前保存的主机发现结果
     loadPreviousResults() {
@@ -127,10 +134,10 @@ export default {
             )
 
             // 处理返回的分组数据
-            this.processGroupedData(response.data.groups)
+            this.processGroupedData(response.groups)
 
             // 保存完整的响应数据到sessionStorage
-            sessionStorage.setItem('hostdiscoveryjson', JSON.stringify(response.data))
+            sessionStorage.setItem('hostdiscoveryjson', JSON.stringify(response.groups))
 
 
             const storedIps = sessionStorage.getItem('nmapIps');
@@ -162,7 +169,7 @@ export default {
             this.$message.success(`发现 ${this.totalHostsCount} 个存活主机`)
 
           } catch (error) {
-            this.$message.error('扫描失败：' + (error.response?.data || error.message))
+            this.$message.error('扫描失败：' + (error.response || error.message))
           } finally {
             this.loading = false
           }

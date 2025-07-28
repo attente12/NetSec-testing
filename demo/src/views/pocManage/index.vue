@@ -413,7 +413,7 @@ export default {
         } else if (flag === '1') {
           url = '/getWithOutPocCondition';
         } else if (flag === '2') {
-          url = '/getWithTranCondition';
+          url = '/getWithTranPocCondition';
         }
         const data = await this.$axios.get(url, {
           params: { page: this.currentPage, page_size: this.pageSize }
@@ -426,7 +426,7 @@ export default {
       }
     },
     loadVulTypes() {
-      neoFetch('/api/poc/getAllVulnTypes')
+      neoFetch(this.$store.state.fetchUrl + '/poc/getAllVulnTypes')
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -462,7 +462,7 @@ export default {
     //搜索的实现
     load() {
       let query = new URLSearchParams({ keyword: this.searchKeyword.trim() }).toString();
-      neoFetch(`/api/searchData?${query}`)
+      neoFetch(`${this.$store.state.fetchUrl}/searchData?${query}`)
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -573,7 +573,7 @@ export default {
     },
 
     del(id) {
-      neoFetch(`/api/deleteDataById`, {
+      neoFetch(`${this.$store.state.fetchUrl}/deleteDataById`, {
         method: 'DELETE',
         body: JSON.stringify({ ids: id })
       })
@@ -593,7 +593,7 @@ export default {
 
     delBatch() {
       const idsToDelete = this.$refs.table.selection.map(row => row.id);
-      neoFetch(`/api/deleteDataById`, {
+      neoFetch(`${this.$store.state.fetchUrl}/deleteDataById`, {
         method: 'DELETE',
         body: JSON.stringify({ ids: idsToDelete })
       })
@@ -824,7 +824,7 @@ export default {
       }
 
       try {
-        const response = await neoFetch('/api/insertData', {
+        const response = await neoFetch(this.$store.state.fetchUrl + '/insertData', {
           method: 'POST',
           body: formData,
         });

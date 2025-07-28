@@ -6,7 +6,8 @@ Vue.use(Vuex);
 
 export const store = new Vuex.Store({
     state: {
-        message: {}
+        message: {},
+        fetchUrl: 'http://192.168.0.129:8081', // 基础URL
     },
     mutations: {
         updateMessage(state, payload) {

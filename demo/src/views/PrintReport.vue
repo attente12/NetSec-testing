@@ -635,7 +635,7 @@ export default {
 
     async fetchBaselineDetails() {
       try {
-        const response = await neoFetch(`/api/userinfo?ip=${this.assetData.ip}`);
+        const response = await neoFetch(this.$store.state.fetchUrl + `/userinfo?ip=${this.assetData.ip}`);
         const data = await response.json();
         if (data && data.checkResults) {
           this.baselineDetails = data.checkResults;
@@ -647,7 +647,7 @@ export default {
 
     async fetchClassifyDetails() {
       try {
-        const response = await neoFetch(`/api/level3Userinfo?ip=${this.assetData.ip}`);
+        const response = await neoFetch(this.$store.state.fetchUrl + `/level3Userinfo?ip=${this.assetData.ip}`);
         const data = await response.json();
         if (data && data.checkResults) {
           this.classifyDetails = data.checkResults;

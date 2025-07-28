@@ -300,7 +300,7 @@
                 <template v-slot:default>
                   <div class="progress-content">
                     <span class="rate">{{ currentAsset.level3_baseline_summary.non_compliance_rate_to_initial_checks
-                    }}%</span>
+                      }}%</span>
                   </div>
                 </template>
               </el-progress>
@@ -315,21 +315,21 @@
               <div class="stat-item">
                 <div class="item-header">合格项数</div>
                 <div class="item-value" style="color: #67C23A;">{{ currentAsset.level3_baseline_summary.compliant_items
-                }}
+                  }}
                 </div>
               </div>
               <div class="stat-item">
                 <div class="item-header">部分合格项数</div>
                 <div class="item-value" style="color: #E6A23C;">{{
                   currentAsset.level3_baseline_summary.half_compliant_items
-                }}</div>
+                  }}</div>
               </div>
 
               <div class="stat-item">
                 <div class="item-header">不合格项数</div>
                 <div class="item-value" style="color: #F56C6C;">{{
                   currentAsset.level3_baseline_summary.non_compliant_items
-                }}</div>
+                  }}</div>
               </div>
               <!--              <div class="stat-item">-->
               <!--                <div class="item-header">待人工检查项数</div>-->
@@ -1436,8 +1436,8 @@ export default {
       try {
         // 并行获取基线检测详细信息和等保测评详细信息
         const [baselineResponse, classifyResponse] = await Promise.all([
-          neoFetch(`/api/userinfo?ip=${this.currentAsset.ip}`),
-          neoFetch(`/api/level3Userinfo?ip=${this.currentAsset.ip}`)
+          neoFetch(this.$store.state.fetchUrl + `/userinfo?ip=${this.currentAsset.ip}`),
+          neoFetch(this.$store.state.fetchUrl + `/level3Userinfo?ip=${this.currentAsset.ip}`)
         ]);
 
         // 处理基线检测数据
@@ -2082,7 +2082,7 @@ export default {
     },
 
     getResults() {
-      neoFetch('/api//assets/full_info')
+      neoFetch(this.$store.state.fetchUrl + '/assets/full_info')
         .then(response => response.json())
         .then(data => {
           this.assets = data;
@@ -2100,7 +2100,7 @@ export default {
     // 获取资产组列表
     async getAssetGroups() {
       try {
-        const response = await neoFetch('/api/asset_group/list');
+        const response = await neoFetch(this.$store.state.fetchUrl + '/asset_group/list');
         if (!response.ok) {
           throw new Error('获取资产组列表失败');
         }
@@ -2135,7 +2135,7 @@ export default {
       this.addGroupLoading = true;
 
       try {
-        const response = await neoFetch('/api/asset_group', {
+        const response = await neoFetch(this.$store.state.fetchUrl + '/asset_group', {
           method: 'POST',
           body: JSON.stringify(this.newGroupForm)
         });
@@ -2186,7 +2186,7 @@ export default {
       this.editGroupLoading = true;
 
       try {
-        const response = await neoFetch(`/api/asset_group/${this.editGroupForm.id}`, {
+        const response = await neoFetch(this.$store.state.fetchUrl + `/asset_group/${this.editGroupForm.id}`, {
           method: 'PUT',
           body: JSON.stringify({ new_name: this.editGroupForm.new_name })
         });
@@ -2321,7 +2321,7 @@ export default {
 
       try {
         const promises = this.moveAssetForm.selectedAssets.map(assetIp =>
-          neoFetch(`/api/asset/${assetIp}/group`, {
+          neoFetch(this.$store.state.fetchUrl + `/asset/${assetIp}/group`, {
             method: 'PUT',
             body: JSON.stringify({ group_id: this.moveAssetForm.targetGroupId })
           })
@@ -2356,7 +2356,7 @@ export default {
     // 单个资产移动
     async moveAssetToGroup(assetIp, targetGroupId) {
       try {
-        const response = await neoFetch(`/api/asset/${assetIp}/group`, {
+        const response = await neoFetch(this.$store.state.fetchUrl + `/asset/${assetIp}/group`, {
           method: 'PUT',
           body: JSON.stringify({ group_id: targetGroupId })
         });
@@ -2550,7 +2550,7 @@ export default {
       this.baselineDetails = [];
 
       // 调用API获取详细信息
-      neoFetch(`/api/userinfo?ip=${this.currentAsset.ip}`)
+      neoFetch(this.$store.state.fetchUrl + `/userinfo?ip=${this.currentAsset.ip}`)
         .then(response => response.json())
         .then(data => {
           if (data && data.checkResults) {
@@ -2577,7 +2577,7 @@ export default {
       this.classifyDetails = [];
 
       // 调用API获取详细信息
-      neoFetch(`/api/level3Userinfo?ip=${this.currentAsset.ip}`)
+      neoFetch(this.$store.state.fetchUrl + `/level3Userinfo?ip=${this.currentAsset.ip}`)
         .then(response => response.json())
         .then(data => {
           if (data && data.checkResults) {

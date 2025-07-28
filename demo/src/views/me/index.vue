@@ -12,7 +12,9 @@
                     </span>
                 </div>
 
-                <div class="my_button" @click="showAndCloseEditInfo"><span>编辑个人信息</span><span>></span></div>
+                <div class="my_button" @click="showEditInfo">
+                    <span>编辑个人信息</span><span>></span>
+                </div>
                 <div class="my_button" v-if="isAdmin" @click="showAndCloseUserManager">
                     <span>管理其他用户</span><span>{{ showUserManager ? '-' : '+' }}</span>
                 </div>
@@ -21,8 +23,8 @@
             </div>
         </main>
         <user-table v-if="showUserManager" @adminAdd="showAdminAdd" @editting="getEdittingUser"></user-table>
-        <edit-info v-if="showEditInfo" :isAdmin="editAdminFlag" :currentInfo="whoIsEditted"
-            @iClose="showAndCloseEditInfo"></edit-info>
+        <edit-info v-if="editInfoFlag" :isAdmin="editAdminFlag" :currentInfo="whoIsEditted"
+            @iClose="closeEditInfo"></edit-info>
     </div>
 </template>
 <script>
@@ -38,21 +40,28 @@ export default {
     },
     data() {
         return {
+            userid: "",
             username: "",
             email: "",
             isAdmin: true,
-            showEditInfo: false,
+            editInfoFlag: false,
             showUserManager: false,
             editAdminFlag: false,
             whoIsEditted: {}
         };
     },
     methods: {
-        showAndCloseEditInfo() {
-            // 触发编辑信息组件的显示
+        showEditInfo() {
+            this.editInfoFlag = true;
+            this.whoIsEditted = {
+                userid: this.userid,
+                username: this.username,
+                email: this.email
+            };
+        },
+        closeEditInfo() {
+            this.editInfoFlag = false;
             this.whoIsEditted = {};
-            this.showEditInfo = !this.showEditInfo;
-            this.editAdminFlag = false; // 重置管理员编辑标志
         },
         showAndCloseUserManager() {
             // 触发编辑信息组件的显示
@@ -63,6 +72,7 @@ export default {
             this.showEditInfo = true;
         },
         getInfo() {
+            this.userid = getCookie('id') || '';
             this.username = getCookie('username') || 'Joe';
             this.email = getCookie('email') || 'okjoe@qq.com';
             this.isAdmin = getCookie('role') === 'admin';

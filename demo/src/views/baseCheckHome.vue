@@ -72,7 +72,7 @@
 
                     <el-button type="primary" @click="turnFlag">切换到{{ flag ? 'Linux' : 'Windows' }}</el-button>
                     <el-button v-show="flag" type="primary" class="versionSelectBT" @click="WindowsSubmitForm"
-                        :disabled="ip && pd && adminName ? null : true">检测全部</el-button>
+                        :disabled="ip && pd && adminName ? null : true" :loading="loading">预检测</el-button>
                 </el-form-item>
             </el-form>
 
@@ -82,8 +82,12 @@
             <div slot="header" class="card-header">
 
                 <span>检测项目选择</span>
-                <el-button v-if="flag" type="primary" :disabled="isChecked ? null : true"
-                    @click="isSelectAll ? checkAllW : batchExecuteW" icon="el-icon-video-play" :loading="batchLoading">
+                <el-button v-if="flag && isSelectAll" type="primary" :disabled="isChecked ? null : true"
+                    @click="checkAllW" icon="el-icon-video-play" :loading="batchLoading">
+                    批量执行
+                </el-button>
+                <el-button v-if="flag && !isSelectAll" type="primary" :disabled="isChecked ? null : true"
+                    @click="batchExecuteW" icon="el-icon-video-play" :loading="batchLoading">
                     批量执行
                 </el-button>
             </div>
@@ -308,6 +312,7 @@ export default {
             isChecked: false,
             checkAll: false,//linux全选标记
             isSelectAll: true,//windows全选标记
+            batchLoading: false,
         };
     },
     watch: {
@@ -396,6 +401,8 @@ export default {
         },
 
         WindowsSubmitForm() {
+            this.loading = true;
+
             const payload = {
                 hostname: this.adminName,
                 ip: this.ip,
@@ -403,7 +410,7 @@ export default {
             };
             console.log("Submitting form...", payload);
 
-            neoFetch('/api/win_login', {
+            neoFetch(this.$store.state.fetchUrl + '/win_login', {
                 method: 'POST',
                 body: JSON.stringify(payload),
             })
@@ -417,6 +424,7 @@ export default {
                         // 对于除500外的其他错误，抛出错误并附带状态码
                         throw new Error(`HTTP status ${response.status}`);
                     }
+                    this.loading = false;
                     return response.json();
                 })
                 .then(data => {
@@ -427,15 +435,16 @@ export default {
                     console.log("Received data:", simplifyData.Event_result)
                     this.checkResult.ServerInfo = simplifyData.ServerInfo
                     this.checkResult.Event_result = simplifyData.Event_result
-                    this.sendData()
                     if (!this.value) this.value = data.ServerInfo.version
                     // 仅在成功响应时执行UI操作
                     this.versionFlag = true
                     this.isChecked = true
-                    this.showPopup = true // 显示遮罩层
+                    this.loading = false;
+
                     return true
                 })
                 .catch((error) => {
+                    this.loading = false;
                     console.error('Error:', error);
                     // 显示除500外的其他HTTP错误的错误码
                     alert(`发生错误：${error.message}`);
@@ -446,6 +455,7 @@ export default {
         sendData() {
             if (this.isSelectAll) {
                 this.$store.commit('updateMessage', this.checkResult)
+                console.log("全选，直接发送结果")
             } else {
                 let idArr = []
                 let newres = []
@@ -479,27 +489,13 @@ export default {
                 }
 
                 this.loading = true;
-                //let payload; // 在 if/else 外部声明变量
-
-                // if (this.checkAll) {
-                //   payload = {
-                //     ip: this.formData.ip,
-                //     pd: this.formData.pd
-                //   }; // 给变量赋值
-                // } else {
-                //   payload = {
-                //     ip: this.formData.ip,
-                //     pd: this.formData.pd,
-                //     ids: this.selectedItems
-                //   }; // 给变量赋值
-                // }
                 const payload = {
                     ip: this.formData.ip,
                     pd: this.formData.pd,
                     ids: this.selectedItems
                 };
 
-                neoFetch('/api/login', {
+                neoFetch(this.$store.state.fetchUrl + '/login', {
                     method: 'POST',
                     body: JSON.stringify(payload),
                 })
@@ -547,10 +543,14 @@ export default {
 
         checkAllW() {
             if (this.isChecked) {
-                this.viewResult();
+                console.log("批量执行")
+                this.sendData()
+                this.viewResult()
                 return 0
             } else {
-                this.submitForm()
+
+                this.WindowsSubmitForm()
+                this.sendData()
                 this.viewResult()
             }
         },
@@ -562,6 +562,7 @@ export default {
                 return 0
             } else {
                 this.WindowsSubmitForm()
+                this.sendData()
                 this.viewResult()
             }
         },

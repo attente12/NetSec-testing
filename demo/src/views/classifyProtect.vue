@@ -339,7 +339,7 @@ export default {
       this.tableLoading = true;
       this.this.$axios.get(`/level3Userinfo?ip=${this.selectedIP}`)
         .then(response => {
-          this.checkresults = response.data.checkResults.map(item => {
+          this.checkresults = response.checkResults.map(item => {
             // 根据 tmp_IsComply 的值来设置 score
             let score = '';
 
@@ -638,7 +638,7 @@ export default {
         .then(response => {
           // 保存成功
           this.saveLoading = false;
-          this.$message.success(`成功更新${response.data.itemsUpdated}项评分结果`);
+          this.$message.success(`成功更新${response.itemsUpdated}项评分结果`);
         })
         .catch(error => {
           // 保存失败
@@ -652,7 +652,7 @@ export default {
       this.resultLoading = true;
       this.this.$axios.get(`/getlevel3ResultByIp?ip=${this.selectedIP}`)
         .then(response => {
-          this.levelResult = response.data;
+          this.levelResult = response;
           this.showScoreResult = true;
           this.resultLoading = false;
 

@@ -233,7 +233,7 @@ export default {
       this.tableLoading = true;
       this.$axios.get(`/level3TmpUserinfo?ip=${ip}`)
         .then(response => {
-          this.checkresults = response.data.checkResults.map(item => {
+          this.checkresults = response.checkResults.map(item => {
             let score = '';
 
             // 根据不同状态设置初始score值
@@ -266,7 +266,7 @@ export default {
     async fetchProtectionScore() {
       try {
         const response = await this.$axios.get(`/getLevel3Score?ip=${this.ip}`);
-        this.protectionScore = response.data;
+        this.protectionScore = response;
       } catch (error) {
         console.error('获取等保得分失败:', error);
         // 设置默认值
@@ -302,7 +302,7 @@ export default {
       this.$axios.post('/updateLevel3Protect', requestData)
         .then(response => {
           this.saveLoading = false;
-          this.$message.success(`成功更新${response.data.itemsUpdated}项评分结果`);
+          this.$message.success(`成功更新${response.itemsUpdated}项评分结果`);
         })
         .catch(error => {
           this.saveLoading = false;

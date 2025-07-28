@@ -13,7 +13,7 @@ export default {
   data() {
     return {
       iframeKey: 1,
-      baseUrl: 'http://10.9.130.67:5000/'
+      baseUrl: 'http://192.168.0.129:5000/'
     }
   },
   computed: {

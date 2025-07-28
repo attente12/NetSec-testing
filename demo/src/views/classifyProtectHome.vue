@@ -212,7 +212,7 @@ export default {
           ids: this.selectedItems
         };
 
-        neoFetch('/api/level3Login', {
+        neoFetch(this.$store.state.fetchUrl + '/level3Login', {
           method: 'POST',
           body: JSON.stringify(payload),
         })

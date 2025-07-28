@@ -58,7 +58,7 @@ export default {
     },
     methods: {
         fetchAndDisplayChenckResults() {
-            neoFetch('api/userinfo')
+            neoFetch(this.$store.state.fetchUrl + '/userinfo')
                 .then(response => response.json())
                 .then(checkresults => {
                     this.checkresults = checkresults;

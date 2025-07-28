@@ -119,6 +119,8 @@ export default {
                 setCookie('username', this.form.username, 1);
                 setCookie('email', res.email, 1);
                 setCookie('role', res.role, 1);
+                setCookie('id', res.id, 1);
+
                 this.$router.push({ path: '/indexPage' });
             } catch (error) {
                 this.loading = false;

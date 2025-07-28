@@ -100,8 +100,8 @@ export default {
       this.loading = true
       try {
         const response = await this.$axios.get('/poc/getAllVulnTypes')
-        console.log('获取到的数据:', response.data) // 调试信息
-        this.vulnTypes = response.data.types || []
+
+        this.vulnTypes = response.types || []
       } catch (error) {
         console.error('获取漏洞类型失败:', error)
         this.$message.error('获取漏洞类型失败，请稍后重试')

@@ -52,7 +52,7 @@
                     </el-col>
                     <el-col :span="12">
                         <div class="info-item"><span class="info-label">主机物理CPU核心数：</span>{{ serverInfo.cpuCore || '未知'
-                            }}</div>
+                        }}</div>
                     </el-col>
                     <el-col :span="12">
                         <div class="info-item"><span class="info-label">硬件型号：</span>{{ serverInfo.ProductName || '未知' }}
@@ -77,7 +77,7 @@
                 </div>
             </div>
 
-            <el-table v-show="isWindows" :data="filteredCheckresults" style="width: 100%" border stripe
+            <el-table :data="filteredCheckresults" style="width: 100%" border stripe
                 :header-cell-style="{ background: '#f5f7fa', color: '#606266' }" v-loading="tableLoading">
                 <el-table-column label="序号" width="70" type="index"></el-table-column>
                 <el-table-column prop="description" label="检测项" min-width="150"></el-table-column>
@@ -94,7 +94,7 @@
                     <template slot-scope="scope">
                         <span v-if="scope.row.IsComply === 'false' || scope.row.IsComply === 'pending'">{{
                             scope.row.recommend
-                            }}</span>
+                        }}</span>
                         <span v-else>-</span>
                     </template>
                 </el-table-column>
@@ -196,12 +196,10 @@ export default {
             aliveHosts: [],
             selectedIP: '',
             globalDate: '',
+            message: this.$store.state.message,
         }
     },
     computed: {
-        message() {
-            return this.$store.state.message;
-        },
         filteredCheckresults() {
             return this.checkresults.filter(result => {
                 const matchesStatus = this.selectedStatus === 'all' ||
@@ -232,27 +230,6 @@ export default {
             if (this.selectedIP) {
                 this.fetchAndDisplayChenckResults();
             }
-        },
-
-        fetchAndDisplayChenckResults() {
-            if (!this.selectedIP) {
-                this.$message.warning('请先选择服务器IP');
-                return;
-            }
-
-            this.tableLoading = true;
-            this.$axios.get(`/userinfo?ip=${this.selectedIP}`)
-                .then(response => {
-                    this.checkresults = response.data.checkResults;
-                    this.serverInfo = response.data.serverInfo;
-                    this.tableLoading = false;
-                    this.estimatePageCount();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    this.tableLoading = false;
-                    this.$message.error('获取检测结果失败，请重试');
-                });
         },
 
         estimatePageCount() {
@@ -427,10 +404,10 @@ export default {
                 this.$message.error('PDF生成失败，请重试！');
             }
         },
-
-        filterSearchResults() {
+        getMessage() {
+            this.serverInfo = this.message.ServerInfo;
+            this.checkresults = this.message.Event_result;
         },
-
         goToClassifyProtect() {
             this.$router.push('/classifyProtect');
         },
@@ -462,6 +439,7 @@ export default {
 
     },
     mounted() {
+        this.getMessage()
         this.globalDate = new Date().toString();
     }
 }

@@ -18,7 +18,6 @@ import toVerify from "@/views/toVerify.vue";
 import pluginScan from "@/views/pluginScan.vue";
 import assetManage from "@/views/assetManage.vue";
 import hostDiscovery from "@/views/hostDiscovery.vue";
-import test from "@/views/test.vue";
 import tempBaseCheck from "@/views/tempBaseCheck.vue";
 import classifyProtectHome from "@/views/classifyProtectHome.vue";
 import tempClassifyProtect from "@/views/tempClassifyProtect.vue";
@@ -129,12 +128,6 @@ const routes = [
                 name: 'assetManage',
                 component: assetManage,
                 meta: { title: '资产管理' }
-            },
-            {
-                path: '/test',
-                name: 'test',
-                component: test,
-                meta: { title: '测试' }
             },
             {
                 path: '/tempBaseCheck',
