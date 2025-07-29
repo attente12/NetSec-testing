@@ -139,6 +139,8 @@ export default {
                 if (res.status !== '200') return alert('验证码错误或已过期，请重新注册');
                 alert('注册成功，请登录');
                 this.loading = false;
+                this.isVerify = false;
+                this.form.code = '';
                 this.isLogin = true;
 
             } catch (error) {
@@ -158,6 +160,7 @@ export default {
                     password: this.form.password,
                 });
                 console.log(res);
+                this.loading = false;
                 this.isVerify = true;
             } catch (error) {
                 this.loading = false;

@@ -239,11 +239,12 @@ export default {
       const target = { ip: this.scanTarget };
       this.$axios.post('/getNmapIp', target)
         .then(response => {
-          console.log('Scan result:', response);
+          console.log('Scan result:', response)
+          this.result = response.scan_result
           Message.success('扫描完成');
           setTimeout(() => {
             this.detectState = false;
-            window.location.reload(); // 刷新页面
+
           }, 2000); // 显示提示2秒后刷新页面
           // 在这里处理成功响应的数据
         })
@@ -298,34 +299,7 @@ export default {
         this.$message.error('获取存活主机列表失败');
       }
     },
-    // 新增：获取活跃IP列表的方法
-    // fetchAliveHosts() {
-    //   this.$axios.get('/getAliveHosts')
-    //       .then(response => {
-    //         this.aliveHosts = response.data.alive_hosts;
-    //         if (!this.scanTarget) {
-    //           this.scanTarget = this.aliveHosts[0];
-    //           this.loadTableData();
-    //         }
-    //       })
-    //       .catch(error => {
-    //         console.error('获取活跃IP列表失败:', error);
-    //         this.$message.error('获取活跃IP列表失败');
-    //       });
-    // },
-    // loadTableData(){
-    //   this.$axios.get('/getAllData').then(response => {
-    //     this.pocList=response.data;
-    //   })
-    //   this.$axios.post('/pocScan/mergeResults', { ip: this.scanTarget })
-    //       .then(response => {
-    //         this.result = response.data;
-    //         console.log(response.data);
-    //       })
-    //       .catch(error => {
-    //         console.error('error:', error);
-    //       });
-    // },
+
     loadTableData() {
       this.$axios.get('/getVaildPOCData').then(response => {
         this.pocList = response;

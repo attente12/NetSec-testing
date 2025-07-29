@@ -16,7 +16,7 @@ import classifyProtect from "../views/classifyProtect.vue"
 import CVELibrary from "@/views/CVELibrary.vue";
 import toVerify from "@/views/toVerify.vue";
 import pluginScan from "@/views/pluginScan.vue";
-import assetManage from "@/views/assetManage.vue";
+import assetManage from "@/views/assetManage";
 import hostDiscovery from "@/views/hostDiscovery.vue";
 import tempBaseCheck from "@/views/tempBaseCheck.vue";
 import classifyProtectHome from "@/views/classifyProtectHome.vue";

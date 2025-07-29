@@ -68,8 +68,9 @@ export default {
             this.showUserManager = !this.showUserManager;
         },
         showAdminAdd() {
+            console.log('管理员添加新用户');
             this.editAdminFlag = true;
-            this.showEditInfo = true;
+            this.editInfoFlag = true;
         },
         getInfo() {
             this.userid = getCookie('id') || '';
@@ -78,12 +79,14 @@ export default {
             this.isAdmin = getCookie('role') === 'admin';
         },
         getEdittingUser(user) {
+            console.log('获取正在编辑的用户信息:', user);
             this.whoIsEditted = user;
-            this.showEditInfo = true;
+            this.editInfoFlag = true;
             this.editAdminFlag = true; // 设置为管理员编辑状态
         },
         exit() {
             deleteAllCookies();
+            sessionStorage.clear();
             this.$router.push({ name: 'login' });
         }
     },

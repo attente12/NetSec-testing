@@ -112,13 +112,15 @@ export default {
         try {
           const parsedData = JSON.parse(savedData)
           // 处理保存的分组数据
-          this.processGroupedData(parsedData.groups)
+
+          this.processGroupedData(parsedData)
           this.searched = true // 标记为已搜索状态
-          console.log('已加载之前的主机发现结果')
+          console.log('加载之前的主机发现结果:', parsedData)
+
         } catch (error) {
           console.error('加载之前的结果失败:', error)
           // 如果数据损坏，清除该项
-          sessionStorage.removeItem('hostdiscoveryjson')
+
         }
       }
     },

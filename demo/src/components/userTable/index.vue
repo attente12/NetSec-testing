@@ -8,17 +8,21 @@
             <el-table-column prop="account_status" label="用户状态" width="120" />
             <el-table-column fixed="right" label="操作" min-width="180">
                 <template #default="{ row }">
-                    <el-button link type="primary" size="small" @click="handleEdit(row)">
-                        编辑
-                    </el-button>
-                    <el-button v-if="row.account_status === 'deleted'" link type="success" size="small"
-                        @click="handleRestore(row)">
-                        恢复
-                    </el-button>
-                    <el-button v-if="row.account_status !== 'deleted'" link type="danger" size="small"
-                        @click="handleDelete(row)">
-                        删除
-                    </el-button>
+                    <div v-if="row.role !== 'admin'">
+                        <el-button :disabled="row.account_status === 'deleted'" link type="primary" size="small"
+                            @click="handleEdit(row)">
+                            编辑
+                        </el-button>
+                        <el-button v-if="row.account_status === 'deleted'" link type="success" size="small"
+                            @click="handleRestore(row)">
+                            恢复
+                        </el-button>
+                        <el-button v-if="row.account_status !== 'deleted'" link type="danger" size="small"
+                            @click="handleDelete(row)">
+                            删除
+                        </el-button>
+                    </div>
+
                 </template>
             </el-table-column>
         </el-table>
@@ -101,6 +105,7 @@ export default {
             }
         },
         addUser() {
+            console.log('添加新用户');
             this.$emit('adminAdd');
         },
         handleDelete(row) {

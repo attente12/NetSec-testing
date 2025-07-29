@@ -133,14 +133,14 @@ export default {
             action: 'add'
           })
 
-          console.log('新增响应:', response.data) // 调试信息
-          this.$message.success(response.data.message || '添加成功')
+          console.log('新增响应:', response.message) // 调试信息
+          window.alert(response.message || '添加成功')
           this.addDialogVisible = false
           this.fetchVulnTypes() // 重新获取列表
         } catch (error) {
           console.error('新增失败:', error) // 调试信息
-          const errorMsg = error.response?.data?.message || '添加失败，请稍后重试'
-          this.$message.error(errorMsg)
+
+
         } finally {
           this.submitLoading = false
         }
@@ -163,14 +163,14 @@ export default {
           action: 'delete'
         })
 
-        console.log('删除响应:', response.data) // 调试信息
-        this.$message.success(response.data.message || '删除成功')
+        console.log('删除响应:', response) // 调试信息
+        window.alert(response.message || '删除成功')
         this.deleteDialogVisible = false
         this.fetchVulnTypes() // 重新获取列表
       } catch (error) {
         console.error('删除失败:', error) // 调试信息
-        const errorMsg = error.response?.data?.message || '删除失败，请稍后重试'
-        this.$message.error(errorMsg)
+
+
       } finally {
         this.deleteLoading = false
       }

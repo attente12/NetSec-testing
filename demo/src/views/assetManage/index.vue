@@ -40,14 +40,7 @@
                 <div class="asset-info">
                   <i class="el-icon-monitor"></i>
                   <span class="asset-ip" :title="asset.ip">{{ asset.ip }}</span>
-                  <!--                  <div class="asset-status">-->
-                  <!--                    <el-tag-->
-                  <!--                        :type="asset.alive ? 'success' : 'danger'"-->
-                  <!--                        size="mini"-->
-                  <!--                        style="width: 30px; display: inline-block; text-align: center; margin-left: 0px;margin-right: 0px;">-->
-                  <!--                      {{ asset.alive ? '在线' : '离线' }}-->
-                  <!--                    </el-tag>-->
-                  <!--                  </div>-->
+
                 </div>
                 <div class="asset-actions" @click.stop>
                   <el-dropdown @command="(groupId) => moveAssetToGroup(asset.ip, groupId)"
@@ -113,14 +106,6 @@
             <span class="label">硬件型号：</span>
             <span class="value">{{ currentAsset.serverinfo.ProductName }}</span>
           </div>
-          <!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
-          <!--            <span class="label">空闲内存：</span>-->
-          <!--            <span class="value">{{ currentAsset.serverinfo.free }}</span>-->
-          <!--          </div>-->
-          <!--          <div class="info-item" v-if="currentAsset.serverinfo">-->
-          <!--            <span class="label">互联网连接：</span>-->
-          <!--            <span class="value">{{ currentAsset.serverinfo.isInternet === 'true' ? '已连接' : '未连接' }}</span>-->
-          <!--          </div>-->
           <div class="info-item">
             <span class="label">开放端口：</span>
             <span class="value">{{ formatOpenPorts }}</span>
@@ -130,12 +115,7 @@
 
       <!-- 基线检测信息 -->
       <div class="baseline-section" v-if="currentAsset.baseline_summary">
-        <!--        <h2>-->
-        <!--          基线检测-->
-        <!--          <el-tooltip content="查看详细信息" placement="top">-->
-        <!--            <i class="el-icon-view baseline-info-icon" @click="showBaselineDetails"></i>-->
-        <!--          </el-tooltip>-->
-        <!--        </h2>-->
+
         <h2>
           基线检测
           <el-tooltip content="查看详细信息" placement="top">
@@ -218,30 +198,6 @@
           </div>
         </div>
       </div>
-      <!-- 等保测评信息 -->
-      <!--      <div class="baseline-section" v-if="currentAsset.baseline_summary">-->
-      <!--        <h2>-->
-      <!--          等级保护测评-->
-      <!--          <el-tooltip content="查看详细信息" placement="top">-->
-      <!--            <i class="el-icon-view baseline-info-icon" @click="showClassifyProtectDetails"></i>-->
-      <!--          </el-tooltip>-->
-      <!--        </h2>-->
-      <!--        <div class="baseline-info">-->
-      <!--          <div class="baseline-summary">-->
-      <!--            <div class="compliance-dashboard">-->
-      <!--&lt;!&ndash;              <div class="compliance-label" style="text-align: center; margin-bottom: 10px; font-weight: bold; color: #333;">合规率</div>&ndash;&gt;-->
-      <!--&lt;!&ndash;              <el-progress type="dashboard" :percentage="currentAsset.baseline_summary.compliance_rate" :color="'#67C23A'" :stroke-width="10">&ndash;&gt;-->
-      <!--&lt;!&ndash;                <template v-slot:default>&ndash;&gt;-->
-      <!--&lt;!&ndash;                  <div class="progress-content">&ndash;&gt;-->
-      <!--&lt;!&ndash;                    <span class="rate">{{ currentAsset.baseline_summary.compliance_rate }}%</span>&ndash;&gt;-->
-      <!--&lt;!&ndash;                  </div>&ndash;&gt;-->
-      <!--&lt;!&ndash;                </template>&ndash;&gt;-->
-      <!--&lt;!&ndash;              </el-progress>&ndash;&gt;-->
-      <!--            </div>-->
-      <!--          </div>-->
-      <!--        </div>-->
-      <!--      </div>-->
-      <!-- 等保测评信息 -->
       <div class="baseline-section" v-if="currentAsset.level3_baseline_summary">
         <h2>
           等级保护测评
@@ -300,7 +256,7 @@
                 <template v-slot:default>
                   <div class="progress-content">
                     <span class="rate">{{ currentAsset.level3_baseline_summary.non_compliance_rate_to_initial_checks
-                      }}%</span>
+                    }}%</span>
                   </div>
                 </template>
               </el-progress>
@@ -315,21 +271,21 @@
               <div class="stat-item">
                 <div class="item-header">合格项数</div>
                 <div class="item-value" style="color: #67C23A;">{{ currentAsset.level3_baseline_summary.compliant_items
-                  }}
+                }}
                 </div>
               </div>
               <div class="stat-item">
                 <div class="item-header">部分合格项数</div>
                 <div class="item-value" style="color: #E6A23C;">{{
                   currentAsset.level3_baseline_summary.half_compliant_items
-                  }}</div>
+                }}</div>
               </div>
 
               <div class="stat-item">
                 <div class="item-header">不合格项数</div>
                 <div class="item-value" style="color: #F56C6C;">{{
                   currentAsset.level3_baseline_summary.non_compliant_items
-                  }}</div>
+                }}</div>
               </div>
               <!--              <div class="stat-item">-->
               <!--                <div class="item-header">待人工检查项数</div>-->
@@ -535,39 +491,6 @@
           <div class="pie-chart" ref="vulTypePieChart" style="width: 100%; height: 300px;"></div>
         </el-card>
 
-        <!-- 按漏洞类型分组的表格 -->
-        <!--        <div class="table-section" v-if="Object.keys(groupedVulTypeVulnerabilities).length > 0">-->
-        <!--          <h3><strong>漏洞详情</strong></h3>-->
-        <!--          <div v-for="(vulnerabilities, type) in groupedVulTypeVulnerabilities"-->
-        <!--               :key="type"-->
-        <!--               class="vulnerability-group">-->
-        <!--            <h4 class="group-title">{{ type }}</h4>-->
-        <!--            <el-table-->
-        <!--                :data="vulnerabilities"-->
-        <!--                border-->
-        <!--                stripe-->
-        <!--                :header-cell-style="{ backgroundColor: '#f5f7fa' }"-->
-        <!--            >-->
-        <!--              <el-table-column prop="vuln_id" label="漏洞ID" width="150"></el-table-column>-->
-        <!--              <el-table-column prop="vuln_name" label="漏洞名称" width="150"></el-table-column>-->
-        <!--              <el-table-column prop="softwareType" label="资产类型" width="150"></el-table-column>-->
-        <!--              <el-table-column prop="service_name" label="服务名称" width="100"></el-table-column>-->
-        <!--              <el-table-column prop="cvss" label="风险等级" width="120">-->
-        <!--                <template slot-scope="scope">-->
-        <!--                  <el-tag :type="getCvssType(scope.row.cvss)">{{ getRiskLevel(scope.row.cvss) }}</el-tag>-->
-        <!--                </template>-->
-        <!--              </el-table-column>-->
-        <!--              <el-table-column prop="summary" label="漏洞描述"></el-table-column>-->
-        <!--              <el-table-column prop="vulExist" label="是否存在" width="100">-->
-        <!--                <template slot-scope="scope">-->
-        <!--                  <el-tag :type="scope.row.vulExist === '存在' ? 'danger' : 'success'">-->
-        <!--                    {{ scope.row.vulExist }}-->
-        <!--                  </el-tag>-->
-        <!--                </template>-->
-        <!--              </el-table-column>-->
-        <!--            </el-table>-->
-        <!--          </div>-->
-        <!--        </div>-->
         <div class="table-section" v-if="Object.keys(groupedVulTypeVulnerabilities).length > 0">
           <h3><strong>漏洞详情</strong></h3>
           <div v-for="(vulnerabilities, type) in groupedVulTypeVulnerabilities" :key="type" class="vulnerability-group">
@@ -749,7 +672,7 @@
 
 <script>
 import * as echarts from 'echarts';
-import { neoFetch } from '../utils/fetch';
+import { neoFetch } from '../../utils/fetch';
 
 export default {
   name: 'VulnerabilityTable',
@@ -2106,6 +2029,7 @@ export default {
         }
         const data = await response.json();
         this.assetGroups = data;
+        console.log('资产组列表:', data);
 
         // 默认展开所有组
         this.expandedGroups = data.map(group => group.id);
@@ -2267,8 +2191,8 @@ export default {
     async deleteGroup(groupId, deleteAssets) {
       try {
         const url = deleteAssets
-          ? `/api/asset_group/${groupId}?delete_assets=true`
-          : `/api/asset_group/${groupId}`;
+          ? this.$store.state.fetchUrl + `/asset_group/${groupId}?delete_assets=true`
+          : this.$store.state.fetchUrl + `/asset_group/${groupId}`;
 
         const response = await neoFetch(url, {
           method: 'DELETE'
@@ -2362,7 +2286,7 @@ export default {
         });
 
         if (response.ok) {
-          this.$message.success('资产移动成功');
+          alert('资产移动成功');
           await this.getResults();
         } else {
           const errorData = await response.json().catch(() => ({}));
@@ -2708,794 +2632,5 @@ export default {
 </script>
 
 <style scoped>
-.check-time {
-  font-size: 12px;
-  color: #909399;
-  font-weight: normal;
-  margin-left: 15px;
-  display: inline-block;
-}
-
-.vulnerability-container {
-  display: flex;
-  height: 100%;
-  min-height: 600px;
-  background-color: #fff;
-}
-
-.ip-list {
-  width: 250px;
-  border-right: 1px solid #e6e6e6;
-  background-color: #f5f7fa;
-  display: flex;
-  flex-direction: column;
-}
-
-.menu-header {
-  height: 50px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid #e6e6e6;
-  background-color: #fff;
-  flex-shrink: 0;
-}
-
-.menu-header .title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.menu-header .asset-count {
-  margin-left: 10px;
-}
-
-.add-group-btn {
-  margin-left: auto;
-}
-
-.group-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px 0;
-}
-
-.group-item {
-  border: none;
-  margin-bottom: 5px;
-}
-
-.group-title {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 0 10px;
-  min-height: 40px;
-}
-
-/*
-.group-name {
-  font-weight: 600;
-  color: #303133;
-  flex: 1;
-  font-size: 14px;
-}
-*/
-.group-name {
-  font-weight: 600;
-  max-width: 110px;
-  color: #303133;
-  flex: 1;
-  font-size: 14px;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-
-.group-count {
-  color: #909399;
-  font-size: 12px;
-  margin-left: 5px;
-  margin-right: 10px;
-}
-
-.group-actions {
-  margin-left: auto;
-  display: flex;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.group-title:hover .group-actions {
-  opacity: 1;
-}
-
-.group-actions .el-button {
-  padding: 4px;
-  margin: 0;
-  min-width: auto;
-  border: none;
-}
-
-.group-actions .el-button:hover {
-  background-color: rgba(64, 158, 255, 0.1);
-  color: #409EFF;
-}
-
-.assets-list {
-  padding-left: 15px;
-  padding-right: 10px;
-}
-
-.asset-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  margin: 2px 0;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s;
-  position: relative;
-}
-
-.asset-item:hover {
-  background-color: #ecf5ff;
-  transform: translateX(2px);
-}
-
-.asset-item.active {
-  background-color: #409EFF;
-
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
-}
-
-/* 确保选中状态下的IP地址文字颜色保持黑色 */
-.asset-item.active .asset-ip {
-  color: #303133 !important;
-}
-
-/* 确保选中状态下的图标颜色保持原样 */
-.asset-item.active .asset-info i {
-  color: #909399 !important;
-}
-
-.asset-info {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-}
-
-.asset-info i {
-  margin-right: 8px;
-  color: #909399;
-  font-size: 14px;
-}
-
-/* 只修改右侧内容区域(.ip-header)内的资产信息布局 */
-.ip-header .asset-info {
-  padding: 15px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  /* 使用网格布局，每行两列 */
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 20px;
-  /* 行间距10px，列间距20px */
-}
-
-.asset-item.active .asset-info i {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.asset-ip {
-  margin-right: 3px;
-  font-size: 13px;
-  font-weight: 500;
-  flex: 1;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-block;
-  /*  新增：确保文本能省略 */
-  max-width: 200px;
-  /*  新增：限制最大宽度 */
-  vertical-align: middle;
-  /* （可选）对齐优化 */
-}
-
-.asset-status {
-  margin-left: auto;
-  margin-right: 8px;
-}
-
-.asset-status .el-tag {
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 2px;
-}
-
-.asset-actions {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.asset-item:hover .asset-actions {
-  opacity: 1;
-}
-
-.asset-actions .el-button {
-  padding: 2px;
-  margin: 0;
-  font-size: 12px;
-}
-
-.empty-group {
-  text-align: center;
-  padding: 20px 10px;
-}
-
-.empty-group .el-empty {
-  padding: 10px;
-}
-
-.content-area {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.empty-content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.ip-header {
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.ip-header h2 {
-  color: #303133;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 15px 0;
-}
-
-.chart-toggle {
-  margin-right: 20px;
-  margin-top: 15px;
-}
-
-.chart-section {
-  margin: 20px 0;
-  padding: 0;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-.pie-chart {
-  width: 100%;
-  height: 400px;
-}
-
-.asset-info {
-  padding: 15px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
-}
-
-.info-item {
-  line-height: 28px;
-  display: flex;
-}
-
-.info-item .label {
-  color: #606266;
-  width: 80px;
-  text-align: right;
-  margin-right: 15px;
-  flex-shrink: 0;
-}
-
-.info-item .value {
-  color: #303133;
-  flex: 1;
-  /* 防止长文本溢出 */
-  word-break: break-all;
-  overflow-wrap: break-word;
-}
-
-
-
-.table-section {
-  margin-bottom: 30px;
-}
-
-.table-section h3 {
-  margin: 15px 0;
-  color: #303133;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.el-tag {
-  width: 65px;
-  text-align: center;
-}
-
-.el-table .cell {
-  text-align: center;
-}
-
-.el-table .el-table__row td:nth-child(4) .cell {
-  text-align: left;
-}
-
-.vulnerability-group {
-  margin-bottom: 20px;
-}
-
-.group-title {
-  color: #606266;
-  font-size: 14px;
-  font-weight: 500;
-  margin: 10px 0;
-  padding-left: 10px;
-  border-left: 3px solid #409EFF;
-}
-
-.port-group {
-  margin-bottom: 20px;
-}
-
-.ports-section {
-  margin-bottom: 30px;
-}
-
-.ports-section h2,
-.baseline-section h2 {
-  color: #303133;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 15px 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.weak-password-section {
-  margin-bottom: 30px;
-}
-
-.weak-password-section h2 {
-  color: #303133;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 15px 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.baseline-section {
-  margin-bottom: 30px;
-}
-
-.baseline-info {
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  padding: 20px;
-}
-
-.baseline-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.progress-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.progress-content .rate {
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
-}
-
-.progress-content .label {
-  font-size: 14px;
-  color: #606266;
-  margin-top: 5px;
-}
-
-.baseline-stats {
-  display: flex;
-  flex: 1;
-  justify-content: space-around;
-  margin-left: 30px;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 0 15px;
-}
-
-.item-header {
-  font-size: 14px;
-  color: #606266;
-  margin-bottom: 10px;
-}
-
-.item-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
-}
-
-.compliance-details {
-  margin-top: 20px;
-}
-
-.detail-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.detail-label {
-  width: 70px;
-  margin-right: 15px;
-}
-
-.detail-progress {
-  flex: 1;
-}
-
-.detail-numbers {
-  width: 80px;
-  text-align: right;
-  color: #606266;
-  font-size: 14px;
-  margin-left: 15px;
-}
-
-.compliance-dashboard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.compliance-label {
-  font-size: 16px;
-  color: #333;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.baseline-info-icon {
-  cursor: pointer;
-  margin-left: 10px;
-  color: #409EFF;
-  font-size: 16px;
-}
-
-.baseline-info-icon:hover {
-  color: #66b1ff;
-}
-
-.baseline-details-content {
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-.baseline-details-loading {
-  height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.loading-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.el-table .cell {
-  white-space: pre-wrap;
-  word-break: break-word;
-  line-height: 23px;
-}
-
-.undo-items-section {
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #ebeef5;
-}
-
-.undo-title {
-  color: #E6A23C;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.undo-title i {
-  margin-right: 5px;
-}
-
-.undo-content {
-  padding: 10px 0;
-}
-
-.el-collapse {
-  border: none;
-}
-
-.el-collapse-item__header {
-  background-color: transparent;
-  border: none;
-  padding: 0;
-  height: auto;
-  line-height: normal;
-}
-
-.el-collapse-item__content {
-  padding: 10px 0;
-  background-color: transparent;
-  border: none;
-}
-
-.el-collapse-item__arrow {
-  margin-right: 8px;
-}
-
-.level-score-section {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-  border: 2px solid #e1e6ff;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.1);
-}
-
-.score-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.score-header i {
-  margin-right: 8px;
-  color: #FFD700;
-  font-size: 18px;
-}
-
-.score-display-inline {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.score-circle-small {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  flex-shrink: 0;
-}
-
-.score-circle-small.excellent {
-  background: linear-gradient(135deg, #67C23A, #85ce61);
-  border: 3px solid #67C23A;
-}
-
-.score-circle-small.good {
-  background: linear-gradient(135deg, #409EFF, #66b1ff);
-  border: 3px solid #409EFF;
-}
-
-.score-circle-small.qualified {
-  background: linear-gradient(135deg, #E6A23C, #ebb563);
-  border: 3px solid #E6A23C;
-}
-
-.score-circle-small.basic {
-  background: linear-gradient(135deg, #909399, #a6a9ad);
-  border: 3px solid #909399;
-}
-
-.score-circle-small.unqualified {
-  background: linear-gradient(135deg, #F56C6C, #f78989);
-  border: 3px solid #F56C6C;
-}
-
-.score-number-small {
-  font-size: 24px;
-  font-weight: bold;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  line-height: 1;
-}
-
-.score-unit-small {
-  font-size: 12px;
-  color: white;
-  opacity: 0.9;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.score-grade-inline {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 12px;
-}
-
-.score-grade-inline .el-tag {
-  align-self: flex-start;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 16px;
-  line-height: 1.4;
-  display: inline-flex;
-  align-items: center;
-  height: auto;
-}
-
-.baseline-summary {
-  border-top: 1px solid #ebeef5;
-  padding-top: 20px;
-  margin-top: 10px;
-}
-
-/* 对话框相关样式 */
-.move-asset-content {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.selection-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.selection-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.asset-checkbox {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.3s;
-}
-
-.asset-checkbox:hover {
-  background-color: #f5f7fa;
-}
-
-.asset-checkbox:last-child {
-  border-bottom: none;
-}
-
-.asset-checkbox .el-checkbox {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.asset-checkbox .asset-ip {
-  margin-left: 8px;
-  font-weight: 500;
-}
-
-.asset-status-tag {
-  margin-left: 10px;
-}
-
-.no-assets {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-/* 响应式设计 */
-@media (max-width: 1200px) {
-  .ip-list {
-    width: 220px;
-  }
-}
-
-@media (max-width: 768px) {
-  .vulnerability-container {
-    flex-direction: column;
-  }
-
-  .ip-list {
-    width: 100%;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-
-  .score-display-inline {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-
-  .score-grade-inline {
-    width: 100%;
-  }
-
-  .baseline-stats {
-    flex-wrap: wrap;
-    margin-left: 0;
-    margin-top: 20px;
-  }
-
-  .stat-item {
-    flex: 1;
-    min-width: calc(50% - 10px);
-    margin-bottom: 15px;
-  }
-}
-
-/* 滚动条样式 */
-.group-container::-webkit-scrollbar,
-.move-asset-content::-webkit-scrollbar,
-.content-area::-webkit-scrollbar {
-  width: 6px;
-}
-
-.group-container::-webkit-scrollbar-track,
-.move-asset-content::-webkit-scrollbar-track,
-.content-area::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.group-container::-webkit-scrollbar-thumb,
-.move-asset-content::-webkit-scrollbar-thumb,
-.content-area::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.group-container::-webkit-scrollbar-thumb:hover,
-.move-asset-content::-webkit-scrollbar-thumb:hover,
-.content-area::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
+@import url(./style.css);
 </style>

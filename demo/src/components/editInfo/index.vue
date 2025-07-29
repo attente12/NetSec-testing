@@ -37,6 +37,8 @@
 </template>
 <script>
 
+import { setCookie, getCookie } from '@/utils/cookie'
+
 
 export default {
     name: "EditInfo",
@@ -83,7 +85,7 @@ export default {
     },
     methods: {
         initForm() {
-            this.form.userid = this.currentInfo.userid || '';
+            this.form.userid = this.currentInfo.id || this.currentInfo.userid || '';
             this.form.username = this.currentInfo.username || '';
             this.form.email = this.currentInfo.email || '';
         },
@@ -91,15 +93,25 @@ export default {
             if (!this.form.email && !this.form.password) {
                 return alert("请至少修改邮箱或密码");
             }
+            if (!this.form.password && this.form.email === this.currentInfo.email) {
+                return alert("请至少修改邮箱或密码");
+            }
             try {
                 const res = await this.$axios.put('/updateUser', {
-                    userid: this.form.userid,
+                    userid: parseInt(this.form.userid),
                     email: this.form.email,
                     password: this.form.password,
                 });
+                if (this.currentInfo.email === getCookie('email')) {
+                    // 更新cookie中的email
+                    setCookie('email', this.form.email, 1);
+                }
+
+
                 alert(res.message || '用户信息更新成功');
+                window.location.reload(); // 刷新页面以应用更改
             } catch (error) {
-                return alert("更新用户信息失败，请稍后再试");
+                return alert(error || "更新用户信息失败，请稍后再试");
             }
         },
         async addUser() {
