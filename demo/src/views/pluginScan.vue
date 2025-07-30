@@ -186,9 +186,11 @@ export default {
 
       // 收集所有端口的漏洞结果
       let allVulns = [];
+      console.log(this.result.ports)
       this.result.ports.forEach(port => {
         if (port.vuln_result && port.vuln_result.length > 0) {
           allVulns = allVulns.concat(port.vuln_result);
+
         }
       });
 
@@ -197,16 +199,20 @@ export default {
         allVulns = allVulns.concat(this.result.os_vuln_result);
       }
 
-      // 去重（基于Vuln_id）
-      allVulns = _.uniqBy(allVulns, 'Vuln_id');
-
       // 新增：如果有选中的vuln_id列表，则只显示这些漏洞
+      let temp;
       if (this.selectedVulnIds && this.selectedVulnIds.length > 0) {
-        allVulns = allVulns.filter(vuln => this.selectedVulnIds.includes(vuln.Vuln_id));
+        temp = allVulns.filter(vuln => this.selectedVulnIds.includes(vuln.Vuln_id));
       }
 
-      // 明确定义排序顺序: 存在 > 不存在 > 未验证
-      return _.sortBy(allVulns, [
+
+      // 去重（基于Vuln_id）
+
+      const neoArr = _.uniqBy(temp || allVulns, 'Vuln_id')//存储去重后的数组
+
+
+
+      const res = _.sortBy(neoArr, [
         // 首要排序条件：按漏洞状态
         item => {
           if (item.vulExist === '存在') return 0;
@@ -215,8 +221,11 @@ export default {
           return 3; // 其他未知状态
         },
         // 次要排序条件：按漏洞ID
-        'Vuln_id'
-      ]);
+        'Vuln_id'])
+      // 明确定义排序顺序: 存在 > 不存在 > 未验证
+
+      return res;
+
     }
   },
 
@@ -239,7 +248,7 @@ export default {
       const target = { ip: this.scanTarget };
       this.$axios.post('/getNmapIp', target)
         .then(response => {
-          console.log('Scan result:', response)
+
           this.result = response.scan_result
           Message.success('扫描完成');
           setTimeout(() => {
