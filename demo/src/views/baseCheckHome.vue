@@ -299,7 +299,7 @@ export default {
                 { id: 49, name: '检查所有磁盘分区的文件系统格式' },
                 { id: 50, name: '检查是否已对所有驱动器关闭 Windows 自动播放' },
                 { id: 51, name: '检查是否已禁用 Windows 硬盘默认共享' },
-                { id: 52, name: '检查服务器在暂停会话前所需的空闲时间量' },
+                // { id: 52, name: '检查服务器在暂停会话前所需的空闲时间量' },
                 { id: 53, name: '检查是否正确配置 NTP 时间同步服务器' },
                 { id: 54, name: '检查是否正确配置 DNS 服务器' },
                 { id: 55, name: '检查是否已开启数据DEP功能' },
@@ -369,7 +369,7 @@ export default {
 
                 this.versionFlag = true
                 this.isSelectAll = true
-                this.handleCheckAllChange(true)
+                this.handleCheckAllChangeW(true)
             }
         },
     },
@@ -431,7 +431,7 @@ export default {
                     // 检查data是否为null来避免执行不需要的代码
                     if (data === null) return;
                     let simplifyData = data
-                    simplifyData.Event_result = simplifyData.Event_result.slice(0, 50)
+                    simplifyData.Event_result = simplifyData.Event_result.slice(0, 55)
                     console.log("Received data:", simplifyData.Event_result)
                     this.checkResult.ServerInfo = simplifyData.ServerInfo
                     this.checkResult.Event_result = simplifyData.Event_result
