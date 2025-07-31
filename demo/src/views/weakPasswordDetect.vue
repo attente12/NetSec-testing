@@ -468,12 +468,12 @@ export default {
           // this.fetchAndDisplayPasswordResults();
         } else {
           this.aliveHosts = [];
-          this.$message.warning('未找到存活主机列表，请先进行主机发现');
+          alert('未找到存活主机列表，请先进行主机发现');
         }
       } catch (error) {
         console.error('解析sessionStorage数据失败:', error);
         this.aliveHosts = [];
-        this.$message.error('获取存活主机列表失败');
+        alert('获取存活主机列表失败');
       }
     },
     // 获取活跃IP列表
@@ -488,12 +488,12 @@ export default {
     //       })
     //       .catch(error => {
     //         console.error('获取活跃IP列表失败:', error);
-    //         this.$message.error('获取活跃IP列表失败');
+    //         alert('获取活跃IP列表失败');
     //       });
     // },
     fetchAndDisplayPasswordResults() {
       if (!this.scanTarget) {
-        this.$message.warning('请先选择服务器IP');
+        alert('请先选择服务器IP');
         return;
       }
 
@@ -504,7 +504,7 @@ export default {
         })
         .catch(error => {
           console.error('Error:', error);
-          this.$message.error('获取检测结果失败，请重试');
+          alert('获取检测结果失败，请重试');
         });
     },
     // 5. 修改 fetchAllHostsWeakPasswords 方法
@@ -575,7 +575,7 @@ export default {
     //     this.fetchAllHostsWeakPasswords();
     //
     //     if (this.allHostsWeakPasswords.length === 0) {
-    //       this.$message.warning('没有发现任何弱口令数据');
+    //       alert('没有发现任何弱口令数据');
     //       return;
     //     }
     //
@@ -588,7 +588,7 @@ export default {
     //     window.location.reload();
     //   } catch (error) {
     //     console.error('打印所有主机报告失败:', error);
-    //     this.$message.error('打印报告失败');
+    //     alert('打印报告失败');
     //   }
     // },
     // 10. 修改 printAllHostsReport 方法 - 打印所有主机弱口令
@@ -600,7 +600,7 @@ export default {
         console.log('All hosts weak passwords:', this.allHostsWeakPasswords); // 调试日志
 
         if (this.allHostsWeakPasswords.length === 0) {
-          this.$message.warning('没有发现任何弱口令数据');
+          alert('没有发现任何弱口令数据');
           return;
         }
 
@@ -615,7 +615,7 @@ export default {
         });
       } catch (error) {
         console.error('打印所有主机报告失败:', error);
-        this.$message.error('打印报告失败');
+        alert('打印报告失败');
       }
     },
 
@@ -639,7 +639,7 @@ export default {
 
     handleUsernameFileChange(file) {
       if (file.raw.type !== 'text/plain') {
-        this.$message.error('请上传txt文件');
+        alert('请上传txt文件');
         this.$refs.usernameUpload.clearFiles();
         return false;
       }
@@ -649,14 +649,14 @@ export default {
     handlePasswordFileChange(file) {
       //限制文件类型
       if (file.raw.type !== 'text/plain') {
-        this.$message.error('请上传txt文件');
+        alert('请上传txt文件');
         this.$refs.passwordUpload.clearFiles();
         return false;
       }
       //限制文件大小1MB
       const maxSize = 1024 * 1024;
       if (file.raw.size > maxSize) {
-        this.$message.error('文件大小不能超过1MB');
+        alert('文件大小不能超过1MB');
         this.$refs.passwordUpload.clearFiles();
         return false;
       }
@@ -665,11 +665,11 @@ export default {
 
     validateDictionaryFiles() {
       if (this.usernameFile && !this.passwordFile) {
-        this.$message.error('请同时上传用户名和密码字典文件');
+        alert('请同时上传用户名和密码字典文件');
         return false;
       }
       if (!this.usernameFile && this.passwordFile) {
-        this.$message.error('请同时上传用户名和密码字典文件');
+        alert('请同时上传用户名和密码字典文件');
         return false;
       }
       return true;
@@ -679,12 +679,12 @@ export default {
     async detect() {
       this.debouncedDetectLoading = true;
       if (this.isScanning) {
-        this.$message.warning('扫描正在进行中，请稍候...');
+        alert('扫描正在进行中，请稍候...');
         return;
       }
 
       if (!this.scanTarget) {
-        this.$message.error('请输入有效的IP地址');
+        alert('请输入有效的IP地址');
         this.debouncedDetectLoading = false;
         return;
       }
@@ -698,13 +698,13 @@ export default {
           ip: this.scanTarget
         });
 
-        if (response.data.message === 'Nmap 扫描完成并获取 CVE 数据。') {
-          this.$message.success('Nmap 扫描完成并获取 CVE 数据');
+        if (response.message === 'Nmap 扫描完成并获取 CVE 数据。') {
+          alert('Nmap 扫描完成并获取 CVE 数据');
         } else {
-          this.$message.error('扫描失败，请重试');
+          alert('扫描失败，请重试');
         }
       } catch (error) {
-        this.$message.error('网络错误或服务器无响应');
+        alert('网络错误或服务器无响应');
         console.error('Scan error:', error);
       } finally {
         this.isScanning = false;
@@ -715,17 +715,17 @@ export default {
     // 4. 完全重写 serviceDetect 方法
     async serviceDetect() {
       if (this.isDetecting) {
-        this.$message.warning('检测正在进行中，请稍候...');
+        alert('检测正在进行中，请稍候...');
         return;
       }
 
       if (this.selectedServices.length === 0) {
-        this.$message.error('请至少选择一个服务');
+        alert('请至少选择一个服务');
         return;
       }
 
       if (!this.scanTarget) {
-        this.$message.error('请输入有效的IP地址');
+        alert('请输入有效的IP地址');
         return;
       }
 
@@ -774,13 +774,13 @@ export default {
         if (allResults.length > 0) {
           // 保存结果到 sessionStorage
           this.saveWeakPasswordToStorage(allResults);
-          this.$message.success(`检测完成，发现 ${allResults.length} 个弱口令`);
+          alert(`检测完成，发现 ${allResults.length} 个弱口令`);
         } else {
-          this.$message.warning('检测完成，但未发现弱口令');
+          alert('检测完成，但未发现弱口令');
         }
       } catch (error) {
         console.error('检测失败:', error);
-        this.$message.error('检测失败，请检查网络或服务器');
+        alert('检测失败，请检查网络或服务器');
       } finally {
         this.isDetecting = false;
         this.debouncedServiceDetectLoading = false;
@@ -810,13 +810,13 @@ export default {
       });
 
       this.tableData = [];
-      this.$message.success('所有弱口令数据已清除');
+      alert('所有弱口令数据已清除');
     },
 
 
     printReport() {
       if (!this.scanTarget) {
-        this.$message.warning('请先选择目标IP');
+        alert('请先选择目标IP');
         return;
       }
 
@@ -824,7 +824,7 @@ export default {
       this.loadWeakPasswordFromStorage();
 
       if (this.tableData.length === 0) {
-        this.$message.warning('当前主机没有弱口令数据');
+        alert('当前主机没有弱口令数据');
         return;
       }
 
