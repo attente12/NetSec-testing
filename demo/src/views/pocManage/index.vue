@@ -498,16 +498,12 @@ export default {
         }
       })
         .then(response => {
-          if (response.status === 200) {
-            this.selectedPocCode = response.data.content;
-            this.$nextTick(() => {
-              this.dialogVisible = true;
-            });
-          } else {
-            // 处理非200响应状态码
-            console.error('Failed to fetch POC content:', response.status, response.statusText);
-            // this.$message.error('操作失败: ' + response.data.error);
-          }
+
+          this.selectedPocCode = response.content;
+          this.$nextTick(() => {
+            this.dialogVisible = true;
+          });
+
         })
         .catch(error => {
           if (error.response && error.response.status === 500) {
@@ -567,7 +563,7 @@ export default {
         }
       })
         .then(response => {
-          this.selectedPocCode = response.data.content;
+          this.selectedPocCode = response.content;
         })
       this.editDialogVisible = true;
     },

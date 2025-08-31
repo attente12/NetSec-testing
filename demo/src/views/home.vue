@@ -88,7 +88,7 @@
               <div class="manual-item-content">
                 <h4>POC脚本模板</h4>
                 <p>包含常见漏洞的POC脚本编写模板，便于安全人员快速开发自定义POC</p>
-                <el-button type="primary" size="small" icon="el-icon-download" @click="downloadFile('/poc_helper.pdf')">
+                <el-button type="primary" size="small" icon="el-icon-download" @click="downloadFile('/poc_helper.md')">
                   下载模板
                 </el-button>
               </div>

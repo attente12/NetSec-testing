@@ -40,7 +40,7 @@ export default {
         `
         iframeDoc.head.appendChild(script)
       } catch (e) {
-        console.log('跨域限制无法操作iframe内容')
+        console.log('跨域限制无法操作iframe内容', e)
       }
     }
   }
