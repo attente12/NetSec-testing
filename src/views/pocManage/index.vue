@@ -470,8 +470,10 @@ export default {
           return response.json();
         })
         .then(data => {
-          this.pocs = data.map(poc => ({
+          this.bakPocs = data.map(poc => ({
             ...poc,
+            vuln_id: poc.cve_id,
+            cve_id: undefined,
             showFullDescription: false
           }));
           this.totalItems = this.pocs.length;
