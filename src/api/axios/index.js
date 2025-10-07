@@ -3,7 +3,7 @@ import { getCookie } from '../../utils/cookie';
 
 const instance = axios.create({
     baseURL: 'http://192.168.0.129:8081', // 基础URL
-    timeout: 90000, // 请求超时时间（毫秒）
+    timeout: 180000, // 请求超时时间（毫秒）
 });
 
 // 请求拦截器
