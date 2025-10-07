@@ -12,7 +12,7 @@
           <el-button type="primary" @click="batchExecutePOC" style="margin-top: 5px;">批量执行POC</el-button>
           <!--          <el-button @click="printResult" style="margin-top: 5px;">打印报告</el-button>-->
           <el-table ref="table" :data="paginatedTasks" stripe style="width: 100%; margin-top: 10px"
-            :row-key="row => row.CVE" :default-sort="{ prop: 'CVE', order: 'descending' }">
+            :row-key="row => row.CVE">
 
             <el-table-column type="selection" width="55"></el-table-column>
             <!--            <el-table-column prop="CVE" label="漏洞编号" width="180"></el-table-column>-->
@@ -135,7 +135,6 @@
 <script>
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import _ from 'lodash';
 
 export default {
   data() {
@@ -170,14 +169,16 @@ export default {
       });
 
       // 按vulExist状态排序
-      return _.orderBy(allVulnerabilities,
-        [(v) => {
-          if (v.vulExist === '存在') return 0;
-          if (v.vulExist === '不存在') return 1;
-          return 2;
-        }],
-        ['asc']
-      );
+      return allVulnerabilities.sort((a, b) => {
+        if (a.pocExist === '是' && b.pocExist !== '是') {
+          return -1; // a 排在 b 前面
+        }
+        if (a.pocExist !== '是' && b.pocExist === '是') {
+          return 1; // b 排在 a 前面
+        }
+        return 0; // 保持原有顺序
+      });
+
     },
     paginatedTasks() {
       // 处理 scanResults 数据，提取需要的 CVE 信息
@@ -202,10 +203,18 @@ export default {
         });
       });
 
+      // 这种方法绝对保证所有'是'都在前面
+      const yesItems = results.filter(item => item.POCState === '是');
+      const noItems = results.filter(item => item.POCState !== '是');
+      const sortedData = [...yesItems, ...noItems];
+      console.log(sortedData);
+
       const start = (this.pagination.currentPage - 1) * this.pagination.pageSize;
       const end = start + this.pagination.pageSize;
 
-      return results.slice(start, end);
+
+
+      return sortedData.slice(start, end);
     }
   },
   created() {
@@ -319,9 +328,9 @@ export default {
           this.$message.success('批量执行POC成功');
 
           // 更新本地存储中的数据
-          if (response.data && response.data.ScanHostResult) {
+          if (response && response.ScanHostResult) {
             // 将响应数据保存到localStorage
-            this.updateLocalStorageWithPocResults(response.data.ScanHostResult);
+            this.updateLocalStorageWithPocResults(response.ScanHostResult);
           }
 
           // 重新获取数据以显示最新结果
@@ -342,9 +351,9 @@ export default {
           this.$message.info(`已执行POC: ${row.CVE}`);
 
           // 更新本地存储中的数据
-          if (response.data && response.data.ScanHostResult) {
+          if (response && response.ScanHostResult) {
             // 将响应数据保存到localStorage
-            this.updateLocalStorageWithPocResults(response.data.ScanHostResult);
+            this.updateLocalStorageWithPocResults(response.ScanHostResult);
           }
 
           // 重新获取数据以显示最新结果
@@ -462,7 +471,6 @@ export default {
         scanHostResult.ports.forEach(port => {
           Object.keys(port.cpes).forEach(cpeKey => {
             const cveList = port.cpes[cpeKey];
-
             cveList.forEach(cve => {
               results.push({
                 CVE: cve.Vuln_id,
