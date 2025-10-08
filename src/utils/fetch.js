@@ -5,7 +5,6 @@ export function neoFetch(url, options = {}) {
     const username = getCookie('username');
     const headers = {
         ...options.headers,
-        'Content-Type': 'application/json',
     };
 
     if (username) {

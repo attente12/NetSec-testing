@@ -33,6 +33,9 @@
         <el-form-item label="漏洞名称">
           <el-input v-model="newPoc.vul_name"></el-input>
         </el-form-item>
+        <el-form-item label="漏洞评分">
+          <el-input v-model="newPoc.cvss_score"></el-input>
+        </el-form-item>
         <!-- 修改为下拉选择框 -->
         <el-form-item label="漏洞类型">
           <el-select v-model="newPoc.type" placeholder="请选择漏洞类型" style="width: 100%;">
@@ -295,6 +298,7 @@ export default {
         type: '',
         cve_id: '',
         vul_name: '',
+        cvss_score: '',
         description: '',
         script_type: '',
         affected_infra: '',
@@ -537,6 +541,7 @@ export default {
         cve_id: '',
         vul_name: '',
         description: '',
+        cvss_score: '',
         script_type: '',
         affected_infra: '',
         // 其他属性的重置...
@@ -805,20 +810,25 @@ export default {
         return;
       }
 
-      const formData = new FormData();
-      formData.append('cve_id', this.newPoc.cve_id);
-      formData.append('vul_name', this.newPoc.vul_name);
+      const formData = new FormData()
+      formData.append('cve_id', this.newPoc.cve_id)
+      formData.append('vul_name', this.newPoc.vul_name)
+      formData.append('cvss_score', this.newPoc.cvss_score)
       formData.append('description', this.newPoc.description);
       formData.append('affected_infra', this.newPoc.affected_infra);
       formData.append('script_type', this.newPoc.script_type);
       formData.append('type', this.newPoc.type);
       if (this.fileList.length > 0) {
         formData.append('mode', 'upload');
+        formData.append('poc_condition', '暂存');
         formData.append('file', this.fileList[0].raw || this.fileList[0]); // 添加文件到表单数据
       } else if (this.newcode.length > 0) {
         formData.append('mode', 'edit');
         formData.append('edit_filename', this.editFilename);
         formData.append('poc_content', this.newcode);
+        formData.append('poc_condition', '暂存');
+      }else{
+        formData.append('poc_condition', '无');
       }
 
       try {
@@ -840,6 +850,7 @@ export default {
         this.$message.error('An error occurred: ' + error);
       }
     },
+
     async submitEditPoc() {
 
       this.editSubmitAttempted = true;
@@ -871,9 +882,6 @@ export default {
 
       try {
         const response = await this.$axios.put('/updateDataById', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
         });
 
         if (response.data.message === '更新成功') { // 后端可能返回的成功消息字段为 "message"

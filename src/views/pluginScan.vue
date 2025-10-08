@@ -156,6 +156,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import _ from 'lodash';
 import { Message } from "element-ui";
+import { neoFetch } from '../utils/fetch';
 
 export default {
   data() {
@@ -352,20 +353,24 @@ export default {
         });
     },
 
-    autoSelect() {
+    async autoSelect() {
       if (!this.scanTarget) {
         this.$message.error('请选择有效的IP地址');
         return;
       }
-
-      this.$axios.post('/pocScan/autoSelectPoc', { ip: this.scanTarget })
-        .then(response => {
-          const autoSelectedIds = response.map(poc => poc.id);
-          this.checkedPocs = this.pocList.filter(poc => autoSelectedIds.includes(poc.id));
-        })
-        .catch(error => {
-          console.error('Auto select error:', error);
-        });
+      try {
+        const res = await neoFetch(this.$store.state.fetchUrl +'/pocScan/autoSelectPoc', {
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body:{ "ip": this.scanTarget }
+      })
+      const autoSelectedIds = res.map(poc => poc.id)
+      this.checkedPocs = this.pocList.filter(poc => autoSelectedIds.includes(poc.id))
+      } catch (error) {
+        console.log(error);
+      }
+      
+      
     },
 
     async printReport() {
