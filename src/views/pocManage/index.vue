@@ -430,7 +430,7 @@ export default {
       }
     },
     loadVulTypes() {
-      neoFetch(this.$store.state.fetchUrl + '/poc/getAllVulnTypes')
+      neoFetch(this.$store.state.fetchUrl + '/poc/getAllVulnTypes',{headers: { 'content-type': 'application/json' }})
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -466,7 +466,7 @@ export default {
     //搜索的实现
     load() {
       let query = new URLSearchParams({ keyword: this.searchKeyword.trim() }).toString();
-      neoFetch(`${this.$store.state.fetchUrl}/searchData?${query}`)
+      neoFetch(`${this.$store.state.fetchUrl}/searchData?${query}`,{headers: { 'content-type': 'application/json' }})
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -578,12 +578,15 @@ export default {
     del(id) {
       neoFetch(`${this.$store.state.fetchUrl}/deleteDataById`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',  // 确保设置了这个头
+        },
         body: JSON.stringify({ ids: id })
       })
         .then(response => {
           if (response.ok) {
             this.$message.success('删除成功！');
-            this.loadData();  // 重新加载数据
+            this.loadDataNew();  // 重新加载数据
           } else {
             this.$message.error('删除失败！');
           }
@@ -596,14 +599,17 @@ export default {
 
     delBatch() {
       const idsToDelete = this.$refs.table.selection.map(row => row.id);
-      neoFetch(`${this.$store.state.fetchUrl}/deleteDataById`, {
-        method: 'DELETE',
-        body: JSON.stringify({ ids: idsToDelete })
-      })
+      neoFetch(`${this.$store.state.fetchUrl}/deleteDataById`,{
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',  // 确保设置了这个头
+          },
+          body: JSON.stringify({ "ids": idsToDelete })  // 确保使用了JSON.stringify
+        })
         .then(response => {
           if (response.ok) {
             this.$message.success('批量删除成功！');
-            this.loadData();  // 重新加载数据
+            this.loadDataNew();  // 重新加载数据
           } else {
             this.$message.error('批量删除失败！');
           }
@@ -827,13 +833,14 @@ export default {
         formData.append('edit_filename', this.editFilename);
         formData.append('poc_content', this.newcode);
         formData.append('poc_condition', '暂存');
-      }else{
+      } else {
         formData.append('poc_condition', '无');
       }
 
       try {
         const response = await neoFetch(this.$store.state.fetchUrl + '/insertData', {
           method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: formData,
         });
         const result = await response.json();
@@ -914,7 +921,7 @@ export default {
       filename += '.py';
 
       // 加载文件内容，从`public`目录下读取
-      neoFetch(`/${filename}`)
+      neoFetch(`/${filename}`,{headers: { 'content-type': 'application/json' }})
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -931,7 +938,7 @@ export default {
     },
     async loadFile() {
       try {
-        const response = await neoFetch("/nmap_infrastructure_list_grouped_multiline.txt");
+        const response = await neoFetch("/nmap_infrastructure_list_grouped_multiline.txt",{headers: { 'content-type': 'application/json' }});
         if (!response.ok) throw new Error("Network response was not ok");
         const text = await response.text();
         // 将每一行内容处理为 { value: "文本" } 格式

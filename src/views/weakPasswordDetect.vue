@@ -710,7 +710,7 @@
         this.PasswordStrengthLoading = true;
         try {
           const response = await this.$axios.post('/testWeakPassword', { pd: this.secret });
-          switch (response.data.message) {
+          switch (response.message) {
             case 'Weak':
               this.passwordStrength = '弱';
               this.passwordStrengthColor = '#f56c6c';

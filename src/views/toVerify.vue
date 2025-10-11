@@ -351,7 +351,7 @@ export default {
     // },
     async loadFile() {
       try {
-        const response = await neoFetch("/nmap_infrastructure_list_grouped_multiline.txt");
+        const response = await neoFetch("/nmap_infrastructure_list_grouped_multiline.txt",{headers: { 'content-type': 'application/json' }});
         if (!response.ok) throw new Error("Network response was not ok");
         const text = await response.text();
         // 将每一行内容处理为 { value: "文本" } 格式

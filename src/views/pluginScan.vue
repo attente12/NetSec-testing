@@ -359,18 +359,20 @@ export default {
         return;
       }
       try {
-        const res = await neoFetch(this.$store.state.fetchUrl +'/pocScan/autoSelectPoc', {
-        method:'POST',
-        headers:{'content-type':'application/json'},
-        body:{ "ip": this.scanTarget }
-      })
-      const autoSelectedIds = res.map(poc => poc.id)
-      this.checkedPocs = this.pocList.filter(poc => autoSelectedIds.includes(poc.id))
+        const res = await neoFetch(this.$store.state.fetchUrl + '/pocScan/autoSelectPoc', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ "ip": this.scanTarget })
+        })
+        const data = await res.json() 
+        console.log(data);
+        const autoSelectedIds = data.map(poc => poc.id)
+        this.checkedPocs = this.pocList.filter(poc => autoSelectedIds.includes(poc.id))
       } catch (error) {
         console.log(error);
       }
-      
-      
+
+
     },
 
     async printReport() {

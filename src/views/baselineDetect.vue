@@ -58,7 +58,7 @@ export default {
     },
     methods: {
         fetchAndDisplayChenckResults() {
-            neoFetch(this.$store.state.fetchUrl + '/userinfo')
+            neoFetch(this.$store.state.fetchUrl + '/userinfo',{headers: { 'content-type': 'application/json' }})
                 .then(response => response.json())
                 .then(checkresults => {
                     this.checkresults = checkresults;

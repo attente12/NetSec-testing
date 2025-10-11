@@ -1359,8 +1359,8 @@ export default {
       try {
         // 并行获取基线检测详细信息和等保测评详细信息
         const [baselineResponse, classifyResponse] = await Promise.all([
-          neoFetch(this.$store.state.fetchUrl + `/userinfo?ip=${this.currentAsset.ip}`),
-          neoFetch(this.$store.state.fetchUrl + `/level3Userinfo?ip=${this.currentAsset.ip}`)
+          neoFetch(this.$store.state.fetchUrl + `/userinfo?ip=${this.currentAsset.ip}`,{headers: { 'content-type': 'application/json' }}),
+          neoFetch(this.$store.state.fetchUrl + `/level3Userinfo?ip=${this.currentAsset.ip}`,{headers: { 'content-type': 'application/json' }})
         ]);
 
         // 处理基线检测数据
@@ -2005,7 +2005,7 @@ export default {
     },
 
     getResults() {
-      neoFetch(this.$store.state.fetchUrl + '/assets/full_info')
+      neoFetch(this.$store.state.fetchUrl + '/assets/full_info',{headers: { 'content-type': 'application/json'}})
         .then(response => response.json())
         .then(data => {
           this.assets = data;
@@ -2023,7 +2023,7 @@ export default {
     // 获取资产组列表
     async getAssetGroups() {
       try {
-        const response = await neoFetch(this.$store.state.fetchUrl + '/asset_group/list');
+        const response = await neoFetch(this.$store.state.fetchUrl + '/asset_group/list',{headers: { 'content-type': 'application/json' }});
         if (!response.ok) {
           throw new Error('获取资产组列表失败');
         }
@@ -2061,6 +2061,7 @@ export default {
       try {
         const response = await neoFetch(this.$store.state.fetchUrl + '/asset_group', {
           method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify(this.newGroupForm)
         });
 
@@ -2112,6 +2113,7 @@ export default {
       try {
         const response = await neoFetch(this.$store.state.fetchUrl + `/asset_group/${this.editGroupForm.id}`, {
           method: 'PUT',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ new_name: this.editGroupForm.new_name })
         });
 
@@ -2195,7 +2197,8 @@ export default {
           : this.$store.state.fetchUrl + `/asset_group/${groupId}`;
 
         const response = await neoFetch(url, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: { 'content-type': 'application/json' }
         });
 
         if (response.ok) {
@@ -2247,6 +2250,7 @@ export default {
         const promises = this.moveAssetForm.selectedAssets.map(assetIp =>
           neoFetch(this.$store.state.fetchUrl + `/asset/${assetIp}/group`, {
             method: 'PUT',
+            headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ group_id: this.moveAssetForm.targetGroupId })
           })
         );
@@ -2282,6 +2286,7 @@ export default {
       try {
         const response = await neoFetch(this.$store.state.fetchUrl + `/asset/${assetIp}/group`, {
           method: 'PUT',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ group_id: targetGroupId })
         });
 
@@ -2474,7 +2479,7 @@ export default {
       this.baselineDetails = [];
 
       // 调用API获取详细信息
-      neoFetch(this.$store.state.fetchUrl + `/userinfo?ip=${this.currentAsset.ip}`)
+      neoFetch(this.$store.state.fetchUrl + `/userinfo?ip=${this.currentAsset.ip}`,{headers: { 'content-type': 'application/json' }})
         .then(response => response.json())
         .then(data => {
           if (data && data.checkResults) {
@@ -2501,7 +2506,7 @@ export default {
       this.classifyDetails = [];
 
       // 调用API获取详细信息
-      neoFetch(this.$store.state.fetchUrl + `/level3Userinfo?ip=${this.currentAsset.ip}`)
+      neoFetch(this.$store.state.fetchUrl + `/level3Userinfo?ip=${this.currentAsset.ip}`,{headers: { 'content-type': 'application/json' }})
         .then(response => response.json())
         .then(data => {
           if (data && data.checkResults) {

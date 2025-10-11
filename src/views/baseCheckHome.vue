@@ -412,6 +412,7 @@ export default {
 
             neoFetch(this.$store.state.fetchUrl + '/win_login', {
                 method: 'POST',
+                headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(payload),
             })
                 .then(response => {
@@ -497,6 +498,7 @@ export default {
 
                 neoFetch(this.$store.state.fetchUrl + '/login', {
                     method: 'POST',
+                    headers: { 'content-type': 'application/json' },
                     body: JSON.stringify(payload),
                 })
                     .then(response => {

@@ -214,6 +214,7 @@ export default {
 
         neoFetch(this.$store.state.fetchUrl + '/level3Login', {
           method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify(payload),
         })
           .then(response => {
@@ -348,16 +349,18 @@ export default {
   font-size: 12px;
   text-align: right;
 
-  .el-link {
-    display: inline-flex;
-    align-items: center;
 
-    i {
-      margin-right: 3px;
-      font-size: 14px;
-    }
-  }
 }
+
+.el-link {
+  display: inline-flex;
+  align-items: center
+}
+
+.el-link i {
+      margin-right: 3px;
+      font-size: 14px
+    }
 
 .login-form>>>.el-form-item {
   margin-bottom: 18px;
